@@ -1,16 +1,13 @@
-#include <iostream>
+#include "Windows.h"
+#include "system/Application.h"
 
 int main()
 {
-	try
-	{
-		std::cout << "CG course!" << std::endl;
-	}
-	catch (std::exception& e)
-	{
-		std::cerr << e.what() << std::endl;
-		return EXIT_FAILURE;
-	}
+	SetConsoleOutputCP(CP_UTF8);
+	SetConsoleCP(CP_UTF8);
+
+	Application app;
+	app.Run();
 
 	return EXIT_SUCCESS;
 }
