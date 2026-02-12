@@ -9,6 +9,7 @@ class CircleController final : public IController
 public:
 	explicit CircleController(std::shared_ptr<CircleModel> model);
 
+	void Update(float dt) override;
 	void IncRadius();
 	void DecRadius();
 

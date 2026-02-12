@@ -14,6 +14,10 @@ CircleController::CircleController(std::shared_ptr<CircleModel> model)
 {
 }
 
+void CircleController::Update(float dt)
+{
+}
+
 void CircleController::IncRadius()
 {
 	try

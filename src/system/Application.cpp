@@ -26,9 +26,13 @@ Application::~Application()
 
 void Application::Run()
 {
+	sf::Clock clock;
 	while (m_window.isOpen())
 	{
+		auto dt = clock.restart();
+
 		ProcessEvents();
+		Update(dt.asSeconds());
 		Render();
 	}
 }
@@ -46,6 +50,14 @@ void Application::ProcessEvents()
 		{
 			m_scene->ProcessEvents(*event, m_window);
 		}
+	}
+}
+
+void Application::Update(float dt)
+{
+	if (m_scene)
+	{
+		m_scene->Update(dt);
 	}
 }
 

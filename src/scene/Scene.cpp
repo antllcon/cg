@@ -1,4 +1,5 @@
 #include "Scene.h"
+#include "src/controller/IController.h"
 #include "src/view/IView.h"
 
 void Scene::Init()
@@ -10,6 +11,14 @@ void Scene::ProcessEvents(const sf::Event& event, const sf::RenderWindow& window
 	for (auto& view : m_views)
 	{
 		view->HandleEvent(event, window);
+	}
+}
+
+void Scene::Update(float dt)
+{
+	for (auto& controller : m_controllers)
+	{
+		controller->Update(dt);
 	}
 }
 

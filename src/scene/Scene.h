@@ -13,6 +13,7 @@ public:
 	virtual void Init();
 
 	void ProcessEvents(const sf::Event& event, const sf::RenderWindow& window);
+	void Update(float dt);
 	void Render(sf::RenderWindow& window) const;
 
 protected:
