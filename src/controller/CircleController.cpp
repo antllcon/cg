@@ -24,7 +24,6 @@ void CircleController::IncRadius()
 	catch (const std::exception& e)
 	{
 		std::cerr << "Exception: " << e.what() << std::endl;
-		// TODO: вывод toast уведомления (сделать)
 	}
 }
 
@@ -38,6 +37,5 @@ void CircleController::DecRadius()
 	catch (const std::exception& e)
 	{
 		std::cerr << "Exception: " << e.what() << std::endl;
-		// TODO: вывод toast уведомления (сделать)
 	}
 }
