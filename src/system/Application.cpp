@@ -1,9 +1,7 @@
 #include "Application.h"
-
 #include "Monitor.h"
 #include "Windows.h"
-#include "src/controller/CircleController.h"
-#include "src/model/CircleModel.h"
+#include "src/scene/MainScene.h"
 #include "src/view/CircleView.h"
 
 namespace
@@ -19,7 +17,7 @@ Application::Application()
 {
 	auto refreshRate = Monitor::GetMonitorRefreshRate();
 	m_window.setFramerateLimit(refreshRate);
-	InitScene();
+	LoadScene(std::make_unique<MainScene>());
 }
 
 Application::~Application()
@@ -35,19 +33,6 @@ void Application::Run()
 	}
 }
 
-void Application::InitScene()
-{
-	auto circleModel = std::make_shared<CircleModel>();
-	m_models.push_back(circleModel);
-
-	auto circleController = std::make_shared<CircleController>(circleModel);
-	m_controllers.push_back(circleController);
-
-	auto circleView = std::make_shared<CircleView>(circleController, circleModel);
-	m_views.push_back(circleView);
-	circleModel->RegisterObserver(circleView);
-}
-
 void Application::ProcessEvents()
 {
 	while (const auto event = m_window.pollEvent())
@@ -57,9 +42,9 @@ void Application::ProcessEvents()
 			m_window.close();
 		}
 
-		for (auto& view : m_views)
+		if (m_scene)
 		{
-			view->HandleEvent(*event, m_window);
+			m_scene->ProcessEvents(*event, m_window);
 		}
 	}
 }
@@ -68,10 +53,19 @@ void Application::Render()
 {
 	m_window.clear(BACKGROUND_COLOR);
 
-	for (const auto& view : m_views)
+	if (m_scene)
 	{
-		view->Render(m_window);
+		m_scene->Render(m_window);
 	}
 
 	m_window.display();
+}
+
+void Application::LoadScene(std::unique_ptr<Scene> scene)
+{
+	m_scene = std::move(scene);
+	if (m_scene)
+	{
+		m_scene->Init();
+	}
 }
