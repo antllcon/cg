@@ -15,6 +15,7 @@ struct LetterData
 {
 	LetterType type;
 	sf::Vector2f position;
+	sf::Vector2f basePosition;
 	sf::Color color;
 };
 
