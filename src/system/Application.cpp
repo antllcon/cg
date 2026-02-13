@@ -2,12 +2,11 @@
 #include "Monitor.h"
 #include "Windows.h"
 #include "src/scene/MainScene.h"
-#include "src/view/CircleView.h"
 
 namespace
 {
-constexpr unsigned int WINDOW_WIDTH = 800u;
-constexpr unsigned int WINDOW_HEIGHT = 600u;
+constexpr unsigned int WINDOW_WIDTH = 400u;
+constexpr unsigned int WINDOW_HEIGHT = 400u;
 constexpr auto WINDOW_NAME = "MVC template";
 constexpr sf::Color BACKGROUND_COLOR = sf::Color::Black;
 } // namespace
@@ -26,9 +25,13 @@ Application::~Application()
 
 void Application::Run()
 {
+	sf::Clock clock;
 	while (m_window.isOpen())
 	{
+		auto dt = clock.restart();
+
 		ProcessEvents();
+		Update(dt.asSeconds());
 		Render();
 	}
 }
@@ -46,6 +49,14 @@ void Application::ProcessEvents()
 		{
 			m_scene->ProcessEvents(*event, m_window);
 		}
+	}
+}
+
+void Application::Update(float dt)
+{
+	if (m_scene)
+	{
+		m_scene->Update(dt);
 	}
 }
 
