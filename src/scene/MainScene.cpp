@@ -1,18 +1,17 @@
 #include "MainScene.h"
-
-#include "src/controller/CircleController.h"
-#include "src/model/CircleModel.h"
-#include "src/view/CircleView.h"
+#include "src/controller/LettersController.h"
+#include "src/model/LettersModel.h"
+#include "src/view/LettersView.h"
 
 void MainScene::Init()
 {
-	auto circleModel = std::make_shared<CircleModel>();
-	AddModel(circleModel);
+	auto model = std::make_shared<LettersModel>();
+	AddModel(model);
 
-	auto circleController = std::make_shared<CircleController>(circleModel);
-	AddController(circleController);
+	auto controller = std::make_shared<LettersController>(model);
+	AddController(controller);
 
-	auto gameView = std::make_shared<CircleView>(circleController, circleModel);
-	AddView(gameView);
-	circleModel->RegisterObserver(gameView);
+	auto view = std::make_shared<LettersView>(model);
+	AddView(view);
+	model->RegisterObserver(view);
 }

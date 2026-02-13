@@ -2,7 +2,6 @@
 #include "Monitor.h"
 #include "Windows.h"
 #include "src/scene/MainScene.h"
-#include "src/view/CircleView.h"
 
 namespace
 {
