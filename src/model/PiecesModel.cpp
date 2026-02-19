@@ -4,19 +4,33 @@
 
 PiecesModel::PiecesModel()
 {
-	for (int i = 0; i < 8; ++i)
-	{
-		sf::Vector2i gridPos{i, 6};
-		sf::Vector2f pixelPos = ChessGrid::GridToPixels(gridPos);
-		m_piecesData.push_back({PieceType::Pawn, PieceColor::White, pixelPos, gridPos, false});
-	}
+    m_piecesData.push_back({PieceType::Rook, PieceColor::Black, ChessGrid::GridToPixels({0, 0}), {0, 0}, false});
+    m_piecesData.push_back({PieceType::Knight, PieceColor::Black, ChessGrid::GridToPixels({1, 0}), {1, 0}, false});
+    m_piecesData.push_back({PieceType::Bishop, PieceColor::Black, ChessGrid::GridToPixels({2, 0}), {2, 0}, false});
+    m_piecesData.push_back({PieceType::Queen, PieceColor::Black, ChessGrid::GridToPixels({3, 0}), {3, 0}, false});
+    m_piecesData.push_back({PieceType::King, PieceColor::Black, ChessGrid::GridToPixels({4, 0}), {4, 0}, false});
+    m_piecesData.push_back({PieceType::Bishop, PieceColor::Black, ChessGrid::GridToPixels({5, 0}), {5, 0}, false});
+    m_piecesData.push_back({PieceType::Knight, PieceColor::Black, ChessGrid::GridToPixels({6, 0}), {6, 0}, false});
+    m_piecesData.push_back({PieceType::Rook, PieceColor::Black, ChessGrid::GridToPixels({7, 0}), {7, 0}, false});
 
-	for (int i = 0; i < 8; ++i)
-	{
-		sf::Vector2i gridPos{i, 1};
-		sf::Vector2f pixelPos = ChessGrid::GridToPixels(gridPos);
-		m_piecesData.push_back({PieceType::Pawn, PieceColor::Black, pixelPos, gridPos, false});
-	}
+    for (int i = 0; i < ChessGrid::BOARD_SIZE; ++i)
+    {
+        m_piecesData.push_back({PieceType::Pawn, PieceColor::Black, ChessGrid::GridToPixels({i, 1}), {i, 1}, false});
+    }
+
+    for (int i = 0; i < ChessGrid::BOARD_SIZE; ++i)
+    {
+        m_piecesData.push_back({PieceType::Pawn, PieceColor::White, ChessGrid::GridToPixels({i, 6}), {i, 6}, false});
+    }
+
+    m_piecesData.push_back({PieceType::Rook, PieceColor::White, ChessGrid::GridToPixels({0, 7}), {0, 7}, false});
+    m_piecesData.push_back({PieceType::Knight, PieceColor::White, ChessGrid::GridToPixels({1, 7}), {1, 7}, false});
+    m_piecesData.push_back({PieceType::Bishop, PieceColor::White, ChessGrid::GridToPixels({2, 7}), {2, 7}, false});
+    m_piecesData.push_back({PieceType::Queen, PieceColor::White, ChessGrid::GridToPixels({3, 7}), {3, 7}, false});
+    m_piecesData.push_back({PieceType::King, PieceColor::White, ChessGrid::GridToPixels({4, 7}), {4, 7}, false});
+    m_piecesData.push_back({PieceType::Bishop, PieceColor::White, ChessGrid::GridToPixels({5, 7}), {5, 7}, false});
+    m_piecesData.push_back({PieceType::Knight, PieceColor::White, ChessGrid::GridToPixels({6, 7}), {6, 7}, false});
+    m_piecesData.push_back({PieceType::Rook, PieceColor::White, ChessGrid::GridToPixels({7, 7}), {7, 7}, false});
 }
 
 ChessData& PiecesModel::GetData()
