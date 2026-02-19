@@ -3,7 +3,7 @@
 
 namespace Monitor
 {
-constexpr unsigned int FRAMERATE_LIMIT = 60u;
+constexpr auto FRAMERATE_LIMIT = 60u;
 
 inline unsigned int GetMonitorRefreshRate()
 {

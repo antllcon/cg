@@ -28,6 +28,6 @@ protected:
 
 private:
 	std::vector<std::shared_ptr<void>> m_models;
-	std::vector<std::shared_ptr<IController>> m_controllers;
 	std::vector<std::shared_ptr<IView>> m_views;
+	std::vector<std::shared_ptr<IController>> m_controllers;
 };

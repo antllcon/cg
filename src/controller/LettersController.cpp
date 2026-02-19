@@ -3,10 +3,10 @@
 
 namespace
 {
-constexpr float GRAVITY = 2000.0f;
-constexpr float JUMP_SPEED = 600.0f;
-constexpr float PHASE_DELAY = 0.3f;
-constexpr float REST_TIME = 0.1f;
+constexpr auto GRAVITY = 2000.0f;
+constexpr auto JUMP_SPEED = 600.0f;
+constexpr auto PHASE_DELAY = 0.3f;
+constexpr auto REST_TIME = 0.0f;
 
 float CalculateJumpDisplacement(float time)
 {

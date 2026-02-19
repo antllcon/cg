@@ -5,10 +5,10 @@
 
 namespace
 {
-constexpr unsigned int WINDOW_WIDTH = 800u;
-constexpr unsigned int WINDOW_HEIGHT = 600u;
-constexpr auto WINDOW_NAME = "MVC template";
-constexpr sf::Color BACKGROUND_COLOR = sf::Color::Black;
+constexpr auto WINDOW_WIDTH = 800u;
+constexpr auto WINDOW_HEIGHT = 600u;
+constexpr auto WINDOW_NAME = "Application";
+constexpr auto BACKGROUND_COLOR = sf::Color::Black;
 } // namespace
 
 Application::Application()
@@ -75,6 +75,7 @@ void Application::Render()
 void Application::LoadScene(std::unique_ptr<Scene> scene)
 {
 	m_scene = std::move(scene);
+
 	if (m_scene)
 	{
 		m_scene->Init();
