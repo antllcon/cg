@@ -3,14 +3,13 @@
 
 namespace
 {
-constexpr auto GRAVITY = 2000.0f;
+constexpr auto GRAVITY = 1000.0f;
 constexpr auto JUMP_SPEED = 600.0f;
-constexpr auto PHASE_DELAY = 0.3f;
-constexpr auto REST_TIME = 0.0f;
+constexpr auto PHASE_DELAY = 0.4f;
 
 float CalculateJumpDisplacement(float time)
 {
-	return (JUMP_SPEED * time) - (0.5f * GRAVITY * time * time);
+	return JUMP_SPEED * time - 0.5f * GRAVITY * time * time;
 }
 } // namespace
 
@@ -22,57 +21,47 @@ LettersController::LettersController(std::shared_ptr<LettersModel> model)
 
 void LettersController::Update(float dt)
 {
-	auto& data = m_model->GetData();
-	bool isChanged = false;
+	m_model->BeginUpdate();
 
-	for (size_t i = 0; i < data.size(); ++i)
+	for (size_t i = 0; i < m_model->GetData().size(); ++i)
 	{
-		if (UpdateLetterState(i, dt))
-		{
-			isChanged = true;
-		}
+		UpdateLetterState(i, dt);
 	}
 
-	if (isChanged)
-	{
-		m_model->NotifyObservers();
-	}
+	m_model->EndUpdate();
 }
 
-bool LettersController::UpdateLetterState(size_t index, float dt)
+void LettersController::UpdateLetterState(size_t index, float dt)
 {
 	m_letterTimers[index] += dt;
-	const float time = m_letterTimers[index];
-	auto& letter = m_model->GetData()[index];
+	const auto time = m_letterTimers[index];
 
 	if (time < 0.0f)
 	{
-		letter.position = letter.basePosition;
-		return false;
+		return;
 	}
 
-	const float displacement = CalculateJumpDisplacement(time);
-	const float newY = letter.basePosition.y - displacement;
+	const auto letter = m_model->GetData()[index];
+	const auto displacement = CalculateJumpDisplacement(time);
+	const sf::Vector2f newPosition = {letter.basePosition.x, letter.basePosition.y - displacement};
 
-	if (newY >= letter.basePosition.y)
+	if (newPosition.y <= letter.basePosition.y)
 	{
-		letter.position = letter.basePosition;
-		m_letterTimers[index] = -REST_TIME;
+		m_model->SetLetterPosition(index, newPosition);
 	}
 	else
 	{
-		letter.position.y = newY;
+		m_model->SetLetterPosition(index, letter.basePosition);
+		m_letterTimers[index] = 0.0f;
 	}
-
-	return true;
 }
 
 void LettersController::InitTimers()
 {
-	const size_t count = m_model->GetData().size();
-	m_letterTimers.resize(count);
+	const size_t countLetters = m_model->GetData().size();
+	m_letterTimers.resize(countLetters);
 
-	for (size_t i = 0; i < count; ++i)
+	for (size_t i = 0; i < countLetters; ++i)
 	{
 		m_letterTimers[i] = -(static_cast<float>(i) * PHASE_DELAY);
 	}

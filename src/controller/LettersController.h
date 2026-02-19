@@ -14,8 +14,9 @@ public:
 
 private:
 	void InitTimers();
-	bool UpdateLetterState(size_t index, float dt);
+	void UpdateLetterState(size_t index, float dt);
 
 	std::shared_ptr<LettersModel> m_model;
 	std::vector<float> m_letterTimers;
+	float m_globalTime = 0.0f;
 };

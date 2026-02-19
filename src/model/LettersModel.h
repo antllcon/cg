@@ -26,12 +26,16 @@ class LettersModel final : public CObservable<LettersData>
 public:
 	LettersModel();
 
-	LettersData& GetData();
 	const LettersData& GetData() const;
+	void SetLetterPosition(size_t index, const sf::Vector2f& position);
+
+	void BeginUpdate();
+	void EndUpdate();
 
 protected:
 	LettersData GetChangedData() const override;
 
 private:
 	LettersData m_data;
+	bool m_isUpdating;
 };
