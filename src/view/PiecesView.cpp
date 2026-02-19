@@ -5,7 +5,7 @@
 
 namespace
 {
-constexpr float PIECE_SIZE = 32.0f;
+constexpr float PIECE_SIZE = ChessGrid::CELL_SIZE - 10.0f;
 constexpr float PIECE_OFFSET = (ChessGrid::CELL_SIZE - PIECE_SIZE) / 2.0f;
 
 constexpr sf::Color COLOR_WHITE(255, 255, 255);
@@ -15,7 +15,9 @@ constexpr sf::Color COLOR_BORDER(0, 0, 0);
 constexpr uint8_t ALPHA_COLOR = 200u;
 } // namespace
 
-PiecesView::PiecesView(std::shared_ptr<PiecesModel> model, std::shared_ptr<PiecesController> controller)
+PiecesView::PiecesView(
+	std::shared_ptr<PiecesModel> model,
+	std::shared_ptr<PiecesController> controller)
 	: m_controller(std::move(controller))
 {
 	if (model)

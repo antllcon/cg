@@ -14,7 +14,10 @@ void BoardView::HandleEvent(const sf::Event&, const sf::RenderWindow&)
 
 void BoardView::Render(sf::RenderWindow& window) const
 {
-	sf::RectangleShape cell({static_cast<float>(ChessGrid::CELL_SIZE), static_cast<float>(ChessGrid::CELL_SIZE)});
+	sf::RectangleShape cell({
+		static_cast<float>(ChessGrid::CELL_SIZE),
+		static_cast<float>(ChessGrid::CELL_SIZE)
+	});
 
 	for (int y = 0; y < ChessGrid::BOARD_SIZE; ++y)
 	{
