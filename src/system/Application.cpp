@@ -5,8 +5,8 @@
 
 namespace
 {
-constexpr auto WINDOW_WIDTH = 800u;
-constexpr auto WINDOW_HEIGHT = 600u;
+constexpr auto WINDOW_WIDTH = 640u;
+constexpr auto WINDOW_HEIGHT = 640u;
 constexpr auto WINDOW_NAME = "Application";
 constexpr auto BACKGROUND_COLOR = sf::Color::Black;
 } // namespace

@@ -33,6 +33,8 @@ void DrawG(std::vector<std::unique_ptr<sf::Drawable>>& shapes, const LetterData&
 
     void DrawV(std::vector<std::unique_ptr<sf::Drawable>>& shapes, const LetterData& data)
     {
+		shapes.push_back(ShapeFactory::CreateRect(data.position, {THICKNESS, LETTER_HEIGHT}, data.color));
+
         float bottomHeight = LETTER_HEIGHT * 0.6f;
         float bottomWidth = LETTER_WIDTH;
         sf::Vector2f bottomPos = {data.position.x, data.position.y + (LETTER_HEIGHT - bottomHeight)};
@@ -43,14 +45,13 @@ void DrawG(std::vector<std::unique_ptr<sf::Drawable>>& shapes, const LetterData&
         sf::Vector2f innerBottomSize = {bottomWidth - 2 * THICKNESS, bottomHeight - 2 * THICKNESS};
         shapes.push_back(ShapeFactory::CreateRect(innerBottomPos, innerBottomSize, BG_COLOR));
 
-        float topHeight = LETTER_HEIGHT * 0.4f;
-        float topWidth = LETTER_WIDTH * 0.8f;
+		constexpr float outerRadius = LETTER_HEIGHT * 0.6f / 2.0f;
+		constexpr float innerRadius = outerRadius - THICKNESS;
 
-        shapes.push_back(ShapeFactory::CreateRect(data.position, {topWidth, topHeight}, data.color));
+        shapes.push_back(ShapeFactory::CreateCircle(data.position, outerRadius, data.color));
 
-        sf::Vector2f innerTopPos = {data.position.x + THICKNESS, data.position.y + THICKNESS};
-        sf::Vector2f innerTopSize = {topWidth - 2 * THICKNESS, topHeight - 2 * THICKNESS};
-        shapes.push_back(ShapeFactory::CreateRect(innerTopPos, innerTopSize, BG_COLOR));
+		sf::Vector2f innerPos = {data.position.x + THICKNESS, data.position.y + THICKNESS};
+        shapes.push_back(ShapeFactory::CreateCircle(innerPos, innerRadius, BG_COLOR));
     }
 
     void DrawO(std::vector<std::unique_ptr<sf::Drawable>>& shapes, const LetterData& data)
