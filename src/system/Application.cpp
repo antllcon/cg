@@ -7,7 +7,7 @@ namespace
 {
 constexpr unsigned int WINDOW_WIDTH = 400u;
 constexpr unsigned int WINDOW_HEIGHT = 400u;
-constexpr auto WINDOW_NAME = "MVC template";
+constexpr auto WINDOW_NAME = "Simple chess";
 constexpr sf::Color BACKGROUND_COLOR = sf::Color::Black;
 } // namespace
 
@@ -75,6 +75,7 @@ void Application::Render()
 void Application::LoadScene(std::unique_ptr<Scene> scene)
 {
 	m_scene = std::move(scene);
+
 	if (m_scene)
 	{
 		m_scene->Init();
