@@ -15,50 +15,133 @@ constexpr sf::Color COLOR_BORDER(0, 0, 0);
 constexpr float BORDER_THICKNESS = -1.5f;
 constexpr uint8_t ALPHA_COLOR = 200u;
 
+void AssertHasPoints(const std::vector<sf::Vector2f>& points)
+{
+    if (points.empty())
+    {
+        throw std::runtime_error("Точки для отрисовки отсутствуют");
+    }
+}
+
+const std::vector<sf::Vector2f>& GetPawnPoints()
+{
+    static const std::vector<sf::Vector2f> points =
+    {
+        {6.0f, 31.0f}, {26.0f, 31.0f}, {19.0f, 19.0f}, {21.5f, 19.0f},
+        {22.0f, 15.5f}, {19.0f, 14.0f}, {21.0f, 8.0f}, {16.0f, 5.0f},
+        {11.0f, 8.0f}, {12.5f, 14.0f}, {9.0f, 15.5f}, {10.0f, 19.0f},
+        {12.5f, 19.0f}
+    };
+    return points;
+}
+
+const std::vector<sf::Vector2f>& GetRookPoints()
+{
+    static const std::vector<sf::Vector2f> points =
+    {
+        {5.0f, 26.5f}, {4.0f, 31.5f}, {27.5f, 31.5f}, {26.5f, 26.5f},
+        {24.5f, 25.0f}, {22.5f, 12.0f}, {25.0f, 9.5f}, {25.5f, 2.5f},
+        {21.5f, 2.0f}, {20.0f, 6.0f}, {19.5f, 6.0f}, {18.5f, 1.5f},
+        {13.0f, 1.5f}, {12.0f, 5.5f}, {11.0f, 5.5f}, {10.0f, 2.0f},
+        {5.5f, 2.5f}, {6.5f, 9.5f}, {9.0f, 12.0f}, {7.5f, 25.0f}
+    };
+    return points;
+}
+
+const std::vector<sf::Vector2f>& GetKnightPoints()
+{
+    static const std::vector<sf::Vector2f> points =
+    {
+        {4.5f, 31.5f}, {28.5f, 31.5f}, {27.0f, 26.5f}, {24.0f, 24.5f},
+        {26.0f, 16.0f}, {20.5f, 5.0f}, {14.0f, 3.5f}, {11.0f, 0.5f},
+        {10.0f, 3.5f}, {7.5f, 6.0f}, {6.0f, 10.0f}, {2.5f, 15.0f},
+        {7.5f, 18.5f}, {9.0f, 15.5f}, {11.0f, 16.0f}, {15.0f, 13.5f},
+        {8.5f, 25.0f}, {5.5f, 26.5f}
+    };
+    return points;
+}
+
+const std::vector<sf::Vector2f>& GetBishopPoints()
+{
+    static const std::vector<sf::Vector2f> points =
+    {
+        {3.5f, 32.0f}, {28.0f, 32.0f}, {26.0f, 26.0f}, {24.0f, 25.0f},
+        {21.5f, 25.0f}, {24.0f, 15.5f}, {19.0f, 6.5f}, {12.0f, 6.5f},
+        {7.0f, 16.5f}, {9.5f, 25.0f}, {7.0f, 25.0f}, {5.0f, 26.0f}
+    };
+    return points;
+}
+
+const std::vector<sf::Vector2f>& GetQueenPoints()
+{
+    static const std::vector<sf::Vector2f> points =
+    {
+        {5.5f, 26.0f}, {4.0f, 31.5f}, {28.0f, 31.5f}, {26.5f, 26.0f},
+        {24.5f, 25.0f}, {30.5f, 7.5f}, {22.5f, 15.0f}, {20.5f, 0.5f},
+        {16.0f, 12.5f}, {11.0f, 0.5f}, {9.5f, 15.0f}, {1.5f, 7.5f},
+        {8.0f, 25.0f}
+    };
+    return points;
+}
+
+const std::vector<sf::Vector2f>& GetKingPoints()
+{
+    static const std::vector<sf::Vector2f> points =
+    {
+        {26.0f, 26.0f}, {27.5f, 31.5f}, {3.5f, 31.5f}, {4.5f, 26.0f},
+        {7.0f, 24.5f}, {2.0f, 18.0f}, {3.5f, 9.5f}, {12.5f, 9.0f},
+        {13.0f, 7.5f}, {10.5f, 7.5f}, {11.0f, 2.5f}, {13.0f, 2.5f},
+        {13.0f, 0.5f}, {17.5f, 0.5f}, {17.5f, 3.0f}, {20.0f, 3.0f},
+        {20.0f, 7.5f}, {17.5f, 7.5f}, {18.0f, 9.0f}, {27.5f, 9.5f},
+        {29.0f, 18.0f}, {23.5f, 24.5f}
+    };
+    return points;
+}
+
+void AddSvgShape(std::vector<std::unique_ptr<sf::Drawable>>& shapes, const std::vector<sf::Vector2f>& points, const sf::Vector2f& pos, const sf::Color& color)
+{
+    AssertHasPoints(points);
+    shapes.push_back(ShapeFactory::CreatePathShape(pos, points, color, COLOR_BORDER, BORDER_THICKNESS));
+}
+
 sf::Vector2f GetPieceBasePosition(const ChessPiece& piece)
 {
-	if (piece.dragPosition.has_value())
-	{
-		return piece.dragPosition.value();
-	}
+    if (piece.dragPosition.has_value())
+    {
+        return piece.dragPosition.value();
+    }
 
-	return ChessGrid::GridToPixels(piece.gridPosition);
+    return ChessGrid::GridToPixels(piece.gridPosition);
 }
 
 void DrawPawn(std::vector<std::unique_ptr<sf::Drawable>>& shapes, const sf::Vector2f& pos, const sf::Color& color)
 {
-	shapes.push_back(ShapeFactory::CreateRect(pos, {PIECE_SIZE, PIECE_SIZE}, color, COLOR_BORDER, BORDER_THICKNESS));
+    AddSvgShape(shapes, GetPawnPoints(), pos, color);
 }
 
 void DrawRook(std::vector<std::unique_ptr<sf::Drawable>>& shapes, const sf::Vector2f& pos, const sf::Color& color)
 {
-	shapes.push_back(ShapeFactory::CreateRect({pos.x, pos.y + 8.0f}, {PIECE_SIZE, PIECE_SIZE - 8.0f}, color, COLOR_BORDER, BORDER_THICKNESS));
-	shapes.push_back(ShapeFactory::CreateRect({pos.x - 2.0f, pos.y}, {PIECE_SIZE + 4.0f, 10.0f}, color, COLOR_BORDER, BORDER_THICKNESS));
+    AddSvgShape(shapes, GetRookPoints(), pos, color);
 }
 
 void DrawKnight(std::vector<std::unique_ptr<sf::Drawable>>& shapes, const sf::Vector2f& pos, const sf::Color& color)
 {
-	shapes.push_back(ShapeFactory::CreateRect({pos.x, pos.y + 12.0f}, {PIECE_SIZE, PIECE_SIZE - 12.0f}, color, COLOR_BORDER, BORDER_THICKNESS));
-	shapes.push_back(ShapeFactory::CreatePolygon({pos.x - 2.0f, pos.y - 4.0f}, 14.0f, 3, color, COLOR_BORDER, BORDER_THICKNESS));
+    AddSvgShape(shapes, GetKnightPoints(), pos, color);
 }
 
 void DrawBishop(std::vector<std::unique_ptr<sf::Drawable>>& shapes, const sf::Vector2f& pos, const sf::Color& color)
 {
-	shapes.push_back(ShapeFactory::CreateRect({pos.x + 4.0f, pos.y + 12.0f}, {PIECE_SIZE - 8.0f, PIECE_SIZE - 12.0f}, color, COLOR_BORDER, BORDER_THICKNESS));
-	shapes.push_back(ShapeFactory::CreatePolygon({pos.x, pos.y - 4.0f}, 12.0f, 4, color, COLOR_BORDER, BORDER_THICKNESS));
+    AddSvgShape(shapes, GetBishopPoints(), pos, color);
 }
 
 void DrawQueen(std::vector<std::unique_ptr<sf::Drawable>>& shapes, const sf::Vector2f& pos, const sf::Color& color)
 {
-	shapes.push_back(ShapeFactory::CreateRect({pos.x, pos.y + 12.0f}, {PIECE_SIZE, PIECE_SIZE - 12.0f}, color, COLOR_BORDER, BORDER_THICKNESS));
-	shapes.push_back(ShapeFactory::CreatePolygon({pos.x - 2.0f, pos.y - 4.0f}, 14.0f, 8, color, COLOR_BORDER, BORDER_THICKNESS));
+    AddSvgShape(shapes, GetQueenPoints(), pos, color);
 }
 
 void DrawKing(std::vector<std::unique_ptr<sf::Drawable>>& shapes, const sf::Vector2f& pos, const sf::Color& color)
 {
-	shapes.push_back(ShapeFactory::CreateRect({pos.x, pos.y + 10.0f}, {PIECE_SIZE, PIECE_SIZE - 10.0f}, color, COLOR_BORDER, BORDER_THICKNESS));
-	shapes.push_back(ShapeFactory::CreateRect({pos.x + 10.0f, pos.y}, {4.0f, 12.0f}, color, COLOR_BORDER, BORDER_THICKNESS));
-	shapes.push_back(ShapeFactory::CreateRect({pos.x + 6.0f, pos.y + 4.0f}, {12.0f, 4.0f}, color, COLOR_BORDER, BORDER_THICKNESS));
+    AddSvgShape(shapes, GetKingPoints(), pos, color);
 }
 } // namespace
 

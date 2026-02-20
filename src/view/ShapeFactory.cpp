@@ -1,6 +1,19 @@
 #include "ShapeFactory.h"
 #include "SFML/Graphics/CircleShape.hpp"
+#include "SFML/Graphics/ConvexShape.hpp"
 #include "SFML/Graphics/RectangleShape.hpp"
+#include <stdexcept>
+
+namespace
+{
+void AssertIsNotEmpty(size_t size)
+{
+	if (size == 0)
+	{
+		throw std::runtime_error("Массив точек для фигуры пуст");
+	}
+}
+}
 
 namespace ShapeFactory
 {
@@ -23,4 +36,23 @@ std::unique_ptr<sf::Drawable> CreatePolygon(const sf::Vector2f& pos, float radiu
 	polygon->setOutlineThickness(outlineThickness);
 	return polygon;
 }
-} // namespace ShapeFactory
+
+std::unique_ptr<sf::Drawable> CreatePathShape(const sf::Vector2f& pos, const std::vector<sf::Vector2f>& points, const sf::Color& fill, const sf::Color& outline, float outlineThickness)
+{
+	AssertIsNotEmpty(points.size());
+
+	auto shape = std::make_unique<sf::ConvexShape>(points.size());
+
+	for (size_t i = 0; i < points.size(); ++i)
+	{
+		shape->setPoint(i, points[i]);
+	}
+
+	shape->setPosition(pos);
+	shape->setFillColor(fill);
+	shape->setOutlineColor(outline);
+	shape->setOutlineThickness(outlineThickness);
+
+	return shape;
+}
+}

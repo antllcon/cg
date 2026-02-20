@@ -17,13 +17,18 @@ inline sf::Vector2f GridToPixels(const sf::Vector2i& gridPos)
 
 inline sf::Vector2i PixelsToGrid(float x, float y)
 {
-	auto col = (x - BOARD_OFFSET_X) / CELL_SIZE;
-	auto row = (y - BOARD_OFFSET_Y) / CELL_SIZE;
-	return {static_cast<int>(col), static_cast<int>(row)};
+	float col = (x - BOARD_OFFSET_X) / CELL_SIZE;
+	float row = (y - BOARD_OFFSET_Y) / CELL_SIZE;
+
+	return {
+		static_cast<int>(std::floor(col)),
+		static_cast<int>(std::floor(row))
+	};
 }
 
 inline bool IsInsideBoard(const sf::Vector2i& gridPos)
 {
-	return gridPos.x >= 0 && gridPos.x < BOARD_SIZE && gridPos.y >= 0 && gridPos.y < BOARD_SIZE;
+	return gridPos.x >= 0 && gridPos.x < BOARD_SIZE &&
+		   gridPos.y >= 0 && gridPos.y < BOARD_SIZE;
 }
 } // namespace ChessGrid
