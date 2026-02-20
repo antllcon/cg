@@ -1,13 +1,16 @@
 #include "CircleModel.h"
+#include <algorithm>
 #include <stdexcept>
 
 namespace
 {
-void AssertIsPositive(int value)
+constexpr int MIN_RADIUS = 5;
+
+void AssertIsRadiusValid(int radius)
 {
-	if (value <= 0)
+	if (radius < MIN_RADIUS)
 	{
-		throw std::runtime_error("Значение шага должно быть положительным");
+		throw std::runtime_error("Радиус не может быть меньше минимально допустимого значения");
 	}
 }
 }
@@ -25,10 +28,14 @@ void CircleModel::SetCenter(const sf::Vector2i& center)
 	NotifyObservers();
 }
 
-void CircleModel::IncreaseRadius(int step)
+void CircleModel::ChangeRadius(int delta)
 {
-	AssertIsPositive(step);
-	m_data.radius += step;
+	int newRadius = m_data.radius + delta;
+	newRadius = std::max(MIN_RADIUS, newRadius);
+
+	AssertIsRadiusValid(newRadius);
+
+	m_data.radius = newRadius;
 	NotifyObservers();
 }
 

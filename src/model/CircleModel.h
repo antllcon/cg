@@ -16,7 +16,7 @@ public:
 	CircleModel();
 
 	void SetCenter(const sf::Vector2i& center);
-	void IncreaseRadius(int step);
+	void ChangeRadius(int delta);
 	const CircleData& GetData() const;
 
 protected:

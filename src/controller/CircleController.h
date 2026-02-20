@@ -8,9 +8,10 @@ class CircleController final : public IController
 public:
 	explicit CircleController(std::shared_ptr<CircleModel> model);
 
-	void Update(float dt) override;
+	void Update(float) override;
+
 	void OnCanvasClicked(float x, float y);
-	void OnIncreaseRadiusClicked();
+	void OnMouseScrolled(float x, float y, float delta);
 
 private:
 	std::shared_ptr<CircleModel> m_model;

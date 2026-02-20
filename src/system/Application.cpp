@@ -6,9 +6,9 @@
 
 namespace
 {
-constexpr unsigned int WINDOW_WIDTH = 800u;
-constexpr unsigned int WINDOW_HEIGHT = 600u;
-constexpr auto WINDOW_NAME = "MVC template";
+constexpr unsigned int WINDOW_WIDTH = 400u;
+constexpr unsigned int WINDOW_HEIGHT = 400u;
+constexpr auto WINDOW_NAME = "Circle";
 constexpr sf::Color BACKGROUND_COLOR = sf::Color::Black;
 } // namespace
 
