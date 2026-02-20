@@ -10,8 +10,8 @@ public:
 
 	void Update(float) override;
 
-	void OnCanvasClicked(float x, float y);
-	void OnMouseScrolled(float x, float y, float delta);
+	void OnCanvasClicked(float x, float y, bool isRightClick);
+	void OnMouseScrolled(float x, float y, float delta, bool isShiftPressed);
 
 private:
 	std::shared_ptr<CircleModel> m_model;

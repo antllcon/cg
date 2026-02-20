@@ -20,7 +20,7 @@ public:
 	void Update(const CircleData& data, IObservable<CircleData>* subject) override;
 
 private:
-	void UpdateVertices(const std::vector<sf::Vector2i>& points, const sf::Color& color);
+	void UpdateVertices(const std::vector<sf::Vertex>& vertices);
 
 	std::shared_ptr<CircleController> m_controller;
 	sf::VertexArray m_vertices;

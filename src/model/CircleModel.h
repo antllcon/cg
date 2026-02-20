@@ -7,7 +7,10 @@ struct CircleData
 {
 	sf::Vector2i center;
 	int radius;
-	sf::Color color;
+	int thickness;
+	sf::Color outlineColor;
+	sf::Color fillColor;
+	bool isFilled;
 };
 
 class CircleModel final : public CObservable<CircleData>
@@ -17,6 +20,8 @@ public:
 
 	void SetCenter(const sf::Vector2i& center);
 	void ChangeRadius(int delta);
+	void ChangeThickness(int delta);
+	void ToggleFill();
 	const CircleData& GetData() const;
 
 protected:

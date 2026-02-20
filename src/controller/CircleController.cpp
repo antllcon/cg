@@ -23,16 +23,34 @@ void CircleController::Update(float)
 {
 }
 
-void CircleController::OnCanvasClicked(float x, float y)
+void CircleController::OnCanvasClicked(float x, float y, bool isRightClick)
 {
-	m_model->SetCenter({static_cast<int>(x), static_cast<int>(y)});
+	if (isRightClick)
+	{
+		if (IsInsideCircle(x, y, m_model->GetData()))
+		{
+			m_model->ToggleFill();
+		}
+	}
+	else
+	{
+		m_model->SetCenter({static_cast<int>(x), static_cast<int>(y)});
+	}
 }
 
-void CircleController::OnMouseScrolled(float x, float y, float delta)
+void CircleController::OnMouseScrolled(float x, float y, float delta, bool isShiftPressed)
 {
 	if (IsInsideCircle(x, y, m_model->GetData()))
 	{
 		int step = static_cast<int>(delta) * SCROLL_STEP;
-		m_model->ChangeRadius(step);
+
+		if (isShiftPressed)
+		{
+			m_model->ChangeThickness(step);
+		}
+		else
+		{
+			m_model->ChangeRadius(step);
+		}
 	}
 }
