@@ -19,6 +19,7 @@ namespace
 	std::vector<sf::Vector2i> CalculateBresenham(int xc, int yc, int r)
 	{
 		std::vector<sf::Vector2i> points;
+
 		int x = 0;
 		int y = r;
 		int d = 3 - 2 * r;
