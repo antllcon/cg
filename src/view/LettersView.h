@@ -2,6 +2,7 @@
 #include "IView.h"
 #include "src/model/LettersModel.h"
 #include "src/system/Observer.h"
+#include <SFML/Graphics/Drawable.hpp>
 
 class LettersView final
 	: public IView

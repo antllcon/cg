@@ -2,6 +2,7 @@
 #include "src/controller/LettersController.h"
 #include "src/model/LettersModel.h"
 #include "src/view/LettersView.h"
+#include "SFML/Graphics/RenderWindow.hpp"
 
 void MainScene::Init()
 {
