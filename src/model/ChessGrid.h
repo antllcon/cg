@@ -15,7 +15,7 @@ inline sf::Vector2f GridToPixels(const sf::Vector2i& gridPos)
 		(BOARD_OFFSET_Y + gridPos.y * CELL_SIZE)};
 }
 
-inline sf::Vector2i PixelsToGrid(int x, int y)
+inline sf::Vector2i PixelsToGrid(float x, float y)
 {
 	auto col = (x - BOARD_OFFSET_X) / CELL_SIZE;
 	auto row = (y - BOARD_OFFSET_Y) / CELL_SIZE;

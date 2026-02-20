@@ -1,41 +1,52 @@
 #include "PiecesModel.h"
-
 #include "ChessGrid.h"
+
+#include <stdexcept>
+
+namespace
+{
+void AssertIsPieceFound(bool isFound)
+{
+	if (!isFound)
+	{
+		throw std::invalid_argument("Фигура с указанным идентификатором не найдена");
+	}
+}
+
+template <typename Container>
+auto FindPieceById(Container& data, PieceId id)
+{
+	return std::find_if(data.begin(), data.end(), [id](const ChessPiece& piece) {
+		return piece.id == id;
+	});
+}
+}
 
 PiecesModel::PiecesModel()
 {
-    m_piecesData.push_back({PieceType::Rook, PieceColor::Black, ChessGrid::GridToPixels({0, 0}), {0, 0}, false});
-    m_piecesData.push_back({PieceType::Knight, PieceColor::Black, ChessGrid::GridToPixels({1, 0}), {1, 0}, false});
-    m_piecesData.push_back({PieceType::Bishop, PieceColor::Black, ChessGrid::GridToPixels({2, 0}), {2, 0}, false});
-    m_piecesData.push_back({PieceType::Queen, PieceColor::Black, ChessGrid::GridToPixels({3, 0}), {3, 0}, false});
-    m_piecesData.push_back({PieceType::King, PieceColor::Black, ChessGrid::GridToPixels({4, 0}), {4, 0}, false});
-    m_piecesData.push_back({PieceType::Bishop, PieceColor::Black, ChessGrid::GridToPixels({5, 0}), {5, 0}, false});
-    m_piecesData.push_back({PieceType::Knight, PieceColor::Black, ChessGrid::GridToPixels({6, 0}), {6, 0}, false});
-    m_piecesData.push_back({PieceType::Rook, PieceColor::Black, ChessGrid::GridToPixels({7, 0}), {7, 0}, false});
+	AddPiece(PieceType::Rook, PieceColor::Black, {0, 0});
+	AddPiece(PieceType::Knight, PieceColor::Black, {1, 0});
+	AddPiece(PieceType::Bishop, PieceColor::Black, {2, 0});
+	AddPiece(PieceType::Queen, PieceColor::Black, {3, 0});
+	AddPiece(PieceType::King, PieceColor::Black, {4, 0});
+	AddPiece(PieceType::Bishop, PieceColor::Black, {5, 0});
+	AddPiece(PieceType::Knight, PieceColor::Black, {6, 0});
+	AddPiece(PieceType::Rook, PieceColor::Black, {7, 0});
 
-    for (int i = 0; i < ChessGrid::BOARD_SIZE; ++i)
-    {
-        m_piecesData.push_back({PieceType::Pawn, PieceColor::Black, ChessGrid::GridToPixels({i, 1}), {i, 1}, false});
-    }
+	for (int i = 0; i < ChessGrid::BOARD_SIZE; ++i)
+	{
+		AddPiece(PieceType::Pawn, PieceColor::Black, {i, 1});
+		AddPiece(PieceType::Pawn, PieceColor::White, {i, 6});
+	}
 
-    for (int i = 0; i < ChessGrid::BOARD_SIZE; ++i)
-    {
-        m_piecesData.push_back({PieceType::Pawn, PieceColor::White, ChessGrid::GridToPixels({i, 6}), {i, 6}, false});
-    }
-
-    m_piecesData.push_back({PieceType::Rook, PieceColor::White, ChessGrid::GridToPixels({0, 7}), {0, 7}, false});
-    m_piecesData.push_back({PieceType::Knight, PieceColor::White, ChessGrid::GridToPixels({1, 7}), {1, 7}, false});
-    m_piecesData.push_back({PieceType::Bishop, PieceColor::White, ChessGrid::GridToPixels({2, 7}), {2, 7}, false});
-    m_piecesData.push_back({PieceType::Queen, PieceColor::White, ChessGrid::GridToPixels({3, 7}), {3, 7}, false});
-    m_piecesData.push_back({PieceType::King, PieceColor::White, ChessGrid::GridToPixels({4, 7}), {4, 7}, false});
-    m_piecesData.push_back({PieceType::Bishop, PieceColor::White, ChessGrid::GridToPixels({5, 7}), {5, 7}, false});
-    m_piecesData.push_back({PieceType::Knight, PieceColor::White, ChessGrid::GridToPixels({6, 7}), {6, 7}, false});
-    m_piecesData.push_back({PieceType::Rook, PieceColor::White, ChessGrid::GridToPixels({7, 7}), {7, 7}, false});
-}
-
-ChessData& PiecesModel::GetData()
-{
-	return m_piecesData;
+	AddPiece(PieceType::Rook, PieceColor::White, {0, 7});
+	AddPiece(PieceType::Knight, PieceColor::White, {1, 7});
+	AddPiece(PieceType::Bishop, PieceColor::White, {2, 7});
+	AddPiece(PieceType::Queen, PieceColor::White, {3, 7});
+	AddPiece(PieceType::King, PieceColor::White, {4, 7});
+	AddPiece(PieceType::Bishop, PieceColor::White, {5, 7});
+	AddPiece(PieceType::Knight, PieceColor::White, {6, 7});
+	AddPiece(PieceType::Rook, PieceColor::White, {7, 7});
 }
 
 const ChessData& PiecesModel::GetData() const
@@ -43,50 +54,23 @@ const ChessData& PiecesModel::GetData() const
 	return m_piecesData;
 }
 
-void PiecesModel::UpdatePiecePosition(size_t index, const sf::Vector2f& position)
+PieceColor PiecesModel::GetPieceColor(PieceId id) const
 {
-	if (index < m_piecesData.size())
-	{
-		m_piecesData[index].position = position;
-		NotifyObservers();
-	}
+	auto it = FindPieceById(m_piecesData, id);
+	AssertIsPieceFound(it != m_piecesData.end());
+	return it->color;
 }
 
-void PiecesModel::SnapPieceToGrid(size_t index, const sf::Vector2i& gridPos, const sf::Vector2f& visualPos)
+void PiecesModel::AddPiece(PieceType type, PieceColor color, const sf::Vector2i& gridPos)
 {
-	if (index < m_piecesData.size())
-	{
-		m_piecesData[index].gridPosition = gridPos;
-		m_piecesData[index].position = visualPos;
-		NotifyObservers();
-	}
+	m_piecesData.push_back({m_nextId++, type, color, gridPos});
+	NotifyObservers();
 }
 
-void PiecesModel::SetIsDragged(size_t index, bool isDragged)
+void PiecesModel::RemovePiece(PieceId id)
 {
-	if (index < m_piecesData.size())
-	{
-		m_piecesData[index].isDragged = isDragged;
-		NotifyObservers();
-	}
-}
-
-std::optional<size_t> PiecesModel::GetPieceIndexAt(const sf::Vector2i& gridPos) const
-{
-	for (size_t i = 0; i < m_piecesData.size(); ++i)
-	{
-		if (m_piecesData[i].gridPosition == gridPos && !m_piecesData[i].isDragged)
-		{
-			return i;
-		}
-	}
-	return std::nullopt;
-}
-
-void PiecesModel::RemovePieceAt(const sf::Vector2i& gridPos)
-{
-	auto it = std::remove_if(m_piecesData.begin(), m_piecesData.end(), [&](const ChessPiece& p) {
-		return p.gridPosition == gridPos && !p.isDragged;
+	auto it = std::remove_if(m_piecesData.begin(), m_piecesData.end(), [id](const ChessPiece& piece) {
+		return piece.id == id;
 	});
 
 	if (it != m_piecesData.end())
@@ -94,6 +78,72 @@ void PiecesModel::RemovePieceAt(const sf::Vector2i& gridPos)
 		m_piecesData.erase(it, m_piecesData.end());
 		NotifyObservers();
 	}
+}
+
+std::optional<PieceId> PiecesModel::GetPieceIdAt(const sf::Vector2i& gridPos) const
+{
+	for (const auto& piece : m_piecesData)
+	{
+		if (piece.gridPosition == gridPos && !piece.dragPosition.has_value())
+		{
+			return piece.id;
+		}
+	}
+
+	return std::nullopt;
+}
+
+void PiecesModel::RemovePieceAt(const sf::Vector2i& gridPos)
+{
+	auto it = std::remove_if(m_piecesData.begin(), m_piecesData.end(), [&gridPos](const ChessPiece& piece) {
+		return piece.gridPosition == gridPos && !piece.dragPosition.has_value();
+	});
+
+	if (it != m_piecesData.end())
+	{
+		m_piecesData.erase(it, m_piecesData.end());
+		NotifyObservers();
+	}
+}
+
+void PiecesModel::StartDrag(PieceId id, const sf::Vector2f& pixelPos)
+{
+	auto it = FindPieceById(m_piecesData, id);
+	AssertIsPieceFound(it != m_piecesData.end());
+
+	it->dragPosition = pixelPos;
+	NotifyObservers();
+}
+
+void PiecesModel::UpdateDragPosition(PieceId id, const sf::Vector2f& pixelPos)
+{
+	auto it = FindPieceById(m_piecesData, id);
+	AssertIsPieceFound(it != m_piecesData.end());
+
+	if (it->dragPosition.has_value())
+	{
+		it->dragPosition = pixelPos;
+		NotifyObservers();
+	}
+}
+
+void PiecesModel::DropPiece(PieceId id, const sf::Vector2i& newGridPos)
+{
+	auto it = FindPieceById(m_piecesData, id);
+	AssertIsPieceFound(it != m_piecesData.end());
+
+	it->gridPosition = newGridPos;
+	it->dragPosition = std::nullopt;
+	NotifyObservers();
+}
+
+void PiecesModel::CancelDrag(PieceId id)
+{
+	auto it = FindPieceById(m_piecesData, id);
+	AssertIsPieceFound(it != m_piecesData.end());
+
+	it->dragPosition = std::nullopt;
+	NotifyObservers();
 }
 
 ChessData PiecesModel::GetChangedData() const

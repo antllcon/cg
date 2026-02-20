@@ -1,9 +1,8 @@
 #pragma once
 #include "IController.h"
+#include "src/model/PiecesModel.h"
 #include <memory>
 #include <optional>
-
-class PiecesModel;
 
 class PiecesController final : public IController
 {
@@ -12,15 +11,13 @@ public:
 
 	void Update(float) override;
 
-	void OnMousePressed(int x, int y);
-	void OnMouseMoved(int x, int y);
-	void OnMouseReleased(int x, int y);
+	void OnMousePressed(float x, float y);
+	void OnMouseMoved(float x, float y);
+	void OnMouseReleased(float x, float y);
 
 private:
-	void ResetToOriginalPosition(size_t index);
-
 	std::shared_ptr<PiecesModel> m_model;
-	std::optional<size_t> m_draggedPieceIndex;
+	std::optional<PieceId> m_draggedPieceId;
 
 	float m_dragOffsetX = 0.0f;
 	float m_dragOffsetY = 0.0f;

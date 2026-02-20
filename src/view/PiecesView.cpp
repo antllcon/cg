@@ -15,6 +15,16 @@ constexpr sf::Color COLOR_BORDER(0, 0, 0);
 constexpr float BORDER_THICKNESS = -1.5f;
 constexpr uint8_t ALPHA_COLOR = 200u;
 
+sf::Vector2f GetPieceBasePosition(const ChessPiece& piece)
+{
+	if (piece.dragPosition.has_value())
+	{
+		return piece.dragPosition.value();
+	}
+
+	return ChessGrid::GridToPixels(piece.gridPosition);
+}
+
 void DrawPawn(std::vector<std::unique_ptr<sf::Drawable>>& shapes, const sf::Vector2f& pos, const sf::Color& color)
 {
 	shapes.push_back(ShapeFactory::CreateRect(pos, {PIECE_SIZE, PIECE_SIZE}, color, COLOR_BORDER, BORDER_THICKNESS));
@@ -69,18 +79,24 @@ void PiecesView::HandleEvent(const sf::Event& event, const sf::RenderWindow&)
 	{
 		if (mouseButton->button == sf::Mouse::Button::Left)
 		{
-			m_controller->OnMousePressed(mouseButton->position.x, mouseButton->position.y);
+			m_controller->OnMousePressed(
+				static_cast<float>(mouseButton->position.x),
+				static_cast<float>(mouseButton->position.y));
 		}
 	}
 	else if (const auto* mouseMove = event.getIf<sf::Event::MouseMoved>())
 	{
-		m_controller->OnMouseMoved(mouseMove->position.x, mouseMove->position.y);
+		m_controller->OnMouseMoved(
+			static_cast<float>(mouseMove->position.x),
+			static_cast<float>(mouseMove->position.y));
 	}
 	else if (const auto* mouseButtonRel = event.getIf<sf::Event::MouseButtonReleased>())
 	{
 		if (mouseButtonRel->button == sf::Mouse::Button::Left)
 		{
-			m_controller->OnMouseReleased(mouseButtonRel->position.x, mouseButtonRel->position.y);
+			m_controller->OnMouseReleased(
+				static_cast<float>(mouseButtonRel->position.x),
+				static_cast<float>(mouseButtonRel->position.y));
 		}
 	}
 }
@@ -98,10 +114,11 @@ void PiecesView::Update(const ChessData& data, IObservable<ChessData>*)
 	m_shapes.clear();
 
 	auto addShapesForPiece = [this](const ChessPiece& piece) {
-		sf::Vector2f pos = {piece.position.x + PIECE_OFFSET, piece.position.y + PIECE_OFFSET};
+		sf::Vector2f basePos = GetPieceBasePosition(piece);
+		sf::Vector2f pos = {basePos.x + PIECE_OFFSET, basePos.y + PIECE_OFFSET};
 		sf::Color fillColor = piece.color == PieceColor::White ? COLOR_WHITE : COLOR_BLACK;
 
-		if (piece.isDragged)
+		if (piece.dragPosition.has_value())
 		{
 			fillColor.a = ALPHA_COLOR;
 		}
@@ -131,7 +148,7 @@ void PiecesView::Update(const ChessData& data, IObservable<ChessData>*)
 
 	for (const auto& piece : data)
 	{
-		if (!piece.isDragged)
+		if (!piece.dragPosition.has_value())
 		{
 			addShapesForPiece(piece);
 		}
@@ -139,7 +156,7 @@ void PiecesView::Update(const ChessData& data, IObservable<ChessData>*)
 
 	for (const auto& piece : data)
 	{
-		if (piece.isDragged)
+		if (piece.dragPosition.has_value())
 		{
 			addShapesForPiece(piece);
 		}

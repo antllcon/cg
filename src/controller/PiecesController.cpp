@@ -2,11 +2,6 @@
 #include "src/model/ChessGrid.h"
 #include "src/model/PiecesModel.h"
 
-namespace
-{
-constexpr float HALF_CELL = ChessGrid::CELL_SIZE / 2.0f;
-}
-
 PiecesController::PiecesController(std::shared_ptr<PiecesModel> model)
 	: m_model(std::move(model))
 {
@@ -16,118 +11,66 @@ void PiecesController::Update(float)
 {
 }
 
-void PiecesController::OnMousePressed(int x, int y)
+void PiecesController::OnMousePressed(float x, float y)
 {
-	sf::Vector2i gridPos = ChessGrid::PixelsToGrid(x, y);
+	const sf::Vector2i gridPos = ChessGrid::PixelsToGrid(x, y);
+	const auto idOpt = m_model->GetPieceIdAt(gridPos);
 
-	auto indexOpt = m_model->GetPieceIndexAt(gridPos);
-
-	if (indexOpt.has_value())
+	if (idOpt.has_value())
 	{
-		m_draggedPieceIndex = indexOpt.value();
+		m_draggedPieceId = *idOpt;
 
-		const auto& pieces = m_model->GetData();
-		sf::Vector2f currentPos = pieces[*m_draggedPieceIndex].position;
+		const sf::Vector2f pieceBasePixel = ChessGrid::GridToPixels(gridPos);
+		m_dragOffsetX = pieceBasePixel.x - x;
+		m_dragOffsetY = pieceBasePixel.y - y;
 
-		m_dragOffsetX = currentPos.x - static_cast<float>(x);
-		m_dragOffsetY = currentPos.y - static_cast<float>(y);
-
-		m_model->SetIsDragged(*m_draggedPieceIndex, true);
+		const sf::Vector2f startDragPos = {x + m_dragOffsetX, y + m_dragOffsetY};
+		m_model->StartDrag(*m_draggedPieceId, startDragPos);
 	}
 }
 
-void PiecesController::OnMouseMoved(int x, int y)
+void PiecesController::OnMouseMoved(float x, float y)
 {
-	if (m_draggedPieceIndex.has_value())
+	if (m_draggedPieceId.has_value())
 	{
-		float posX = static_cast<float>(x) - HALF_CELL;
-		float posY = static_cast<float>(y) + m_dragOffsetY;
-
-		m_model->UpdatePiecePosition(*m_draggedPieceIndex, {posX, posY});
+		const sf::Vector2f newDragPos = {x + m_dragOffsetX, y + m_dragOffsetY};
+		m_model->UpdateDragPosition(*m_draggedPieceId, newDragPos);
 	}
 }
 
-void PiecesController::OnMouseReleased(int x, int y)
+void PiecesController::OnMouseReleased(float x, float y)
 {
-	if (!m_draggedPieceIndex.has_value())
+	if (!m_draggedPieceId.has_value())
 	{
 		return;
 	}
 
-	size_t index = *m_draggedPieceIndex;
+	const PieceId id = *m_draggedPieceId;
+	m_draggedPieceId.reset();
 
-	sf::Vector2i targetGridPos = ChessGrid::PixelsToGrid(x, y);
+	const sf::Vector2i targetGridPos = ChessGrid::PixelsToGrid(x, y);
 
-	bool moveValid = false;
-
-	if (ChessGrid::IsInsideBoard(targetGridPos))
+	if (!ChessGrid::IsInsideBoard(targetGridPos))
 	{
-		const auto& pieces = m_model->GetData();
-		const auto& currentPiece = pieces[index];
+		m_model->CancelDrag(id);
+		return;
+	}
 
-		auto otherPieceIndex = m_model->GetPieceIndexAt(targetGridPos);
+	const auto targetIdOpt = m_model->GetPieceIdAt(targetGridPos);
 
-		if (otherPieceIndex.has_value())
+	if (targetIdOpt.has_value())
+	{
+		const PieceColor draggedColor = m_model->GetPieceColor(id);
+		const PieceColor targetColor = m_model->GetPieceColor(*targetIdOpt);
+
+		if (targetColor == draggedColor)
 		{
-			const auto& targetPiece = pieces[*otherPieceIndex];
-
-			if (targetPiece.color != currentPiece.color)
-			{
-				m_model->RemovePieceAt(targetGridPos);
-
-				// Так как мы удалили фигуру, индексы могли сместиться.
-				// Но RemovePieceAt использует erase-remove идиому.
-				// Если удаляемая фигура была ПЕРЕД текущей, индекс текущей съедет.
-				// Это сложный момент при использовании vector.
-				// Для простоты реализации пересчитаем индекс или сделаем допущение.
-				// Лучше всего получить актуальный индекс снова, но в рамках задачи (простой MVC)
-				// допустим, что RemovePieceAt корректно обрабатывает данные,
-				// но нам нужно обновить наш index, если вектор изменился.
-
-				// В текущей реализации PiecesModel::RemovePieceAt может инвалидировать index.
-				// Безопаснее найти наш dragged piece заново.
-				// Но так как dragged piece имеет флаг isDragged=true, его найти легко.
-
-				auto& data = m_model->GetData();
-				for (size_t i = 0; i < data.size(); ++i)
-				{
-					if (data[i].isDragged)
-					{
-						index = i;
-						break;
-					}
-				}
-
-				moveValid = true;
-			}
-			else
-			{
-				moveValid = false;
-			}
+			m_model->CancelDrag(id);
+			return;
 		}
-		else
-		{
-			moveValid = true;
-		}
+
+		m_model->RemovePieceAt(targetGridPos);
 	}
 
-	if (moveValid)
-	{
-		sf::Vector2f snapPos = ChessGrid::GridToPixels(targetGridPos);
-		m_model->SnapPieceToGrid(index, targetGridPos, snapPos);
-	}
-	else
-	{
-		ResetToOriginalPosition(index);
-	}
-
-	m_model->SetIsDragged(index, false);
-	m_draggedPieceIndex.reset();
-}
-
-void PiecesController::ResetToOriginalPosition(size_t index)
-{
-	const auto& piece = m_model->GetData()[index];
-	sf::Vector2f originalPixelPos = ChessGrid::GridToPixels(piece.gridPosition);
-	m_model->UpdatePiecePosition(index, originalPixelPos);
+	m_model->DropPiece(id, targetGridPos);
 }
