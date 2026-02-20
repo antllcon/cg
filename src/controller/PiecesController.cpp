@@ -12,9 +12,8 @@ PiecesController::PiecesController(std::shared_ptr<PiecesModel> model)
 {
 }
 
-void PiecesController::Update(float dt)
+void PiecesController::Update(float)
 {
-	(void)dt;
 }
 
 void PiecesController::OnMousePressed(int x, int y)

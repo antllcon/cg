@@ -10,7 +10,7 @@ class PiecesController final : public IController
 public:
 	explicit PiecesController(std::shared_ptr<PiecesModel> model);
 
-	void Update(float dt) override;
+	void Update(float) override;
 
 	void OnMousePressed(int x, int y);
 	void OnMouseMoved(int x, int y);
