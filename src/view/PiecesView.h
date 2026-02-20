@@ -2,6 +2,7 @@
 #include "IView.h"
 #include "src/model/PiecesModel.h"
 #include "src/system/Observer.h"
+#include "SFML/Graphics/Drawable.hpp"
 
 class PiecesController;
 
@@ -18,5 +19,5 @@ public:
 
 private:
 	std::shared_ptr<PiecesController> m_controller;
-	ChessData m_data;
+	std::vector<std::unique_ptr<sf::Drawable>> m_shapes;
 };
