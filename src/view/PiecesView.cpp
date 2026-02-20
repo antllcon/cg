@@ -1,5 +1,4 @@
 #include "PiecesView.h"
-
 #include "SFML/Graphics/RectangleShape.hpp"
 #include "ShapeFactory.h"
 #include "src/controller/PiecesController.h"
@@ -99,7 +98,7 @@ void PiecesView::Update(const ChessData& data, IObservable<ChessData>*)
 	m_shapes.clear();
 
 	auto addShapesForPiece = [this](const ChessPiece& piece) {
-		sf::Vector2f basePos = {piece.position.x + PIECE_OFFSET, piece.position.y + PIECE_OFFSET};
+		sf::Vector2f pos = {piece.position.x + PIECE_OFFSET, piece.position.y + PIECE_OFFSET};
 		sf::Color fillColor = piece.color == PieceColor::White ? COLOR_WHITE : COLOR_BLACK;
 
 		if (piece.isDragged)
@@ -110,22 +109,22 @@ void PiecesView::Update(const ChessData& data, IObservable<ChessData>*)
 		switch (piece.type)
 		{
 		case PieceType::Pawn:
-			DrawPawn(m_shapes, basePos, fillColor);
+			DrawPawn(m_shapes, pos, fillColor);
 			break;
 		case PieceType::Rook:
-			DrawRook(m_shapes, basePos, fillColor);
+			DrawRook(m_shapes, pos, fillColor);
 			break;
 		case PieceType::Knight:
-			DrawKnight(m_shapes, basePos, fillColor);
+			DrawKnight(m_shapes, pos, fillColor);
 			break;
 		case PieceType::Bishop:
-			DrawBishop(m_shapes, basePos, fillColor);
+			DrawBishop(m_shapes, pos, fillColor);
 			break;
 		case PieceType::Queen:
-			DrawQueen(m_shapes, basePos, fillColor);
+			DrawQueen(m_shapes, pos, fillColor);
 			break;
 		case PieceType::King:
-			DrawKing(m_shapes, basePos, fillColor);
+			DrawKing(m_shapes, pos, fillColor);
 			break;
 		}
 	};
