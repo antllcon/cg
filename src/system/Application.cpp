@@ -26,9 +26,13 @@ Application::~Application()
 
 void Application::Run()
 {
+	sf::Clock clock;
 	while (m_window.isOpen())
 	{
+		auto dt = clock.restart();
+
 		ProcessEvents();
+		Update(dt.asSeconds());
 		Render();
 	}
 }
@@ -49,6 +53,14 @@ void Application::ProcessEvents()
 	}
 }
 
+void Application::Update(float dt)
+{
+	if (m_scene)
+	{
+		m_scene->Update(dt);
+	}
+}
+
 void Application::Render()
 {
 	m_window.clear(BACKGROUND_COLOR);
@@ -64,6 +76,7 @@ void Application::Render()
 void Application::LoadScene(std::unique_ptr<Scene> scene)
 {
 	m_scene = std::move(scene);
+
 	if (m_scene)
 	{
 		m_scene->Init();

@@ -22,6 +22,7 @@ public:
 
 private:
 	void ProcessEvents();
+	void Update(float dt);
 	void Render();
 	void LoadScene(std::unique_ptr<Scene> scene);
 

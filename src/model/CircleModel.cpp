@@ -1,40 +1,43 @@
 #include "CircleModel.h"
-
 #include <stdexcept>
 
 namespace
 {
-void AssertRadiusIsValid(float radius)
+void AssertIsPositive(int value)
 {
-	if (radius < 10.0f || radius > 300.0f)
+	if (value <= 0)
 	{
-		throw std::runtime_error("Радиус вышел за допустимые пределы (10-300)");
+		throw std::runtime_error("Значение шага должно быть положительным");
 	}
 }
-
-} // namespace
+}
 
 CircleModel::CircleModel()
-	: m_data({50.0f})
 {
+	m_data.center = {200, 200};
+	m_data.radius = 50;
+	m_data.color = sf::Color::White;
 }
 
-float CircleModel::GetRadius() const
+void CircleModel::SetCenter(const sf::Vector2i& center)
 {
-	return m_data.radius;
+	m_data.center = center;
+	NotifyObservers();
 }
 
-void CircleModel::SetRadius(const float& radius)
+void CircleModel::IncreaseRadius(int step)
 {
-	AssertRadiusIsValid(radius);
-	if (m_data.radius != radius)
-	{
-		m_data.radius = radius;
-		NotifyObservers();
-	}
+	AssertIsPositive(step);
+	m_data.radius += step;
+	NotifyObservers();
+}
+
+const CircleData& CircleModel::GetData() const
+{
+	return m_data;
 }
 
 CircleData CircleModel::GetChangedData() const
 {
-	return CircleData{m_data.radius};
+	return m_data;
 }
