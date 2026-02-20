@@ -29,11 +29,12 @@ struct ChessPiece
 	PieceType type;
 	PieceColor color;
 	sf::Vector2i gridPosition;
-	std::optional<sf::Vector2f> dragPosition;
+	std::optional<sf::Vector2f> dragPosition; // не в модели
 };
 
 using ChessData = std::vector<ChessPiece>;
 
+// Убрать Drag
 class PiecesModel final : public CObservable<ChessData>
 {
 public:
