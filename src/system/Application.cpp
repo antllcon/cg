@@ -1,21 +1,11 @@
 #include "Application.h"
-#include "Monitor.h"
-#include "Windows.h"
+#include "AppConfig.h"
 #include "src/scene/MainScene.h"
-#include "src/view/CircleView.h"
-
-namespace
-{
-constexpr unsigned int WINDOW_WIDTH = 400u;
-constexpr unsigned int WINDOW_HEIGHT = 400u;
-constexpr auto WINDOW_NAME = "Circle";
-constexpr sf::Color BACKGROUND_COLOR = sf::Color::Black;
-} // namespace
 
 Application::Application()
-	: m_window(sf::VideoMode({WINDOW_WIDTH, WINDOW_HEIGHT}), WINDOW_NAME)
+	: m_window(sf::VideoMode({AppConfig::WINDOW_WIDTH, AppConfig::WINDOW_HEIGHT}), AppConfig::WINDOW_NAME)
 {
-	auto refreshRate = Monitor::GetMonitorRefreshRate();
+	auto refreshRate = AppConfig::GetMonitorRefreshRate();
 	m_window.setFramerateLimit(refreshRate);
 	LoadScene(std::make_unique<MainScene>());
 }
@@ -63,7 +53,7 @@ void Application::Update(float dt)
 
 void Application::Render()
 {
-	m_window.clear(BACKGROUND_COLOR);
+	m_window.clear(AppConfig::BACKGROUND_COLOR);
 
 	if (m_scene)
 	{

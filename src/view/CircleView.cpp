@@ -1,103 +1,140 @@
 #include "CircleView.h"
 #include "SFML/Window/Event.hpp"
 #include "src/controller/CircleController.h"
+#include "src/system/AppConfig.h"
 
 namespace
 {
-	sf::Color BlendColors(const sf::Color& c1, const sf::Color& c2, float t)
-	{
-		float clampedT = std::max(0.0f, std::min(1.0f, t));
+constexpr float HALF_PIXEL = 0.5f;
 
-		return sf::Color(
-			static_cast<uint8_t>(c1.r + clampedT * (c2.r - c1.r)),
-			static_cast<uint8_t>(c1.g + clampedT * (c2.g - c1.g)),
-			static_cast<uint8_t>(c1.b + clampedT * (c2.b - c1.b)),
-			static_cast<uint8_t>(c1.a + clampedT * (c2.a - c1.a))
-		);
+sf::Color BlendColors(const sf::Color& color1, const sf::Color& color2, float blendFactor)
+{
+	float clampedFactor = std::max(0.0f, std::min(1.0f, blendFactor));
+
+	return sf::Color(
+		static_cast<uint8_t>(color1.r + clampedFactor * (color2.r - color1.r)),
+		static_cast<uint8_t>(color1.g + clampedFactor * (color2.g - color1.g)),
+		static_cast<uint8_t>(color1.b + clampedFactor * (color2.b - color1.b)),
+		static_cast<uint8_t>(color1.a + clampedFactor * (color2.a - color1.a)));
+}
+
+void AddSymmetricVertices(std::vector<sf::Vertex>& vertices, int centerX, int centerY, int x, int y, const sf::Color& color)
+{
+	auto addIfVisible = [&](int px, int py) {
+		if (px >= 0 && px <= AppConfig::WINDOW_WIDTH && py >= 0 && py <= AppConfig::WINDOW_HEIGHT)
+		{
+			vertices.push_back(sf::Vertex(sf::Vector2f(static_cast<float>(px), static_cast<float>(py)), color));
+		}
+	};
+
+	addIfVisible(centerX + x, centerY + y);
+
+	if (x != 0)
+	{
+		addIfVisible(centerX - x, centerY + y);
 	}
 
-	void AddSymmetricVertices(std::vector<sf::Vertex>& vertices, int xc, int yc, int x, int y, const sf::Color& color)
+	if (y != 0)
 	{
-		vertices.push_back(sf::Vertex(sf::Vector2f(static_cast<float>(xc + x), static_cast<float>(yc + y)), color));
-
-		if (x != 0)
-		{
-			vertices.push_back(sf::Vertex(sf::Vector2f(static_cast<float>(xc - x), static_cast<float>(yc + y)), color));
-		}
-
-		if (y != 0)
-		{
-			vertices.push_back(sf::Vertex(sf::Vector2f(static_cast<float>(xc + x), static_cast<float>(yc - y)), color));
-		}
-
-		if (x != 0 && y != 0)
-		{
-			vertices.push_back(sf::Vertex(sf::Vector2f(static_cast<float>(xc - x), static_cast<float>(yc - y)), color));
-		}
+		addIfVisible(centerX + x, centerY - y);
 	}
 
-	std::vector<sf::Vertex> CalculateSmoothCircle(const CircleData& data)
+	if (x != 0 && y != 0)
 	{
-		std::vector<sf::Vertex> vertices;
-
-		float rOut = static_cast<float>(data.radius);
-		float rIn = rOut - static_cast<float>(data.thickness);
-		int rMax = static_cast<int>(std::ceil(rOut + 1.0f));
-
-		for (int y = 0; y <= rMax; ++y)
-		{
-			for (int x = 0; x <= rMax; ++x)
-			{
-				float d = std::hypot(static_cast<float>(x), static_cast<float>(y));
-
-				if (d > rOut + 0.5f)
-				{
-					break;
-				}
-
-				sf::Color pixelColor = sf::Color::Transparent;
-
-				if (d <= rIn - 0.5f)
-				{
-					if (data.isFilled)
-					{
-						pixelColor = data.fillColor;
-					}
-				}
-				else if (d < rIn + 0.5f)
-				{
-					float t = d - (rIn - 0.5f);
-
-					if (data.isFilled)
-					{
-						pixelColor = BlendColors(data.fillColor, data.outlineColor, t);
-					}
-					else
-					{
-						pixelColor = BlendColors(sf::Color::Transparent, data.outlineColor, t);
-					}
-				}
-				else if (d <= rOut - 0.5f)
-				{
-					pixelColor = data.outlineColor;
-				}
-				else if (d < rOut + 0.5f)
-				{
-					float t = (rOut + 0.5f) - d;
-					pixelColor = data.outlineColor;
-					pixelColor.a = static_cast<uint8_t>(data.outlineColor.a * t);
-				}
-
-				if (pixelColor.a > 0)
-				{
-					AddSymmetricVertices(vertices, data.center.x, data.center.y, x, y, pixelColor);
-				}
-			}
-		}
-
-		return vertices;
+		addIfVisible(centerX - x, centerY - y);
 	}
 }
+
+sf::Color CalculateSolidPixelColor(float distanceFromCenter, float radius, const sf::Color& fillColor)
+{
+	if (distanceFromCenter <= radius - HALF_PIXEL)
+	{
+		return fillColor;
+	}
+
+	if (distanceFromCenter < radius + HALF_PIXEL)
+	{
+		float coverage = (radius + HALF_PIXEL) - distanceFromCenter;
+		sf::Color resultColor = fillColor;
+		resultColor.a = static_cast<uint8_t>(fillColor.a * coverage);
+
+		return resultColor;
+	}
+
+	return sf::Color::Transparent;
+}
+
+sf::Color CalculateOutlinedPixelColor(float distanceFromCenter, float innerRadius, float outerRadius, const sf::Color& fillColor, const sf::Color& outlineColor)
+{
+	if (distanceFromCenter <= innerRadius - HALF_PIXEL)
+	{
+		return fillColor;
+	}
+
+	if (distanceFromCenter < innerRadius + HALF_PIXEL)
+	{
+		float blendFactor = distanceFromCenter - (innerRadius - HALF_PIXEL);
+
+		return BlendColors(fillColor, outlineColor, blendFactor);
+	}
+
+	if (distanceFromCenter <= outerRadius - HALF_PIXEL)
+	{
+		return outlineColor;
+	}
+
+	if (distanceFromCenter < outerRadius + HALF_PIXEL)
+	{
+		float coverage = (outerRadius + HALF_PIXEL) - distanceFromCenter;
+		sf::Color resultColor = outlineColor;
+		resultColor.a = static_cast<uint8_t>(outlineColor.a * coverage);
+
+		return resultColor;
+	}
+
+	return sf::Color::Transparent;
+}
+
+std::vector<sf::Vertex> CalculateSmoothCircle(const CircleData& data)
+{
+	std::vector<sf::Vertex> vertices;
+
+	float innerRadius = static_cast<float>(data.radius);
+	float outerRadius = innerRadius + static_cast<float>(data.thickness);
+	int boundingBoxRadius = static_cast<int>(std::ceil(outerRadius + 1.0f));
+
+	for (int y = 0; y <= boundingBoxRadius; ++y)
+	{
+		for (int x = 0; x <= boundingBoxRadius; ++x)
+		{
+			float distanceFromCenter = std::hypot(static_cast<float>(x), static_cast<float>(y));
+
+			if (distanceFromCenter > outerRadius + HALF_PIXEL)
+			{
+				break;
+			}
+
+			sf::Color pixelColor = sf::Color::Transparent;
+
+			if (data.thickness == 0)
+			{
+				pixelColor = CalculateSolidPixelColor(distanceFromCenter, outerRadius, data.fillColor);
+			}
+			else
+			{
+				pixelColor = CalculateOutlinedPixelColor(distanceFromCenter, innerRadius, outerRadius, data.fillColor, data.thicknessColor);
+			}
+
+			if (pixelColor.a > 0)
+			{
+				AddSymmetricVertices(vertices, data.center.x, data.center.y, x, y, pixelColor);
+			}
+		}
+	}
+
+	return vertices;
+}
+} // namespace
 
 CircleView::CircleView(
 	std::shared_ptr<CircleModel> model,
@@ -114,10 +151,10 @@ void CircleView::HandleEvent(const sf::Event& event, const sf::RenderWindow&)
 {
 	if (const auto* mouseButton = event.getIf<sf::Event::MouseButtonPressed>())
 	{
-		bool isRightClick = (mouseButton->button == sf::Mouse::Button::Right);
-
-		if (mouseButton->button == sf::Mouse::Button::Left)
+		if (mouseButton->button == sf::Mouse::Button::Left || mouseButton->button == sf::Mouse::Button::Right)
 		{
+			bool isRightClick = (mouseButton->button == sf::Mouse::Button::Right);
+
 			m_controller->OnCanvasClicked(
 				static_cast<float>(mouseButton->position.x),
 				static_cast<float>(mouseButton->position.y),
@@ -146,8 +183,7 @@ void CircleView::Render(sf::RenderWindow& window) const
 
 void CircleView::Update(const CircleData& data, IObservable<CircleData>*)
 {
-	std::vector<sf::Vertex> rasterPoints = CalculateSmoothCircle(data);
-	UpdateVertices(rasterPoints);
+	UpdateVertices(CalculateSmoothCircle(data));
 }
 
 void CircleView::UpdateVertices(const std::vector<sf::Vertex>& vertices)

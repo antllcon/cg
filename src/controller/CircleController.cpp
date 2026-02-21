@@ -12,6 +12,15 @@ bool IsInsideCircle(float x, float y, const CircleData& data)
 
 	return dx * dx + dy * dy <= radiusSq;
 }
+
+bool IsInsideCircleThickness(float x, float y, const CircleData& data)
+{
+	float dx = x - static_cast<float>(data.center.x);
+	float dy = y - static_cast<float>(data.center.y);
+	float radiusSq = static_cast<float>((data.radius + data.thickness) * (data.radius + data.thickness));
+
+	return dx * dx + dy * dy <= radiusSq;
+}
 }
 
 CircleController::CircleController(std::shared_ptr<CircleModel> model)
@@ -29,7 +38,11 @@ void CircleController::OnCanvasClicked(float x, float y, bool isRightClick)
 	{
 		if (IsInsideCircle(x, y, m_model->GetData()))
 		{
-			m_model->ToggleFill();
+			m_model->RandomFillColor();
+		}
+		else if (IsInsideCircleThickness(x, y, m_model->GetData()))
+		{
+			m_model->RandomThicknessColor();
 		}
 	}
 	else
@@ -40,7 +53,7 @@ void CircleController::OnCanvasClicked(float x, float y, bool isRightClick)
 
 void CircleController::OnMouseScrolled(float x, float y, float delta, bool isShiftPressed)
 {
-	if (IsInsideCircle(x, y, m_model->GetData()))
+	if (IsInsideCircleThickness(x, y, m_model->GetData()))
 	{
 		int step = static_cast<int>(delta) * SCROLL_STEP;
 

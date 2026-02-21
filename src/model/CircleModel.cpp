@@ -1,19 +1,31 @@
 #include "CircleModel.h"
-#include <algorithm>
-#include <stdexcept>
+#include <random>
 
 namespace
 {
 constexpr int MIN_RADIUS = 5;
-constexpr int MIN_THICKNESS = 1;
+constexpr int MIN_THICKNESS = 0;
+
+sf::Color GenerateRandomColor()
+{
+	static std::mt19937 rng(std::random_device{}());
+	static std::uniform_int_distribution<int> dist(0, 255);
+
+	return sf::Color(
+		static_cast<uint8_t>(dist(rng)),
+		static_cast<uint8_t>(dist(rng)),
+		static_cast<uint8_t>(dist(rng)),
+		static_cast<uint8_t>(dist(rng))
+	);
 }
+} // namespace
 
 CircleModel::CircleModel()
 {
 	m_data.center = {200, 200};
 	m_data.radius = 50;
 	m_data.thickness = 10;
-	m_data.outlineColor = sf::Color::White;
+	m_data.thicknessColor = sf::Color::White;
 	m_data.fillColor = sf::Color(46, 204, 113);
 }
 
@@ -25,29 +37,33 @@ void CircleModel::SetCenter(const sf::Vector2i& center)
 
 void CircleModel::ChangeRadius(int delta)
 {
-	int newRadius = m_data.radius + delta;
-	newRadius = std::max(MIN_RADIUS, newRadius);
-
-	m_data.radius = newRadius;
-	m_data.thickness = std::min(m_data.thickness, m_data.radius);
+	if (m_data.radius + delta >= MIN_RADIUS)
+	{
+		m_data.radius += delta;
+	}
 
 	NotifyObservers();
 }
 
 void CircleModel::ChangeThickness(int delta)
 {
-	int newThickness = m_data.thickness + delta;
-	newThickness = std::max(MIN_THICKNESS, newThickness);
-	newThickness = std::min(m_data.radius, newThickness);
-
-	m_data.thickness = newThickness;
+	if (m_data.thickness + delta >= MIN_THICKNESS)
+	{
+		m_data.thickness += delta;
+	}
 
 	NotifyObservers();
 }
 
-void CircleModel::ToggleFill()
+void CircleModel::RandomFillColor()
 {
-	m_data.isFilled = !m_data.isFilled;
+	m_data.fillColor = GenerateRandomColor();
+	NotifyObservers();
+}
+
+void CircleModel::RandomThicknessColor()
+{
+	m_data.thicknessColor = GenerateRandomColor();
 	NotifyObservers();
 }
 

@@ -1,9 +1,13 @@
 #pragma once
 #include "Windows.h"
 
-namespace Monitor
+namespace AppConfig
 {
-constexpr unsigned int FRAMERATE_LIMIT = 60u;
+constexpr auto WINDOW_WIDTH = 400u;
+constexpr auto WINDOW_HEIGHT = 400u;
+constexpr auto FRAMERATE_LIMIT = 60u;
+constexpr auto WINDOW_NAME = "Circle";
+constexpr auto BACKGROUND_COLOR = sf::Color::Black;
 
 inline unsigned int GetMonitorRefreshRate()
 {
@@ -17,4 +21,4 @@ inline unsigned int GetMonitorRefreshRate()
 
 	return FRAMERATE_LIMIT;
 }
-} // namespace Monitor
+} // namespace AppConfig
