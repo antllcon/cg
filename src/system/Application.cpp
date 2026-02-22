@@ -38,7 +38,14 @@ void Application::ProcessEvents()
 
 		if (m_scene)
 		{
-			m_scene->ProcessEvents(*event, m_window);
+			try
+			{
+				m_scene->ProcessEvents(*event, m_window);
+			}
+			catch (const std::exception& e)
+			{
+				m_scene->OnException(e);
+			}
 		}
 	}
 }
@@ -47,7 +54,14 @@ void Application::Update(float dt)
 {
 	if (m_scene)
 	{
-		m_scene->Update(dt);
+		try
+		{
+			m_scene->Update(dt);
+		}
+		catch (const std::exception& e)
+		{
+			m_scene->OnException(e);
+		}
 	}
 }
 

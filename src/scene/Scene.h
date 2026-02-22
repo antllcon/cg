@@ -15,6 +15,7 @@ public:
 	void ProcessEvents(const sf::Event& event, const sf::RenderWindow& window);
 	void Update(float dt);
 	void Render(sf::RenderWindow& window) const;
+	virtual void OnException(const std::exception& e);
 
 protected:
 	template <typename T>

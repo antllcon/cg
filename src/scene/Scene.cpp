@@ -39,3 +39,7 @@ void Scene::AddController(std::shared_ptr<IController> controller)
 {
 	m_controllers.push_back(std::move(controller));
 }
+
+void Scene::OnException(const std::exception&)
+{
+}
