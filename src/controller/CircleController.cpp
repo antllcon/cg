@@ -1,5 +1,7 @@
 #include "CircleController.h"
 
+#include <stdexcept>
+
 namespace
 {
 constexpr int SCROLL_STEP = 5;
@@ -39,6 +41,7 @@ void CircleController::OnCanvasClicked(float x, float y, bool isRightClick)
 		if (IsInsideCircle(x, y, m_model->GetData()))
 		{
 			m_model->RandomFillColor();
+			throw std::exception("Color changed");
 		}
 		else if (IsInsideCircleThickness(x, y, m_model->GetData()))
 		{
