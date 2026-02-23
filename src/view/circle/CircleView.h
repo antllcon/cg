@@ -1,7 +1,7 @@
 #pragma once
-#include "IView.h"
+#include "../../model/circle/CircleModel.h"
+#include "../IView.h"
 #include "SFML/Graphics/VertexArray.hpp"
-#include "src/model/CircleModel.h"
 #include "src/system/Observer.h"
 #include <memory>
 #include <vector>

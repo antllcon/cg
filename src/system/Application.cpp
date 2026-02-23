@@ -1,6 +1,6 @@
 #include "Application.h"
+#include "../scene/main/MainScene.h"
 #include "AppConfig.h"
-#include "src/scene/MainScene.h"
 
 namespace
 {

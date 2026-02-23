@@ -5,6 +5,7 @@
 #include <numbers>
 #include <stdexcept>
 
+class ThemeModel;
 namespace
 {
 constexpr float PADDING_X = 20.0f;
@@ -39,7 +40,7 @@ void SetupRoundedRectangle(sf::ConvexShape& shape, const sf::Vector2f& size, flo
 
 		for (unsigned int i = 0; i < POINTS_PER_CORNER; ++i)
 		{
-			float angle = startAngle + (static_cast<float>(i) / static_cast<float>(POINTS_PER_CORNER - 1)) * (std::numbers::pi_v<float> / 2.0f);
+			float angle = startAngle + static_cast<float>(i) / static_cast<float>(POINTS_PER_CORNER - 1) * (std::numbers::pi_v<float> / 2.0f);
 			float px = centers[c].x + radius * std::cos(angle);
 			float py = centers[c].y + radius * std::sin(angle);
 			shape.setPoint(c * POINTS_PER_CORNER + i, {px, py});
@@ -48,7 +49,7 @@ void SetupRoundedRectangle(sf::ConvexShape& shape, const sf::Vector2f& size, flo
 }
 }
 
-ToastView::ToastView(std::shared_ptr<ToastModel> model)
+ToastView::ToastView(std::shared_ptr<ToastModel> toastModel, std::shared_ptr<ThemeModel> themeModel)
 	: m_text(m_font)
 	, m_isVisible(false)
 {
@@ -60,9 +61,14 @@ ToastView::ToastView(std::shared_ptr<ToastModel> model)
 
 	m_background.setFillColor(sf::Color(50, 50, 50, 230));
 
-	if (model)
+	if (toastModel)
 	{
-		Update(model->GetData(), nullptr);
+		Update(toastModel->GetData(), nullptr);
+	}
+
+	if (themeModel)
+	{
+		Update(themeModel->GetData(), nullptr);
 	}
 }
 
@@ -87,6 +93,12 @@ void ToastView::Update(const ToastData& data, IObservable<ToastData>*)
 	{
 		SetupVisuals(data.message);
 	}
+}
+
+void ToastView::Update(const ThemeData& data, IObservable<ThemeData>*)
+{
+	m_text.setFillColor(data.primaryText);
+	m_background.setFillColor(data.surfaceBackground);
 }
 
 void ToastView::SetupVisuals(const std::string& message)

@@ -1,6 +1,6 @@
 #pragma once
-#include "Scene.h"
-#include "src/controller/ToastController.h"
+#include "../../controller/toast/ToastController.h"
+#include "../Scene.h"
 
 class MainScene final : public Scene
 {

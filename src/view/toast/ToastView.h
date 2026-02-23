@@ -1,22 +1,25 @@
 #pragma once
-#include "IView.h"
+#include "../../model/theme/ThemeModel.h"
+#include "../../model/toast/ToastModel.h"
+#include "../IView.h"
 #include "SFML/Graphics/ConvexShape.hpp"
 #include "SFML/Graphics/Font.hpp"
 #include "SFML/Graphics/Text.hpp"
-#include "src/model/ToastModel.h"
 #include "src/system/Observer.h"
 #include <memory>
 
 class ToastView final
 	: public IView
 	, public IObserver<ToastData>
+	, public IObserver<ThemeData>
 {
 public:
-	explicit ToastView(std::shared_ptr<ToastModel> model);
+	ToastView(std::shared_ptr<ToastModel> toastModel, std::shared_ptr<ThemeModel> themeModel);
 
 	void HandleEvent(const sf::Event& event, const sf::RenderWindow& window) override;
 	void Render(sf::RenderWindow& window) const override;
 	void Update(const ToastData& data, IObservable<ToastData>* subject) override;
+	void Update(const ThemeData& data, IObservable<ThemeData>* subject) override;
 
 private:
 	void SetupVisuals(const std::string& message);

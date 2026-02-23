@@ -1,6 +1,6 @@
 #include "CircleView.h"
+#include "../../controller/circle/CircleController.h"
 #include "SFML/Window/Event.hpp"
-#include "src/controller/CircleController.h"
 #include "src/system/AppConfig.h"
 
 namespace
