@@ -2,11 +2,30 @@
 #include "AppConfig.h"
 #include "src/scene/MainScene.h"
 
+namespace
+{
+void AssertIsWindowValid(const sf::RenderWindow& window)
+{
+	if (!window.isOpen())
+	{
+		throw std::runtime_error("Окно не инициализировано для применения системных настроек");
+	}
+}
+
+void SetupWindowProperties(sf::RenderWindow& window)
+{
+	AssertIsWindowValid(window);
+	AppConfig::ApplyDarkTitleBar(window);
+	AppConfig::SetWindowIconColor(window, AppConfig::ICON_COLOR, AppConfig::ICON_SIZE);
+}
+}
+
 Application::Application()
-	: m_window(sf::VideoMode({AppConfig::WINDOW_WIDTH, AppConfig::WINDOW_HEIGHT}), AppConfig::WINDOW_NAME)
+	: m_window(sf::VideoMode({AppConfig::WINDOW_WIDTH, AppConfig::WINDOW_HEIGHT}), AppConfig::WINDOW_NAME, AppConfig::WINDOW_STYLE)
 {
 	auto refreshRate = AppConfig::GetMonitorRefreshRate();
 	m_window.setFramerateLimit(refreshRate);
+	SetupWindowProperties(m_window);
 	LoadScene(std::make_unique<MainScene>());
 }
 

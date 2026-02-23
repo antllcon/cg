@@ -29,6 +29,10 @@ target_include_directories(core_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_options(core_lib PRIVATE ${PROJECT_WARNINGS})
 target_link_libraries(core_lib PUBLIC SFML::Graphics SFML::Window SFML::System)
 
+if (WIN32)
+    target_link_libraries(core_lib PUBLIC dwmapi)
+endif ()
+
 add_executable(start src/main.cpp)
 target_link_libraries(start PRIVATE core_lib)
 target_compile_options(start PRIVATE ${PROJECT_WARNINGS})
