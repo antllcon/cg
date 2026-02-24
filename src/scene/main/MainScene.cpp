@@ -6,11 +6,8 @@
 #include "../../view/theme/ThemeView.h"
 #include "../../view/toast/ToastView.h"
 
-void MainScene::Init()
+void MainScene::Init(std::shared_ptr<ThemeModel> themeModel)
 {
-	auto themeModel = std::make_shared<ThemeModel>();
-	AddModel(themeModel);
-
 	auto themeController = std::make_shared<ThemeController>(themeModel);
 	AddController(themeController);
 

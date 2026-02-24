@@ -2,7 +2,7 @@
 #include "src/controller/IController.h"
 #include "src/view/IView.h"
 
-void Scene::Init()
+void Scene::Init(std::shared_ptr<ThemeModel>)
 {
 }
 

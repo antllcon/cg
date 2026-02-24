@@ -5,7 +5,7 @@
 class MainScene final : public Scene
 {
 public:
-	void Init() override;
+	void Init(std::shared_ptr<ThemeModel> themeModel) override;
 	void OnException(const std::exception& e) override;
 
 private:

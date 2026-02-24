@@ -1,5 +1,6 @@
 #pragma once
 #include "SFML/Graphics/RenderWindow.hpp"
+#include "src/model/theme/ThemeModel.h"
 #include <memory>
 #include <vector>
 
@@ -10,7 +11,7 @@ class Scene
 {
 public:
 	virtual ~Scene() = default;
-	virtual void Init();
+	virtual void Init(std::shared_ptr<ThemeModel> themeModel);
 
 	void ProcessEvents(const sf::Event& event, const sf::RenderWindow& window);
 	void Update(float dt);
