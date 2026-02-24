@@ -22,6 +22,22 @@ constexpr auto ICON_COLOR_DARK = sf::Color(32, 32, 32);
 constexpr auto ICON_COLOR_LIGHT = sf::Color(240, 240, 240);
 constexpr auto ICON_SIZE = 32u;
 
+namespace DarkTheme
+{
+constexpr auto WINDOW_BG = sf::Color(30, 30, 30, 200);
+constexpr auto SURFACE_BG = sf::Color(50, 50, 50, 230);
+constexpr auto SURFACE_OUTLINE = sf::Color(80, 80, 80);
+constexpr auto PRIMARY_TEXT = sf::Color::White;
+}
+
+namespace LightTheme
+{
+constexpr auto WINDOW_BG = sf::Color(240, 240, 240, 200);
+constexpr auto SURFACE_BG = sf::Color(255, 255, 255, 230);
+constexpr auto SURFACE_OUTLINE = sf::Color(200, 200, 200);
+constexpr auto PRIMARY_TEXT = sf::Color::Black;
+}
+
 inline unsigned int GetMonitorRefreshRate()
 {
 	DEVMODE devMode;
