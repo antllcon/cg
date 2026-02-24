@@ -6,8 +6,9 @@ int main()
 	SetConsoleOutputCP(CP_UTF8);
 	SetConsoleCP(CP_UTF8);
 
-	Application app;
-	app.Run();
+	auto app = std::make_shared<Application>();
+	app->Init();
+	app->Run();
 
 	return EXIT_SUCCESS;
 }
