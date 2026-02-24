@@ -1,6 +1,7 @@
 #pragma once
 #include "Windows.h"
 #include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Window/Window.hpp>
 #include <dwmapi.h>
 #include <vector>
@@ -9,7 +10,7 @@ namespace AppConfig
 {
 constexpr auto WINDOW_WIDTH = 400u;
 constexpr auto WINDOW_HEIGHT = 400u;
-constexpr auto WINDOW_NAME = "Hangman";
+constexpr auto WINDOW_NAME = "SFML window template MVC";
 constexpr auto WINDOW_STYLE = sf::Style::Titlebar | sf::Style::Close;
 
 constexpr auto FRAMERATE_LIMIT = 60u;
