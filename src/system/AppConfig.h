@@ -13,7 +13,7 @@ constexpr auto WINDOW_HEIGHT = 400u;
 constexpr auto WINDOW_NAME = "SFML window template MVC";
 constexpr auto WINDOW_STYLE = sf::Style::Titlebar | sf::Style::Close;
 
-constexpr auto FRAMERATE_LIMIT = 60u;
+constexpr auto FRAMERATE_LIMIT = 144u;
 constexpr auto DWM_DARK_MODE_ATTRIBUTE = 20;
 
 constexpr auto FONT_PATH = "static/font.ttf";
