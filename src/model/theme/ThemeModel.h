@@ -4,8 +4,10 @@
 
 struct ThemeData
 {
+	bool isDark;
 	sf::Color windowBackground;
 	sf::Color surfaceBackground;
+	sf::Color surfaceOutline;
 	sf::Color primaryText;
 };
 
@@ -14,7 +16,7 @@ class ThemeModel final : public CObservable<ThemeData>
 public:
 	ThemeModel();
 
-	void Toggle();
+	void Invert();
 	const ThemeData& GetData() const;
 
 protected:
@@ -22,5 +24,4 @@ protected:
 
 private:
 	ThemeData m_data;
-	bool m_isDark;
 };

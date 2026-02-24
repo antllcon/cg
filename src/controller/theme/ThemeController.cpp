@@ -11,5 +11,5 @@ void ThemeController::Update(float)
 
 void ThemeController::OnToggleClicked()
 {
-	m_model->Toggle();
+	m_model->Invert();
 }

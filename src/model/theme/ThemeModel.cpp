@@ -5,8 +5,10 @@ namespace
 ThemeData CreateDarkTheme()
 {
 	ThemeData data;
-	data.windowBackground = sf::Color(30, 30, 30);
+	data.isDark = true;
+	data.windowBackground = sf::Color(30, 30, 30, 200);
 	data.surfaceBackground = sf::Color(50, 50, 50, 230);
+	data.surfaceOutline = sf::Color(80, 80, 80);
 	data.primaryText = sf::Color::White;
 
 	return data;
@@ -15,8 +17,10 @@ ThemeData CreateDarkTheme()
 ThemeData CreateLightTheme()
 {
 	ThemeData data;
-	data.windowBackground = sf::Color(240, 240, 240);
+	data.isDark = false;
+	data.windowBackground = sf::Color(240, 240, 240, 200);
 	data.surfaceBackground = sf::Color(255, 255, 255, 230);
+	data.surfaceOutline = sf::Color(200, 200, 200);
 	data.primaryText = sf::Color::Black;
 
 	return data;
@@ -25,14 +29,12 @@ ThemeData CreateLightTheme()
 
 ThemeModel::ThemeModel()
 	: m_data(CreateDarkTheme())
-	, m_isDark(true)
 {
 }
 
-void ThemeModel::Toggle()
+void ThemeModel::Invert()
 {
-	m_isDark = !m_isDark;
-	m_data = m_isDark ? CreateDarkTheme() : CreateLightTheme();
+	m_data = m_data.isDark ? CreateLightTheme() : CreateDarkTheme();
 	NotifyObservers();
 }
 

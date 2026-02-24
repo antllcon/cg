@@ -56,7 +56,7 @@ ToastView::ToastView(std::shared_ptr<ToastModel> toastModel, std::shared_ptr<The
 	AssertIsFontLoaded(m_font.openFromFile(AppConfig::FONT_PATH));
 
 	m_text.setFont(m_font);
-	m_text.setCharacterSize(AppConfig::TOAST_FONT_SIZE);
+	m_text.setCharacterSize(AppConfig::FONT_SIZE);
 	m_text.setFillColor(sf::Color::White);
 
 	m_background.setFillColor(sf::Color(50, 50, 50, 230));
@@ -99,6 +99,7 @@ void ToastView::Update(const ThemeData& data, IObservable<ThemeData>*)
 {
 	m_text.setFillColor(data.primaryText);
 	m_background.setFillColor(data.surfaceBackground);
+	m_background.setOutlineColor(data.surfaceOutline);
 }
 
 void ToastView::SetupVisuals(const std::string& message)
