@@ -15,22 +15,24 @@ void AssertIsWindowValid(const sf::RenderWindow& window)
 void SetupWindowProperties(sf::RenderWindow& window)
 {
 	AssertIsWindowValid(window);
-	AppConfig::ApplyDarkTitleBar(window);
-	AppConfig::SetWindowIconColor(window, AppConfig::ICON_COLOR, AppConfig::ICON_SIZE);
+	AppConfig::SetTitleBarTheme(window, true);
+	AppConfig::SetWindowIconColor(window, AppConfig::ICON_COLOR_LIGHT, AppConfig::ICON_SIZE);
 }
 }
 
 Application::Application()
 	: m_window(sf::VideoMode({AppConfig::WINDOW_WIDTH, AppConfig::WINDOW_HEIGHT}), AppConfig::WINDOW_NAME, AppConfig::WINDOW_STYLE)
+	, m_themeModel(std::make_shared<ThemeModel>())
 {
 	auto refreshRate = AppConfig::GetMonitorRefreshRate();
 	m_window.setFramerateLimit(refreshRate);
 	SetupWindowProperties(m_window);
-	LoadScene(std::make_unique<MainScene>());
 }
 
-Application::~Application()
+void Application::Init()
 {
+	m_themeModel->RegisterObserver(shared_from_this());
+	LoadScene(std::make_unique<MainScene>());
 }
 
 void Application::Run()
@@ -44,6 +46,13 @@ void Application::Run()
 		Update(dt.asSeconds());
 		Render();
 	}
+}
+
+void Application::Update(const ThemeData& data, IObservable<ThemeData>*)
+{
+	AppConfig::SetTitleBarTheme(m_window, data.isDark);
+	auto iconColor = data.isDark ? AppConfig::ICON_COLOR_LIGHT : AppConfig::ICON_COLOR_DARK;
+	AppConfig::SetWindowIconColor(m_window, iconColor, AppConfig::ICON_SIZE);
 }
 
 void Application::ProcessEvents()
@@ -86,7 +95,7 @@ void Application::Update(float dt)
 
 void Application::Render()
 {
-	m_window.clear(AppConfig::BACKGROUND_COLOR);
+	m_window.clear(m_themeModel->GetData().windowBackground);
 
 	if (m_scene)
 	{
@@ -102,6 +111,6 @@ void Application::LoadScene(std::unique_ptr<Scene> scene)
 
 	if (m_scene)
 	{
-		m_scene->Init();
+		m_scene->Init(m_themeModel);
 	}
 }

@@ -8,17 +8,21 @@ class IController;
 class CircleModel;
 
 class Application final
+	: public IObserver<ThemeData>
+	, public std::enable_shared_from_this<Application>
 {
 public:
 	Application();
-	~Application();
+	~Application() override = default;
 
 	Application(const Application&) = delete;
 	Application& operator=(const Application&) = delete;
 	Application(Application&&) = delete;
 	Application& operator=(Application&&) = delete;
 
+	void Init();
 	void Run();
+	void Update(const ThemeData& data, IObservable<ThemeData>*);
 
 private:
 	void ProcessEvents();
@@ -28,4 +32,5 @@ private:
 
 	sf::RenderWindow m_window;
 	std::unique_ptr<Scene> m_scene;
+	std::shared_ptr<ThemeModel> m_themeModel;
 };

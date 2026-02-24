@@ -1,23 +1,26 @@
 #pragma once
 #include "Windows.h"
-
 #include <SFML/Graphics/Color.hpp>
+#include <SFML/Window/Window.hpp>
 #include <dwmapi.h>
+#include <vector>
 
 namespace AppConfig
 {
-constexpr auto WINDOW_WIDTH = 800u;
-constexpr auto WINDOW_HEIGHT = 600u;
-constexpr auto FRAMERATE_LIMIT = 60u;
+constexpr auto WINDOW_WIDTH = 400u;
+constexpr auto WINDOW_HEIGHT = 400u;
 constexpr auto WINDOW_NAME = "Hangman";
-constexpr auto BACKGROUND_COLOR = sf::Color::Black;
-constexpr auto FONT_PATH = "static/font.ttf";
-constexpr auto TOAST_FONT_SIZE = 12u;
-
 constexpr auto WINDOW_STYLE = sf::Style::Titlebar | sf::Style::Close;
-constexpr auto ICON_COLOR = sf::Color(32, 32, 32);
-constexpr auto ICON_SIZE = 32u;
+
+constexpr auto FRAMERATE_LIMIT = 60u;
 constexpr auto DWM_DARK_MODE_ATTRIBUTE = 20;
+
+constexpr auto FONT_PATH = "static/font.ttf";
+constexpr auto FONT_SIZE = 12u;
+
+constexpr auto ICON_COLOR_DARK = sf::Color(32, 32, 32);
+constexpr auto ICON_COLOR_LIGHT = sf::Color(240, 240, 240);
+constexpr auto ICON_SIZE = 32u;
 
 inline unsigned int GetMonitorRefreshRate()
 {
@@ -32,10 +35,10 @@ inline unsigned int GetMonitorRefreshRate()
 	return FRAMERATE_LIMIT;
 }
 
-inline void ApplyDarkTitleBar(const sf::RenderWindow& window)
+inline void SetTitleBarTheme(const sf::RenderWindow& window, bool isDark)
 {
 	HWND hwnd = window.getNativeHandle();
-	BOOL useDarkMode = TRUE;
+	BOOL useDarkMode = isDark ? TRUE : FALSE;
 
 	DwmSetWindowAttribute(
 		hwnd,
@@ -48,14 +51,37 @@ inline void SetWindowIconColor(sf::RenderWindow& window, sf::Color color, unsign
 {
 	std::vector<uint8_t> pixels(size * size * 4);
 
-	for (size_t i = 0; i < pixels.size(); i += 4)
+	float center = size / 2.0f;
+	float outerRadius = size / 2.2f;
+	float innerRadius = outerRadius / 2;
+
+	for (unsigned int y = 0; y < size; ++y)
 	{
-		pixels[i] = color.r;
-		pixels[i + 1] = color.g;
-		pixels[i + 2] = color.b;
-		pixels[i + 3] = color.a;
+		for (unsigned int x = 0; x < size; ++x)
+		{
+			float dx = x - center;
+			float dy = y - center;
+			float distance = std::sqrt(dx * dx + dy * dy);
+
+			size_t index = (y * size + x) * 4;
+
+			if (distance <= outerRadius && distance >= innerRadius)
+			{
+				pixels[index]     = color.r;
+				pixels[index + 1] = color.g;
+				pixels[index + 2] = color.b;
+				pixels[index + 3] = color.a;
+			}
+			else
+			{
+				pixels[index]     = 0;
+				pixels[index + 1] = 0;
+				pixels[index + 2] = 0;
+				pixels[index + 3] = 0;
+			}
+		}
 	}
 
-	window.setIcon({size, size}, pixels.data());
+	window.setIcon({ size, size }, pixels.data());
 }
-} // namespace AppConfig
+}
