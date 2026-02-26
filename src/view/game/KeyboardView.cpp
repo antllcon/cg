@@ -13,26 +13,6 @@ namespace
 		}
 	}
 
-	void AssertIsFontLoaded(bool isLoaded)
-	{
-		if (!isLoaded)
-		{
-			throw std::runtime_error("Не удалось загрузить шрифт для клавиатуры");
-		}
-	}
-
-	sf::Vector2f CalculateKeyPosition(char letter)
-	{
-		int index = letter - 'A';
-		int col = index % 7;
-		int row = index / 7;
-
-		float x = 32.0f + col * 48.0f;
-		float y = 200.0f + row * 48.0f;
-
-		return {x, y};
-	}
-
 	bool IsMouseOverShape(const sf::RectangleShape& shape, const sf::RenderWindow& window)
 	{
 		sf::Vector2i mousePos = sf::Mouse::getPosition(window);
@@ -42,16 +22,13 @@ namespace
 	}
 }
 
-// Изменён конструктор
 KeyboardView::KeyboardView(std::shared_ptr<KeyboardController> controller, const KeyboardData& initialData)
 	: m_controller(controller)
 {
 	AssertPointerNotNull(m_controller.get());
-	AssertIsFontLoaded(m_font.openFromFile(AppConfig::FONT_PATH));
+	AppConfig::LoadDefaultFont(m_font);
 
 	InitKeys();
-
-	// Вызываем Update с начальными данными
 	Update(initialData, nullptr);
 }
 
@@ -67,6 +44,10 @@ void KeyboardView::HandleEvent(const sf::Event& event, const sf::RenderWindow& w
 		{
 			HandleMouseClick(window);
 		}
+	}
+	else if (const auto* resized = event.getIf<sf::Event::Resized>())
+	{
+		UpdateLayout(resized->size.x, resized->size.y);
 	}
 }
 
@@ -89,31 +70,58 @@ void KeyboardView::Update(const KeyboardData& data, IObservable<KeyboardData>*)
 
 void KeyboardView::InitKeys()
 {
-	sf::Vector2f keySize(40.0f, 40.0f);
-
 	for (char character = 'A'; character <= 'Z'; ++character)
 	{
-		sf::Vector2f pos = CalculateKeyPosition(character);
-
-		sf::RectangleShape shape(keySize);
-		shape.setPosition(pos);
+		sf::RectangleShape shape(m_keySize);
 		shape.setFillColor(sf::Color(100, 100, 100));
-		shape.setOutlineColor(sf::Color::Black);
-		shape.setOutlineThickness(2.0f);
 
 		sf::Text text(m_font);
 		text.setString(std::string(1, character));
-		text.setCharacterSize(20);
-		text.setFillColor(sf::Color::White);
-
-		sf::FloatRect bounds = text.getLocalBounds();
-		text.setPosition({
-			pos.x + (keySize.x - bounds.size.x) / 2.0f - bounds.position.x,
-			pos.y + (keySize.y - bounds.size.y) / 2.0f - bounds.position.y
-		});
+		text.setCharacterSize(AppConfig::FONT_SIZE);
+		text.setFillColor(AppConfig::DarkTheme::PRIMARY_TEXT);
 
 		m_keys.insert({character, KeyVisuals{std::move(shape), std::move(text), true}});
 	}
+
+	UpdateLayout(AppConfig::WINDOW_WIDTH, AppConfig::WINDOW_HEIGHT);
+}
+
+void KeyboardView::UpdateLayout(unsigned int windowWidth, unsigned int windowHeight)
+{
+	for (auto& [character, visuals] : m_keys)
+	{
+		sf::Vector2f pos = CalculateKeyPosition(character, windowWidth, windowHeight);
+
+		visuals.shape.setSize(m_keySize);
+		visuals.shape.setPosition(pos);
+
+		sf::FloatRect bounds = visuals.text.getLocalBounds();
+		visuals.text.setPosition({
+			pos.x + (m_keySize.x - bounds.size.x) / 2.0f - bounds.position.x,
+			pos.y + (m_keySize.y - bounds.size.y) / 2.0f - bounds.position.y
+		});
+	}
+}
+
+sf::Vector2f KeyboardView::CalculateKeyPosition(char letter, unsigned int windowWidth, unsigned int windowHeight) const
+{
+	int index = letter - 'A';
+	int row = index / m_keysPerRow;
+	int col = index % m_keysPerRow;
+
+	int totalRows = (26 + m_keysPerRow - 1) / m_keysPerRow;
+	int keysInCurrentRow = (row == totalRows - 1) ? (26 % m_keysPerRow == 0 ? m_keysPerRow : 26 % m_keysPerRow) : m_keysPerRow;
+
+	float rowWidth = (keysInCurrentRow * m_keySize.x) + ((keysInCurrentRow - 1) * m_keyGap);
+	float centerX = AppConfig::GetWindowCenter(windowWidth, windowHeight).x;
+	float startX = centerX - (rowWidth / 2.0f);
+	float totalHeight = (totalRows * m_keySize.y) + ((totalRows - 1) * m_keyGap);
+	float startY = windowHeight - m_bottomMargin - totalHeight;
+
+	float x = startX + col * (m_keySize.x + m_keyGap);
+	float y = startY + row * (m_keySize.y + m_keyGap);
+
+	return {x, y};
 }
 
 void KeyboardView::HandleMouseClick(const sf::RenderWindow& window)

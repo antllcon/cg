@@ -5,10 +5,13 @@
 #include <SFML/Window/Window.hpp>
 #include <dwmapi.h>
 #include <vector>
+#include <SFML/Graphics/Font.hpp>
+#include <string>
+#include <stdexcept>
 
 namespace AppConfig
 {
-constexpr auto WINDOW_WIDTH = 400u;
+constexpr auto WINDOW_WIDTH = 800u;
 constexpr auto WINDOW_HEIGHT = 400u;
 constexpr auto WINDOW_NAME = "Hangman";
 constexpr auto WINDOW_STYLE = sf::Style::Titlebar | sf::Style::Close;
@@ -100,5 +103,24 @@ inline void SetWindowIconColor(sf::RenderWindow& window, sf::Color color, unsign
 	}
 
 	window.setIcon({ size, size }, pixels.data());
+}
+
+inline void LoadDefaultFont(sf::Font& font)
+{
+	if (!font.openFromFile(FONT_PATH))
+	{
+		throw std::runtime_error("Не удалось загрузить шрифт: " + std::string(FONT_PATH));
+	}
+}
+
+inline sf::Vector2f GetWindowCenter(unsigned int width, unsigned int height)
+{
+	return {static_cast<float>(width) / 2.0f, static_cast<float>(height) / 2.0f};
+}
+
+inline sf::Vector2f GetWindowCenter(const sf::RenderWindow& window)
+{
+	auto size = window.getSize();
+	return GetWindowCenter(size.x, size.y);
 }
 }

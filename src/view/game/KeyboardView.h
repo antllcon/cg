@@ -31,7 +31,15 @@ private:
 	std::unordered_map<char, KeyVisuals> m_keys;
 	sf::Font m_font;
 
+	sf::Vector2f m_keySize{ 35.0f, 35.0f };
+	float m_keyGap = 8.0f;
+	float m_bottomMargin = 30.0f;
+	int m_keysPerRow = 9;
+
 	void InitKeys();
+	void UpdateLayout(unsigned int windowWidth, unsigned int windowHeight);
+	sf::Vector2f CalculateKeyPosition(char letter, unsigned int windowWidth, unsigned int windowHeight) const;
+
 	void HandleMouseClick(const sf::RenderWindow& window);
 	void ProcessKeyClick(char letter);
 	void ApplyLetterState(char letter, LetterStatus status);
