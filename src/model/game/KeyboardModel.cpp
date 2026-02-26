@@ -20,12 +20,12 @@ char ToUpperCase(char letter)
 
 KeyboardModel::KeyboardModel()
 {
-	InitializeKeys();
+	InitKeys();
 }
 
 void KeyboardModel::Reset()
 {
-	InitializeKeys();
+	InitKeys();
 	NotifyObservers();
 }
 
@@ -55,12 +55,17 @@ LetterStatus KeyboardModel::GetLetterStatus(char letter) const
 	return LetterStatus::AVAILABLE;
 }
 
+const KeyboardData& KeyboardModel::GetData() const
+{
+	return m_data;
+}
+
 KeyboardData KeyboardModel::GetChangedData() const
 {
 	return m_data;
 }
 
-void KeyboardModel::InitializeKeys()
+void KeyboardModel::InitKeys()
 {
 	m_data.keys.clear();
 	for (char character = 'A'; character <= 'Z'; ++character)

@@ -16,6 +16,7 @@ public:
 	void Reset();
 	void SetLetterStatus(char letter, LetterStatus status);
 	LetterStatus GetLetterStatus(char letter) const;
+	const KeyboardData& GetData() const;
 
 protected:
 	KeyboardData GetChangedData() const override;
@@ -23,5 +24,5 @@ protected:
 private:
 	KeyboardData m_data;
 
-	void InitializeKeys();
+	void InitKeys();
 };
