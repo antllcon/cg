@@ -10,7 +10,7 @@ namespace AppConfig
 {
 constexpr auto WINDOW_WIDTH = 400u;
 constexpr auto WINDOW_HEIGHT = 400u;
-constexpr auto WINDOW_NAME = "SFML window template MVC";
+constexpr auto WINDOW_NAME = "Hangman";
 constexpr auto WINDOW_STYLE = sf::Style::Titlebar | sf::Style::Close;
 
 constexpr auto FRAMERATE_LIMIT = 144u;
