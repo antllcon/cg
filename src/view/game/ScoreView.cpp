@@ -1,15 +1,15 @@
 #include "ScoreView.h"
 #include "src/system/AppConfig.h"
 
-ScoreView::ScoreView(const ScoreData& initialData)
+ScoreView::ScoreView(const ScoreData& initialData, const ThemeData& initialTheme)
 	: m_scoreText(m_font)
 {
 	AppConfig::LoadDefaultFont(m_font);
 
 	m_scoreText.setCharacterSize(24);
-	m_scoreText.setFillColor(AppConfig::DarkTheme::PRIMARY_TEXT);
 	m_scoreText.setStyle(sf::Text::Bold);
 
+	Update(initialTheme, nullptr);
 	Update(initialData, nullptr);
 	UpdateLayout(AppConfig::WINDOW_WIDTH, AppConfig::WINDOW_HEIGHT);
 }
@@ -34,6 +34,11 @@ void ScoreView::Update(const ScoreData& data, IObservable<ScoreData>*)
 
 	m_scoreText.setString(AppConfig::ToSfString(text));
 	UpdateLayout(AppConfig::WINDOW_WIDTH, AppConfig::WINDOW_HEIGHT);
+}
+
+void ScoreView::Update(const ThemeData& data, IObservable<ThemeData>*)
+{
+	m_scoreText.setFillColor(data.primaryText);
 }
 
 void ScoreView::UpdateLayout(unsigned int windowWidth, unsigned int windowHeight)

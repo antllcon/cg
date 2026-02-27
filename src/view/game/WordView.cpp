@@ -1,7 +1,7 @@
 #include "WordView.h"
 #include "src/system/AppConfig.h"
 
-WordView::WordView(const WordData& initialData)
+WordView::WordView(const WordData& initialData, const ThemeData& initialTheme)
 	: m_descriptionText(m_font)
 	, m_hintText(m_font)
 	, m_wordText(m_font)
@@ -9,15 +9,12 @@ WordView::WordView(const WordData& initialData)
 	AppConfig::LoadDefaultFont(m_font);
 
 	m_descriptionText.setCharacterSize(18);
-	m_descriptionText.setFillColor(AppConfig::DarkTheme::PRIMARY_TEXT);
-
 	m_hintText.setCharacterSize(14);
 	m_hintText.setFillColor(sf::Color(150, 150, 150));
-
 	m_wordText.setCharacterSize(36);
-	m_wordText.setFillColor(AppConfig::DarkTheme::PRIMARY_TEXT);
 	m_wordText.setStyle(sf::Text::Bold);
 
+	Update(initialTheme, nullptr);
 	Update(initialData, nullptr);
 	UpdateLayout(AppConfig::WINDOW_WIDTH, AppConfig::WINDOW_HEIGHT);
 }
@@ -44,6 +41,12 @@ void WordView::Update(const WordData& data, IObservable<WordData>*)
 	m_wordText.setString(AppConfig::ToSfString(AddSpaces(data.maskedWord)));
 
 	UpdateLayout(AppConfig::WINDOW_WIDTH, AppConfig::WINDOW_HEIGHT);
+}
+
+void WordView::Update(const ThemeData& data, IObservable<ThemeData>*)
+{
+	m_descriptionText.setFillColor(data.primaryText);
+	m_wordText.setFillColor(data.primaryText);
 }
 
 void WordView::UpdateLayout(unsigned int windowWidth, unsigned int windowHeight)
