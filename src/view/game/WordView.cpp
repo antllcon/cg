@@ -39,10 +39,6 @@ void WordView::Render(sf::RenderWindow& window) const
 
 void WordView::Update(const WordData& data, IObservable<WordData>*)
 {
-	m_descriptionText.setString(data.riddle.description);
-	m_hintText.setString("Подсказка: " + data.riddle.hint);
-	m_wordText.setString(AddSpaces(data.maskedWord));
-
 	m_descriptionText.setString(AppConfig::ToSfString(data.riddle.description));
 	m_hintText.setString(AppConfig::ToSfString("Подсказка: " + data.riddle.hint));
 	m_wordText.setString(AppConfig::ToSfString(AddSpaces(data.maskedWord)));
