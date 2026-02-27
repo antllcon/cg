@@ -9,8 +9,8 @@
 namespace AppConfig
 {
 constexpr auto WINDOW_WIDTH = 400u;
-constexpr auto WINDOW_HEIGHT = 400u;
-constexpr auto WINDOW_NAME = "Circle";
+constexpr auto WINDOW_HEIGHT = 800u;
+constexpr auto WINDOW_NAME = "Bouncing balls";
 constexpr auto WINDOW_STYLE = sf::Style::Titlebar | sf::Style::Close;
 
 constexpr auto FRAMERATE_LIMIT = 144u;
@@ -84,14 +84,14 @@ inline void SetWindowIconColor(sf::RenderWindow& window, sf::Color color, unsign
 
 			if (distance <= outerRadius && distance >= innerRadius)
 			{
-				pixels[index]     = color.r;
+				pixels[index + 0] = color.r;
 				pixels[index + 1] = color.g;
 				pixels[index + 2] = color.b;
 				pixels[index + 3] = color.a;
 			}
 			else
 			{
-				pixels[index]     = 0;
+				pixels[index + 0] = 0;
 				pixels[index + 1] = 0;
 				pixels[index + 2] = 0;
 				pixels[index + 3] = 0;
@@ -100,5 +100,10 @@ inline void SetWindowIconColor(sf::RenderWindow& window, sf::Color color, unsign
 	}
 
 	window.setIcon({ size, size }, pixels.data());
+}
+
+inline sf::String ToUtf8(const std::string& str)
+{
+	return sf::String::fromUtf8(str.begin(), str.end());
 }
 }
