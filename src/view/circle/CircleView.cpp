@@ -9,8 +9,10 @@ constexpr float HALF_PIXEL = 0.5f;
 
 sf::Color BlendColors(const sf::Color& color1, const sf::Color& color2, float blendFactor)
 {
+	// функция для clamp
 	float clampedFactor = std::max(0.0f, std::min(1.0f, blendFactor));
 
+	// функция для lerp
 	return sf::Color(
 		static_cast<uint8_t>(color1.r + clampedFactor * (color2.r - color1.r)),
 		static_cast<uint8_t>(color1.g + clampedFactor * (color2.g - color1.g)),
