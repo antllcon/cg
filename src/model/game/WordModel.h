@@ -25,6 +25,8 @@ public:
 	bool IsHintRevealed() const;
 	bool IsFullyGuessed() const;
 
+	const WordData& GetData() const;
+
 protected:
 	WordData GetChangedData() const override;
 

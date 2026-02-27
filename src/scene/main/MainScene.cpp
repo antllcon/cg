@@ -6,6 +6,7 @@
 #include "../../view/game/KeyboardView.h"
 #include "../../view/theme/ThemeView.h"
 #include "../../view/toast/ToastView.h"
+#include "src/view/game/WordView.h"
 
 void MainScene::Init(std::shared_ptr<ThemeModel> themeModel)
 {
@@ -30,6 +31,10 @@ void MainScene::Init(std::shared_ptr<ThemeModel> themeModel)
     auto wordModel = std::make_shared<WordModel>();
     AddModel(wordModel);
     wordModel->SetNewRiddle({"MVC", "Паттерн проектирования", "Model-View-Controller"});
+
+	auto wordView = std::make_shared<WordView>(wordModel->GetData());
+	wordModel->RegisterObserver(wordView);
+	AddView(wordView);
 
     auto keyboardModel = std::make_shared<KeyboardModel>();
     AddModel(keyboardModel);

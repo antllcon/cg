@@ -101,6 +101,11 @@ bool WordModel::IsFullyGuessed() const
     return m_data.maskedWord.find('_') == std::string::npos;
 }
 
+const WordData& WordModel::GetData() const
+{
+	return m_data;
+}
+
 WordData WordModel::GetChangedData() const
 {
     return m_data;
