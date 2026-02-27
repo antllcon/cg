@@ -104,7 +104,7 @@ void ToastView::Update(const ThemeData& data, IObservable<ThemeData>*)
 
 void ToastView::SetupVisuals(const std::string& message)
 {
-	m_text.setString(message);
+	m_text.setString(AppConfig::ToUtf8(message));
 
 	sf::FloatRect textBounds = m_text.getLocalBounds();
 	float bgWidth = textBounds.size.x + PADDING_X * 2.0f;
