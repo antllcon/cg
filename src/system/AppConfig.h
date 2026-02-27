@@ -2,6 +2,7 @@
 #include "Windows.h"
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/System/String.hpp>
 #include <SFML/Window/Window.hpp>
 #include <dwmapi.h>
 #include <vector>
@@ -122,5 +123,10 @@ inline sf::Vector2f GetWindowCenter(const sf::RenderWindow& window)
 {
 	auto size = window.getSize();
 	return GetWindowCenter(size.x, size.y);
+}
+
+inline sf::String ToSfString(const std::string& str)
+{
+	return sf::String::fromUtf8(str.begin(), str.end());
 }
 }
