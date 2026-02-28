@@ -106,4 +106,9 @@ inline sf::String ToUtf8(const std::string& str)
 {
 	return sf::String::fromUtf8(str.begin(), str.end());
 }
+
+inline sf::Vector2f GetWindowCenter()
+{
+	return { WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 2.0f };
+}
 }

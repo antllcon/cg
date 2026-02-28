@@ -6,28 +6,28 @@
 struct BallData
 {
 	sf::Vector2f position;
-	sf::Vector2f velocity;
+	sf::Vector2f speed;
 	float radius;
 };
 
-struct RectObstacleData
+struct BlockData
 {
 	sf::Vector2f center;
 	sf::Vector2f size;
 	float rotationAngle;
 };
 
-struct CannonData
+struct GunData
 {
 	sf::Vector2f position;
-	sf::Vector2f targetDirection;
+	sf::Vector2f direction;
 };
 
 struct SimulationData
 {
 	std::vector<BallData> balls;
-	std::vector<RectObstacleData> obstacles;
-	CannonData cannon;
+	std::vector<BlockData> blocks;
+	GunData gun;
 };
 
 class SimulationModel final : public CObservable<SimulationData>

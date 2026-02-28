@@ -22,11 +22,11 @@ public:
 
 private:
 	void UpdateBalls(const std::vector<BallData>& balls);
-	void UpdateObstacles(const std::vector<RectObstacleData>& obstacles);
-	void UpdateCannon(const CannonData& cannon);
+	void UpdateBlocks(const std::vector<BlockData>& blocks);
+	void UpdateGun(const GunData& gun);
 
 	std::shared_ptr<SimulationController> m_controller;
 	std::vector<sf::CircleShape> m_balls;
-	std::vector<sf::RectangleShape> m_obstacles;
-	sf::RectangleShape m_cannon;
+	std::vector<sf::RectangleShape> m_blocks;
+	sf::RectangleShape m_gun;
 };

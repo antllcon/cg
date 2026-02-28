@@ -13,7 +13,7 @@ namespace
 		return sf::radians(std::atan2(direction.y, direction.x));
 	}
 
-	sf::RectangleShape CreateObstacleShape(const RectObstacleData& data)
+	sf::RectangleShape CreateBlockShape(const BlockData& data)
 	{
 		sf::RectangleShape shape(data.size);
 		shape.setOrigin({data.size.x / 2.0f, data.size.y / 2.0f});
@@ -34,12 +34,12 @@ namespace
 		return shape;
 	}
 
-	void SetupCannonShape(sf::RectangleShape& shape, const CannonData& data)
+	void SetupGunShape(sf::RectangleShape& shape, const GunData& data)
 	{
 		shape.setSize({CANNON_LENGTH, CANNON_THICKNESS});
 		shape.setOrigin({0.0f, CANNON_THICKNESS / 2.0f});
 		shape.setPosition(data.position);
-		shape.setRotation(CalculateRotationAngle(data.targetDirection));
+		shape.setRotation(CalculateRotationAngle(data.direction));
 		shape.setFillColor(sf::Color(46, 204, 113));
 	}
 }
@@ -84,9 +84,9 @@ void SimulationView::HandleEvent(const sf::Event& event, const sf::RenderWindow&
 
 void SimulationView::Render(sf::RenderWindow& window) const
 {
-	for (const auto& obstacle : m_obstacles)
+	for (const auto& block : m_blocks)
 	{
-		window.draw(obstacle);
+		window.draw(block);
 	}
 
 	for (const auto& ball : m_balls)
@@ -94,13 +94,13 @@ void SimulationView::Render(sf::RenderWindow& window) const
 		window.draw(ball);
 	}
 
-	window.draw(m_cannon);
+	window.draw(m_gun);
 }
 
 void SimulationView::Update(const SimulationData& data, IObservable<SimulationData>*)
 {
-	UpdateObstacles(data.obstacles);
-	UpdateCannon(data.cannon);
+	UpdateBlocks(data.blocks);
+	UpdateGun(data.gun);
 	UpdateBalls(data.balls);
 }
 
@@ -115,18 +115,18 @@ void SimulationView::UpdateBalls(const std::vector<BallData>& balls)
 	}
 }
 
-void SimulationView::UpdateObstacles(const std::vector<RectObstacleData>& obstacles)
+void SimulationView::UpdateBlocks(const std::vector<BlockData>& blocks)
 {
-	m_obstacles.clear();
-	m_obstacles.reserve(obstacles.size());
+	m_blocks.clear();
+	m_blocks.reserve(blocks.size());
 
-	for (const auto& obstacleData : obstacles)
+	for (const auto& blockData : blocks)
 	{
-		m_obstacles.push_back(CreateObstacleShape(obstacleData));
+		m_blocks.push_back(CreateBlockShape(blockData));
 	}
 }
 
-void SimulationView::UpdateCannon(const CannonData& cannon)
+void SimulationView::UpdateGun(const GunData& gun)
 {
-	SetupCannonShape(m_cannon, cannon);
+	SetupGunShape(m_gun, gun);
 }
