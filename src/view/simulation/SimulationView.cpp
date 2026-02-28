@@ -5,8 +5,8 @@
 
 namespace
 {
-	constexpr float CANNON_LENGTH = 50.0f;
-	constexpr float CANNON_THICKNESS = 16.0f;
+	constexpr float GUN_LENGTH = 50.0f;
+	constexpr float GUN_THICKNESS = 16.0f;
 
 	sf::Angle CalculateRotationAngle(const sf::Vector2f& direction)
 	{
@@ -36,8 +36,8 @@ namespace
 
 	void SetupGunShape(sf::RectangleShape& shape, const GunData& data)
 	{
-		shape.setSize({CANNON_LENGTH, CANNON_THICKNESS});
-		shape.setOrigin({0.0f, CANNON_THICKNESS / 2.0f});
+		shape.setSize({GUN_LENGTH, GUN_THICKNESS});
+		shape.setOrigin({0.0f, GUN_THICKNESS / 2.0f});
 		shape.setPosition(data.position);
 		shape.setRotation(CalculateRotationAngle(data.direction));
 		shape.setFillColor(sf::Color(46, 204, 113));
