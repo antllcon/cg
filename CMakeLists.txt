@@ -17,17 +17,31 @@ endif ()
 
 set(BUILD_SHARED_LIBS OFF)
 include(FetchContent)
+
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+
 FetchContent_Declare(
-        SFML
-        GIT_REPOSITORY https://github.com/SFML/SFML.git
-        GIT_TAG 3.0.1
+        glfw
+        GIT_REPOSITORY https://github.com/glfw/glfw.git
+        GIT_TAG 3.4
 )
-FetchContent_MakeAvailable(SFML)
+FetchContent_MakeAvailable(glfw)
+
+add_library(glad STATIC "libs/glad/src/glad.c")
+target_include_directories(glad PUBLIC "libs/glad/include")
+
+if (MSVC)
+    target_compile_options(glad PRIVATE /W0)
+else()
+    target_compile_options(glad PRIVATE -w)
+endif()
 
 add_library(core_lib STATIC ${SRC_FILES} ${HEADER_FILES})
 target_include_directories(core_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_options(core_lib PRIVATE ${PROJECT_WARNINGS})
-target_link_libraries(core_lib PUBLIC SFML::Graphics SFML::Window SFML::System)
+target_link_libraries(core_lib PUBLIC glfw glad)
 
 if (WIN32)
     target_link_libraries(core_lib PUBLIC dwmapi)
@@ -37,27 +51,3 @@ add_executable(start src/main.cpp)
 target_link_libraries(start PRIVATE core_lib)
 target_compile_options(start PRIVATE ${PROJECT_WARNINGS})
 set_target_properties(start PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/res")
-
-option(BUILD_TESTING "Build the tests" ON)
-
-if (BUILD_TESTING)
-    enable_testing()
-    include(FetchContent)
-    FetchContent_Declare(
-            googletest
-            URL https://github.com/google/googletest/archive/52eb8108c5bdec04579160ae17225d66034bd723.zip
-            DOWNLOAD_EXTRACT_TIMESTAMP TRUE
-    )
-    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-    FetchContent_MakeAvailable(googletest)
-
-    file(GLOB_RECURSE TEST_FILES "tests/*.cpp")
-
-    if (TEST_FILES)
-        add_executable(tests ${TEST_FILES})
-        target_link_libraries(tests PRIVATE core_lib GTest::gmock_main)
-
-        include(GoogleTest)
-        gtest_discover_tests(tests)
-    endif ()
-endif ()
