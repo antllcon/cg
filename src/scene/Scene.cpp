@@ -6,11 +6,11 @@ void Scene::Init(std::shared_ptr<ThemeModel>)
 {
 }
 
-void Scene::ProcessEvents(const sf::Event& event, const sf::RenderWindow& window)
+void Scene::ProcessEvents(const Event& event)
 {
 	for (auto& view : m_views)
 	{
-		view->HandleEvent(event, window);
+		view->HandleEvent(event);
 	}
 }
 
@@ -22,11 +22,11 @@ void Scene::Update(float dt)
 	}
 }
 
-void Scene::Render(sf::RenderWindow& window) const
+void Scene::Render(IRenderer& renderer) const
 {
 	for (auto& view : m_views)
 	{
-		view->Render(window);
+		view->Render(renderer);
 	}
 }
 

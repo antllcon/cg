@@ -27,6 +27,7 @@ ThemeData CreateLightTheme()
 	return data;
 }
 }
+
 ThemeModel::ThemeModel()
 	: m_data(CreateDarkTheme())
 {

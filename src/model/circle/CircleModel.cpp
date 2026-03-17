@@ -3,39 +3,39 @@
 
 namespace
 {
-constexpr int MIN_RADIUS = 5;
-constexpr int MIN_THICKNESS = 0;
+constexpr float MIN_RADIUS = 5.0f;
+constexpr float MIN_THICKNESS = 0.0f;
 
-sf::Color GenerateRandomColor()
+Color GenerateRandomColor()
 {
 	static std::mt19937 rng(std::random_device{}());
 	static std::uniform_int_distribution<int> dist(0, 255);
 
-	return sf::Color(
+	return {
 		static_cast<uint8_t>(dist(rng)),
 		static_cast<uint8_t>(dist(rng)),
 		static_cast<uint8_t>(dist(rng)),
-		static_cast<uint8_t>(dist(rng))
-	);
+		255
+	};
 }
-} // namespace
+}
 
 CircleModel::CircleModel()
 {
-	m_data.center = {200, 200};
-	m_data.radius = 50;
-	m_data.thickness = 10;
-	m_data.thicknessColor = sf::Color::White;
-	m_data.fillColor = sf::Color(46, 204, 113);
+	m_data.center = {200.0f, 200.0f};
+	m_data.radius = 50.0f;
+	m_data.thickness = 10.0f;
+	m_data.thicknessColor = {255u, 255u, 255u, 255u};
+	m_data.fillColor = {255u, 255u, 255u, 255u};
 }
 
-void CircleModel::SetCenter(const sf::Vector2i& center)
+void CircleModel::SetCenter(const Point2f& center)
 {
 	m_data.center = center;
 	NotifyObservers();
 }
 
-void CircleModel::ChangeRadius(int delta)
+void CircleModel::ChangeRadius(float delta)
 {
 	if (m_data.radius + delta >= MIN_RADIUS)
 	{
@@ -45,7 +45,7 @@ void CircleModel::ChangeRadius(int delta)
 	NotifyObservers();
 }
 
-void CircleModel::ChangeThickness(int delta)
+void CircleModel::ChangeThickness(float delta)
 {
 	if (m_data.thickness + delta >= MIN_THICKNESS)
 	{

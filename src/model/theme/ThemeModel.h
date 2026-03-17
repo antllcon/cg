@@ -1,14 +1,14 @@
 #pragma once
-#include "SFML/Graphics/Color.hpp"
+#include "src/core/types/Color.h"
 #include "src/system/Observer.h"
 
 struct ThemeData
 {
 	bool isDark;
-	sf::Color windowBackground;
-	sf::Color surfaceBackground;
-	sf::Color surfaceOutline;
-	sf::Color primaryText;
+	Color windowBackground;
+	Color surfaceBackground;
+	Color surfaceOutline;
+	Color primaryText;
 };
 
 class ThemeModel final : public CObservable<ThemeData>

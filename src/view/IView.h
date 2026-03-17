@@ -1,11 +1,13 @@
 #pragma once
-#include "SFML/Graphics/RenderWindow.hpp"
+
+class IRenderer;
+struct Event;
 
 class IView
 {
 public:
 	virtual ~IView() = default;
 
-	virtual void HandleEvent(const sf::Event& event, const sf::RenderWindow& window) = 0;
-	virtual void Render(sf::RenderWindow& window) const = 0;
+	virtual void HandleEvent(const Event& event) = 0;
+	virtual void Render(IRenderer& renderer) const = 0;
 };

@@ -4,26 +4,26 @@
 
 namespace
 {
-constexpr int SCROLL_STEP = 5;
+constexpr float SCROLL_STEP = 5.0f;
 
 bool IsInsideCircle(float x, float y, const CircleData& data)
 {
-	float dx = x - static_cast<float>(data.center.x);
-	float dy = y - static_cast<float>(data.center.y);
-	float radiusSq = static_cast<float>(data.radius * data.radius);
+	float dx = x - data.center.x;
+	float dy = y - data.center.y;
+	float radiusSq = data.radius * data.radius;
 
 	return dx * dx + dy * dy <= radiusSq;
 }
 
 bool IsInsideCircleThickness(float x, float y, const CircleData& data)
 {
-	float dx = x - static_cast<float>(data.center.x);
-	float dy = y - static_cast<float>(data.center.y);
-	float radiusSq = static_cast<float>((data.radius + data.thickness) * (data.radius + data.thickness));
+	float dx = x - data.center.x;
+	float dy = y - data.center.y;
+	float radiusSq = (data.radius + data.thickness) * (data.radius + data.thickness);
 
 	return dx * dx + dy * dy <= radiusSq;
 }
-}
+} // namespace
 
 CircleController::CircleController(std::shared_ptr<CircleModel> model)
 	: m_model(std::move(model))
@@ -43,14 +43,15 @@ void CircleController::OnCanvasClicked(float x, float y, bool isRightClick)
 			m_model->RandomFillColor();
 			throw std::exception("Color changed");
 		}
-		else if (IsInsideCircleThickness(x, y, m_model->GetData()))
+
+		if (IsInsideCircleThickness(x, y, m_model->GetData()))
 		{
 			m_model->RandomThicknessColor();
 		}
 	}
 	else
 	{
-		m_model->SetCenter({static_cast<int>(x), static_cast<int>(y)});
+		m_model->SetCenter({x, y});
 	}
 }
 
@@ -58,7 +59,7 @@ void CircleController::OnMouseScrolled(float x, float y, float delta, bool isShi
 {
 	if (IsInsideCircleThickness(x, y, m_model->GetData()))
 	{
-		int step = static_cast<int>(delta) * SCROLL_STEP;
+		float step = delta * SCROLL_STEP;
 
 		if (isShiftPressed)
 		{

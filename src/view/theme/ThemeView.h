@@ -1,7 +1,6 @@
 #pragma once
 #include "../../model/theme/ThemeModel.h"
 #include "../IView.h"
-#include "SFML/Graphics/RectangleShape.hpp"
 #include "src/system/Observer.h"
 #include <memory>
 
@@ -14,11 +13,11 @@ class ThemeView final
 public:
 	ThemeView(std::shared_ptr<ThemeModel> model, std::shared_ptr<ThemeController> controller);
 
-	void HandleEvent(const sf::Event& event, const sf::RenderWindow& window) override;
-	void Render(sf::RenderWindow& window) const override;
+	void HandleEvent(const Event& event) override;
+	void Render(IRenderer& renderer) const override;
 	void Update(const ThemeData& data, IObservable<ThemeData>* subject) override;
 
 private:
 	std::shared_ptr<ThemeController> m_controller;
-	sf::RectangleShape m_background;
+	Color m_backgroundColor;
 };

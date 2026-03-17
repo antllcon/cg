@@ -1,15 +1,15 @@
 #pragma once
-#include "SFML/Graphics/Color.hpp"
-#include "SFML/System/Vector2.hpp"
+#include "src/core/types/Color.h"
+#include "src/core/types/Point.h"
 #include "src/system/Observer.h"
 
 struct CircleData
 {
-	sf::Vector2i center;
-	int radius;
-	int thickness;
-	sf::Color thicknessColor;
-	sf::Color fillColor;
+	Point2f center;
+	float radius;
+	float thickness;
+	Color thicknessColor;
+	Color fillColor;
 };
 
 class CircleModel final : public CObservable<CircleData>
@@ -17,9 +17,9 @@ class CircleModel final : public CObservable<CircleData>
 public:
 	CircleModel();
 
-	void SetCenter(const sf::Vector2i& center);
-	void ChangeRadius(int delta);
-	void ChangeThickness(int delta);
+	void SetCenter(const Point2f& center);
+	void ChangeRadius(float delta);
+	void ChangeThickness(float delta);
 	void RandomFillColor();
 	void RandomThicknessColor();
 	const CircleData& GetData() const;

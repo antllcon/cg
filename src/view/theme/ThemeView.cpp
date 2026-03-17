@@ -1,36 +1,35 @@
 #include "ThemeView.h"
 #include "../../controller/theme/ThemeController.h"
-#include "SFML/Window/Event.hpp"
+#include "src/core/interfaces/IRenderer.h"
+#include "src/core/types/Event.h"
 #include "src/system/AppConfig.h"
 
 ThemeView::ThemeView(std::shared_ptr<ThemeModel> model, std::shared_ptr<ThemeController> controller)
 	: m_controller(std::move(controller))
 {
-	m_background.setSize({static_cast<float>(AppConfig::WINDOW_WIDTH), static_cast<float>(AppConfig::WINDOW_HEIGHT)});
-
 	if (model)
 	{
 		Update(model->GetData(), nullptr);
 	}
 }
 
-void ThemeView::HandleEvent(const sf::Event& event, const sf::RenderWindow&)
+void ThemeView::HandleEvent(const Event& event)
 {
-	if (const auto* keyEvent = event.getIf<sf::Event::KeyPressed>())
+	if (event.type == EventType::KeyPressed && event.key.code == KeyCode::T)
 	{
-		if (keyEvent->code == sf::Keyboard::Key::T)
-		{
-			m_controller->OnToggleClicked();
-		}
+		m_controller->OnToggleClicked();
 	}
 }
 
-void ThemeView::Render(sf::RenderWindow& window) const
+void ThemeView::Render(IRenderer& renderer) const
 {
-	window.draw(m_background);
+	renderer.DrawRectangle(
+		{0, 0},
+		{static_cast<int>(AppConfig::WINDOW_WIDTH), static_cast<int>(AppConfig::WINDOW_HEIGHT)},
+		m_backgroundColor);
 }
 
 void ThemeView::Update(const ThemeData& data, IObservable<ThemeData>*)
 {
-	m_background.setFillColor(data.windowBackground);
+	m_backgroundColor = data.windowBackground;
 }

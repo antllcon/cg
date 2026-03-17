@@ -1,10 +1,8 @@
 #pragma once
 #include "../../model/circle/CircleModel.h"
 #include "../IView.h"
-#include "SFML/Graphics/VertexArray.hpp"
 #include "src/system/Observer.h"
 #include <memory>
-#include <vector>
 
 class CircleController;
 
@@ -15,13 +13,11 @@ class CircleView final
 public:
 	CircleView(std::shared_ptr<CircleModel> model, std::shared_ptr<CircleController> controller);
 
-	void HandleEvent(const sf::Event& event, const sf::RenderWindow& window) override;
-	void Render(sf::RenderWindow& window) const override;
+	void HandleEvent(const Event& event) override;
+	void Render(IRenderer& renderer) const override;
 	void Update(const CircleData& data, IObservable<CircleData>* subject) override;
 
 private:
-	void UpdateVertices(const std::vector<sf::Vertex>& vertices);
-
 	std::shared_ptr<CircleController> m_controller;
-	sf::VertexArray m_vertices;
+	CircleData m_data;
 };

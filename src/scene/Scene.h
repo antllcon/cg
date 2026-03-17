@@ -1,11 +1,12 @@
 #pragma once
-#include "SFML/Graphics/RenderWindow.hpp"
+#include "src/core/types/Event.h"
 #include "src/model/theme/ThemeModel.h"
 #include <memory>
 #include <vector>
 
 class IView;
 class IController;
+class IRenderer;
 
 class Scene
 {
@@ -13,9 +14,9 @@ public:
 	virtual ~Scene() = default;
 	virtual void Init(std::shared_ptr<ThemeModel> themeModel);
 
-	void ProcessEvents(const sf::Event& event, const sf::RenderWindow& window);
+	void ProcessEvents(const Event& event);
 	void Update(float dt);
-	void Render(sf::RenderWindow& window) const;
+	void Render(IRenderer& renderer) const;
 	virtual void OnException(const std::exception& e);
 
 protected:

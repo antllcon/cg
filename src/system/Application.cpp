@@ -1,32 +1,38 @@
 #include "Application.h"
 #include "../scene/main/MainScene.h"
 #include "AppConfig.h"
+#include <chrono>
+#include <stdexcept>
 
 namespace
 {
-void AssertIsWindowValid(const sf::RenderWindow& window)
+void AssertIsWindowValid(const IWindow* window)
 {
-	if (!window.isOpen())
+	if (!window)
+	{
+		throw std::runtime_error("Окно не передано в приложение");
+	}
+
+	if (!window->IsOpen())
 	{
 		throw std::runtime_error("Окно не инициализировано для применения системных настроек");
 	}
 }
 
-void SetupWindowProperties(sf::RenderWindow& window)
+void SetupWindowProperties(IWindow& window)
 {
-	AssertIsWindowValid(window);
-	AppConfig::SetTitleBarTheme(window, true);
-	AppConfig::SetWindowIconColor(window, AppConfig::ICON_COLOR_LIGHT, AppConfig::ICON_SIZE);
+	window.SetTitleBarTheme(true);
+	window.SetIconColor(AppConfig::ICON_COLOR_LIGHT);
 }
-}
+} // namespace
 
-Application::Application()
-	: m_window(sf::VideoMode({AppConfig::WINDOW_WIDTH, AppConfig::WINDOW_HEIGHT}), AppConfig::WINDOW_NAME, AppConfig::WINDOW_STYLE)
+Application::Application(std::unique_ptr<IWindow> window, std::unique_ptr<IRenderer> renderer)
+	: m_window(std::move(window))
+	, m_renderer(std::move(renderer))
 	, m_themeModel(std::make_shared<ThemeModel>())
 {
-	auto refreshRate = AppConfig::GetMonitorRefreshRate();
-	m_window.setFramerateLimit(refreshRate);
-	SetupWindowProperties(m_window);
+	AssertIsWindowValid(m_window.get());
+	SetupWindowProperties(*m_window);
 }
 
 void Application::Init()
@@ -37,38 +43,45 @@ void Application::Init()
 
 void Application::Run()
 {
-	sf::Clock clock;
-	while (m_window.isOpen())
+	auto lastTime = std::chrono::steady_clock::now();
+
+	while (m_window->IsOpen())
 	{
-		auto dt = clock.restart();
+		auto currentTime = std::chrono::steady_clock::now();
+		std::chrono::duration<float> dt = currentTime - lastTime;
+		lastTime = currentTime;
 
 		ProcessEvents();
-		Update(dt.asSeconds());
+		UpdateLogic(dt.count());
 		Render();
 	}
 }
 
 void Application::Update(const ThemeData& data, IObservable<ThemeData>*)
 {
-	AppConfig::SetTitleBarTheme(m_window, data.isDark);
-	auto iconColor = data.isDark ? AppConfig::ICON_COLOR_LIGHT : AppConfig::ICON_COLOR_DARK;
-	AppConfig::SetWindowIconColor(m_window, iconColor, AppConfig::ICON_SIZE);
+	if (m_window)
+	{
+		m_window->SetTitleBarTheme(data.isDark);
+		Color iconColor = data.isDark ? AppConfig::ICON_COLOR_LIGHT : AppConfig::ICON_COLOR_DARK;
+		m_window->SetIconColor(iconColor);
+	}
 }
 
 void Application::ProcessEvents()
 {
-	while (const auto event = m_window.pollEvent())
+	Event event;
+	while (m_window->PollEvent(event))
 	{
-		if (event->is<sf::Event::Closed>())
+		if (event.type == EventType::Closed)
 		{
-			m_window.close();
+			m_window->Close();
 		}
 
 		if (m_scene)
 		{
 			try
 			{
-				m_scene->ProcessEvents(*event, m_window);
+				m_scene->ProcessEvents(event);
 			}
 			catch (const std::exception& e)
 			{
@@ -78,7 +91,7 @@ void Application::ProcessEvents()
 	}
 }
 
-void Application::Update(float dt)
+void Application::UpdateLogic(float dt)
 {
 	if (m_scene)
 	{
@@ -95,14 +108,14 @@ void Application::Update(float dt)
 
 void Application::Render()
 {
-	m_window.clear(m_themeModel->GetData().windowBackground);
+	m_renderer->Clear(m_themeModel->GetData().windowBackground);
 
 	if (m_scene)
 	{
-		m_scene->Render(m_window);
+		m_scene->Render(*m_renderer);
 	}
 
-	m_window.display();
+	m_renderer->Display();
 }
 
 void Application::LoadScene(std::unique_ptr<Scene> scene)

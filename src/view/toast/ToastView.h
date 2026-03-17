@@ -1,12 +1,11 @@
 #pragma once
-#include "../../model/theme/ThemeModel.h"
-#include "../../model/toast/ToastModel.h"
-#include "../IView.h"
-#include "SFML/Graphics/ConvexShape.hpp"
-#include "SFML/Graphics/Font.hpp"
-#include "SFML/Graphics/Text.hpp"
+#include "src/core/types/Point.h"
+#include "src/model/theme/ThemeModel.h"
+#include "src/model/toast/ToastModel.h"
 #include "src/system/Observer.h"
+#include "src/view/IView.h"
 #include <memory>
+#include <string>
 
 class ToastView final
 	: public IView
@@ -16,16 +15,21 @@ class ToastView final
 public:
 	ToastView(std::shared_ptr<ToastModel> toastModel, std::shared_ptr<ThemeModel> themeModel);
 
-	void HandleEvent(const sf::Event& event, const sf::RenderWindow& window) override;
-	void Render(sf::RenderWindow& window) const override;
+	void HandleEvent(const Event& event) override;
+	void Render(IRenderer& renderer) const override;
 	void Update(const ToastData& data, IObservable<ToastData>* subject) override;
 	void Update(const ThemeData& data, IObservable<ThemeData>* subject) override;
 
 private:
-	void SetupVisuals(const std::string& message);
+	void CalculateBounds();
 
-	sf::Font m_font;
-	sf::Text m_text;
-	sf::ConvexShape m_background;
+	std::string m_message;
 	bool m_isVisible;
+
+	Color m_textColor;
+	Color m_backgroundColor;
+	Color m_outlineColor;
+
+	Point2f m_position;
+	Point2f m_size;
 };
