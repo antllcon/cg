@@ -2,6 +2,7 @@
 #include "src/core/types/Color.h"
 #include "src/core/types/Point.h"
 #include <string>
+#include <vector>
 
 class IRenderer
 {
@@ -14,4 +15,5 @@ public:
 	virtual void DrawRectangle(const Point2i& position, const Point2i& size, const Color& color) = 0;
 	virtual void DrawRoundedRectangle(const Point2i& position, const Point2i& size, float radius, const Color& color, const Color& outlineColor) = 0;
 	virtual void DrawTextData(const Point2i& position, const std::string& text, float fontSize, const Color& color) = 0;
+	virtual void DrawPolygon(const std::vector<Point2f>& points, const Color& color) = 0;
 };

@@ -16,7 +16,11 @@ enum class KeyCode
 	Escape,
 	Enter,
 	Space,
-	Unknown
+	Unknown,
+	Left,
+	Up,
+	Down,
+	Right,
 };
 
 enum class EventType

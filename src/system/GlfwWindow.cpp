@@ -70,6 +70,18 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 	{
 		event.key.code = KeyCode::LShift;
 	}
+	else if (key == GLFW_KEY_UP)
+	{
+		event.key.code = KeyCode::Up;
+	}
+	else if (key == GLFW_KEY_LEFT)
+	{
+		event.key.code = KeyCode::Left;
+	}
+	else if (key == GLFW_KEY_RIGHT)
+	{
+		event.key.code = KeyCode::Right;
+	}
 	else
 	{
 		event.key.code = KeyCode::Unknown;

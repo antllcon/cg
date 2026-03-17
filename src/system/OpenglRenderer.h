@@ -15,10 +15,12 @@ public:
 	void DrawRectangle(const Point2i& position, const Point2i& size, const Color& color) override;
 	void DrawRoundedRectangle(const Point2i& position, const Point2i& size, float radius, const Color& color, const Color& outlineColor) override;
 	void DrawTextData(const Point2i& position, const std::string& text, float fontSize, const Color& color) override;
+	void DrawPolygon(const std::vector<Point2f>& points, const Color& color) override;
 
 private:
 	void RenderGeometry(const float* data, size_t count);
 
+private:
 	uint32_t m_shaderProgram;
 	uint32_t m_vao;
 	uint32_t m_vbo;

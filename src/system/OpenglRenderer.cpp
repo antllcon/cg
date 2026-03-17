@@ -167,6 +167,21 @@ void AppendRoundedRectTriangles(std::vector<float>& data, const Point2i& pos, co
 		PushVertex(data, perimeter[next].x, perimeter[next].y, color);
 	}
 }
+
+void AppendPolygonTriangles(std::vector<float>& data, const std::vector<Point2f>& points, const Color& color)
+{
+	if (points.size() < 3)
+	{
+		return;
+	}
+
+	for (size_t i = 1; i < points.size() - 1; ++i)
+	{
+		PushVertex(data, points[0].x, points[0].y, color);
+		PushVertex(data, points[i].x, points[i].y, color);
+		PushVertex(data, points[i + 1].x, points[i + 1].y, color);
+	}
+}
 } // namespace
 
 OpenglRenderer::OpenglRenderer()
@@ -264,6 +279,12 @@ void OpenglRenderer::DrawTextData(const Point2i&, const std::string&, float, con
 	// throw std::runtime_error("Отрисовка текста не реализована. Требуется библиотека FreeType.");
 }
 
+void OpenglRenderer::DrawPolygon(const std::vector<Point2f>& points, const Color& color)
+{
+	std::vector<float> geometryData;
+	AppendPolygonTriangles(geometryData, points, color);
+	RenderGeometry(geometryData.data(), geometryData.size() / FLOATS_PER_VERTEX);
+}
 void OpenglRenderer::RenderGeometry(const float* data, size_t count)
 {
 	if (count == 0)

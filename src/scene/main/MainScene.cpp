@@ -1,8 +1,8 @@
 #include "MainScene.h"
-#include "src/controller/circle/CircleController.h"
+#include "src/controller/asteroids/AsteroidsController.h"
 #include "src/controller/theme/ThemeController.h"
-#include "src/model/circle/CircleModel.h"
-#include "src/view/circle/CircleView.h"
+#include "src/model/asteroids/AsteroidsModel.h"
+#include "src/view/asteroids/AsteroidsView.h"
 #include "src/view/theme/ThemeView.h"
 #include "src/view/toast/ToastView.h"
 
@@ -15,15 +15,15 @@ void MainScene::Init(std::shared_ptr<ThemeModel> themeModel)
 	themeModel->RegisterObserver(themeView);
 	AddView(themeView);
 
-	auto circleModel = std::make_shared<CircleModel>();
-	AddModel(circleModel);
+	auto asteroidsModel = std::make_shared<AsteroidsModel>();
+	AddModel(asteroidsModel);
 
-	auto circleController = std::make_shared<CircleController>(circleModel);
-	AddController(circleController);
+	auto asteroidsController = std::make_shared<AsteroidsController>(asteroidsModel);
+	AddController(asteroidsController);
 
-	auto circleView = std::make_shared<CircleView>(circleModel, circleController);
-	circleModel->RegisterObserver(circleView);
-	AddView(circleView);
+	auto asteroidsView = std::make_shared<AsteroidsView>(asteroidsModel, asteroidsController);
+	asteroidsModel->RegisterObserver(asteroidsView);
+	AddView(asteroidsView);
 
 	auto toastModel = std::make_shared<ToastModel>();
 	AddModel(toastModel);
