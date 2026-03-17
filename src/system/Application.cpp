@@ -26,9 +26,13 @@ void SetupWindowProperties(IWindow& window)
 }
 } // namespace
 
-Application::Application(std::unique_ptr<IWindow> window, std::unique_ptr<IRenderer> renderer)
+Application::Application(
+	std::unique_ptr<IWindow> window,
+	std::unique_ptr<IRenderer> renderer,
+	std::unique_ptr<IAudioManager> audioManager)
 	: m_window(std::move(window))
 	, m_renderer(std::move(renderer))
+	, m_audioManager(std::move(audioManager))
 	, m_themeModel(std::make_shared<ThemeModel>())
 {
 	AssertIsWindowValid(m_window.get());

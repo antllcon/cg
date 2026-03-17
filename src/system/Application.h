@@ -1,4 +1,5 @@
 #pragma once
+#include "src/core/interfaces/IAudioManager.h"
 #include "src/core/interfaces/IRenderer.h"
 #include "src/core/interfaces/IWindow.h"
 #include "src/scene/Scene.h"
@@ -9,7 +10,10 @@ class Application final
 	, public std::enable_shared_from_this<Application>
 {
 public:
-	Application(std::unique_ptr<IWindow> window, std::unique_ptr<IRenderer> renderer);
+	Application(
+		std::unique_ptr<IWindow> window,
+		std::unique_ptr<IRenderer> renderer,
+		std::unique_ptr<IAudioManager> audioManager);
 	~Application() override = default;
 
 	Application(const Application&) = delete;
@@ -29,6 +33,7 @@ private:
 
 	std::unique_ptr<IWindow> m_window;
 	std::unique_ptr<IRenderer> m_renderer;
+	std::unique_ptr<IAudioManager> m_audioManager;
 	std::unique_ptr<Scene> m_scene;
 	std::shared_ptr<ThemeModel> m_themeModel;
 };

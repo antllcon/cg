@@ -31,7 +31,6 @@ FetchContent_MakeAvailable(glfw)
 
 add_library(glad STATIC "libs/glad/src/glad.c")
 target_include_directories(glad PUBLIC "libs/glad/include")
-
 if (MSVC)
     target_compile_options(glad PRIVATE /W0)
 else()
@@ -40,6 +39,7 @@ endif()
 
 add_library(core_lib STATIC ${SRC_FILES} ${HEADER_FILES})
 target_include_directories(core_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(core_lib PUBLIC libs/stb)
 target_compile_options(core_lib PRIVATE ${PROJECT_WARNINGS})
 target_link_libraries(core_lib PUBLIC glfw glad)
 
