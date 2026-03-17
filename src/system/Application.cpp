@@ -1,5 +1,5 @@
 #include "Application.h"
-#include "../scene/main/MainScene.h"
+#include "src/scene/main/MainScene.h"
 #include "AppConfig.h"
 #include <chrono>
 #include <stdexcept>

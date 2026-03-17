@@ -1,6 +1,6 @@
 #pragma once
-#include "../../model/theme/ThemeModel.h"
-#include "../IView.h"
+#include "src/model/theme/ThemeModel.h"
+#include "src/view/IView.h"
 #include "src/system/Observer.h"
 #include <memory>
 

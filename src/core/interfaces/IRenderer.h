@@ -1,5 +1,5 @@
 #pragma once
-#include "../types/Color.h"
+#include "src/core/types/Color.h"
 #include "src/core/types/Point.h"
 #include <string>
 

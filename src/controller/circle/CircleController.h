@@ -1,6 +1,6 @@
 #pragma once
-#include "../../model/circle/CircleModel.h"
-#include "../IController.h"
+#include "src/controller/IController.h"
+#include "src/model/circle/CircleModel.h"
 #include <memory>
 
 class CircleController final : public IController

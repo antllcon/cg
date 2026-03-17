@@ -1,7 +1,6 @@
 #pragma once
-#include "../types/Event.h"
-#include "../types/Point.h"
 #include "src/core/types/Color.h"
+#include "src/core/types/Event.h"
 
 class IWindow
 {

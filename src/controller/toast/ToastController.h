@@ -1,6 +1,6 @@
 #pragma once
-#include "../../model/toast/ToastModel.h"
-#include "../IController.h"
+#include "src/controller/IController.h"
+#include "src/model/toast/ToastModel.h"
 #include <memory>
 #include <string>
 

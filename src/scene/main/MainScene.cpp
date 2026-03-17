@@ -1,10 +1,10 @@
 #include "MainScene.h"
-#include "../../controller/circle/CircleController.h"
-#include "../../controller/theme/ThemeController.h"
-#include "../../model/circle/CircleModel.h"
-#include "../../view/circle/CircleView.h"
-#include "../../view/theme/ThemeView.h"
-#include "../../view/toast/ToastView.h"
+#include "src/controller/circle/CircleController.h"
+#include "src/controller/theme/ThemeController.h"
+#include "src/model/circle/CircleModel.h"
+#include "src/view/circle/CircleView.h"
+#include "src/view/theme/ThemeView.h"
+#include "src/view/toast/ToastView.h"
 
 void MainScene::Init(std::shared_ptr<ThemeModel> themeModel)
 {

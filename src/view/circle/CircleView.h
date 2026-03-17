@@ -1,6 +1,6 @@
 #pragma once
-#include "../../model/circle/CircleModel.h"
-#include "../IView.h"
+#include "src/model/circle/CircleModel.h"
+#include "src/view/IView.h"
 #include "src/system/Observer.h"
 #include <memory>
 

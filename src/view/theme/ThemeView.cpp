@@ -1,5 +1,5 @@
 #include "ThemeView.h"
-#include "../../controller/theme/ThemeController.h"
+#include "src/controller/theme/ThemeController.h"
 #include "src/core/interfaces/IRenderer.h"
 #include "src/core/types/Event.h"
 #include "src/system/AppConfig.h"

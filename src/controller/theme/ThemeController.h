@@ -1,6 +1,6 @@
 #pragma once
-#include "../../model/theme/ThemeModel.h"
-#include "../IController.h"
+#include "src/controller/IController.h"
+#include "src/model/theme/ThemeModel.h"
 #include <memory>
 
 class ThemeController final : public IController
