@@ -1,36 +1,33 @@
 #pragma once
-#include "src/core/types/Color.h"
+#include "src/core/types/color/Color.h"
 #include <cstdint>
-#include <Windows.h>
 
 namespace AppConfig
 {
-constexpr uint32_t WINDOW_WIDTH = 400;
-constexpr uint32_t WINDOW_HEIGHT = 400;
-constexpr const char* WINDOW_NAME = "Circle";
+inline constexpr uint32_t WINDOW_WIDTH = 800;
+inline constexpr uint32_t WINDOW_HEIGHT = 800;
+inline constexpr auto WINDOW_NAME = "Window";
 
-constexpr uint32_t FRAMERATE_LIMIT = 144;
+inline constexpr auto FONT_PATH = "static/font.ttf";
+inline constexpr uint32_t FONT_SIZE = 12;
 
-constexpr const char* FONT_PATH = "static/font.ttf";
-constexpr uint32_t FONT_SIZE = 12;
-
-constexpr Color ICON_COLOR_DARK{32, 32, 32, 255};
-constexpr Color ICON_COLOR_LIGHT{240, 240, 240, 255};
-constexpr uint32_t ICON_SIZE = 32;
+inline const Color ICON_COLOR_DARK = Color::FromFloat(0.125f, 0.125f, 0.125f, 1.0f);
+inline const Color ICON_COLOR_LIGHT = Color::FromFloat(0.94f, 0.94f, 0.94f, 1.0f);
+inline constexpr uint32_t ICON_SIZE = 32;
 
 namespace DarkTheme
 {
-constexpr Color WINDOW_BG{30, 30, 30, 200};
-constexpr Color SURFACE_BG{50, 50, 50, 230};
-constexpr Color SURFACE_OUTLINE{80, 80, 80, 255};
-constexpr Color PRIMARY_TEXT{255, 255, 255, 255};
-}
+inline const Color WINDOW_BG = Color::FromFloat(0.118f, 0.118f, 0.118f, 0.784f);
+inline const Color SURFACE_BG = Color::FromFloat(0.196f, 0.196f, 0.196f, 0.902f);
+inline const Color SURFACE_OUTLINE = Color::FromFloat(0.314f, 0.314f, 0.314f, 1.0f);
+inline const Color PRIMARY_TEXT = Color::FromFloat(1.0f, 1.0f, 1.0f, 1.0f);
+} // namespace DarkTheme
 
 namespace LightTheme
 {
-constexpr Color WINDOW_BG{240, 240, 240, 200};
-constexpr Color SURFACE_BG{255, 255, 255, 230};
-constexpr Color SURFACE_OUTLINE{200, 200, 200, 255};
-constexpr Color PRIMARY_TEXT{0, 0, 0, 255};
-}
-}
+inline const Color WINDOW_BG = Color::FromFloat(0.94f, 0.94f, 0.94f, 0.784f);
+inline const Color SURFACE_BG = Color::FromFloat(1.0f, 1.0f, 1.0f, 0.902f);
+inline const Color SURFACE_OUTLINE = Color::FromFloat(0.784f, 0.784f, 0.784f, 1.0f);
+inline const Color PRIMARY_TEXT = Color::FromFloat(0.0f, 0.0f, 0.0f, 1.0f);
+} // namespace LightTheme
+} // namespace AppConfig
