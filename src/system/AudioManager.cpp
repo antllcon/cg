@@ -1,5 +1,5 @@
 #include "AudioManager.h"
-#include <miniaudio.h>
+#include <stb_miniaudio.h>
 #include <stdexcept>
 
 namespace
