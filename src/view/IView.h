@@ -1,7 +1,6 @@
 #pragma once
-
-class IRenderer;
-struct Event;
+#include "src/core/interfaces/IRenderer.h"
+#include "src/core/types/event/Event.h"
 
 class IView
 {

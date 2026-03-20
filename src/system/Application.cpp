@@ -1,7 +1,9 @@
 #include "Application.h"
-#include "src/scene/main/MainScene.h"
 #include "AppConfig.h"
+#include "src/core/types/event/EventHandling.h"
+#include "src/scene/main/MainScene.h"
 #include <chrono>
+#include <filesystem>
 #include <stdexcept>
 
 namespace
@@ -22,7 +24,9 @@ void AssertIsWindowValid(const IWindow* window)
 void SetupWindowProperties(IWindow& window)
 {
 	window.SetTitleBarTheme(true);
-	window.SetIconColor(AppConfig::ICON_COLOR_LIGHT);
+	window.SetVSync(true);
+	// window.SetIconColor(AppConfig::ICON_COLOR_LIGHT);
+	window.SetIconFromFile("static/icon.png");
 }
 } // namespace
 
@@ -73,13 +77,17 @@ void Application::Update(const ThemeData& data, IObservable<ThemeData>*)
 
 void Application::ProcessEvents()
 {
-	Event event;
-	while (m_window->PollEvent(event))
+	while (std::optional<Event> eventOpt = m_window->PollEvent())
 	{
-		if (event.type == EventType::Closed)
-		{
-			m_window->Close();
-		}
+		const Event& event = eventOpt.value();
+
+		std::visit(Overload{
+					   [this](const WindowClosedEvent&) {
+						   m_window->Close();
+					   },
+					   [](const auto&) {
+					   }},
+			event);
 
 		if (m_scene)
 		{
