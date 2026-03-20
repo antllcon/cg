@@ -1,17 +1,15 @@
 #include "OpenglRenderer.h"
-#include <glad/glad.h>
+#include "AppConfig.h"
 #include <GLFW/glfw3.h>
 #include <cmath>
-#include <libs/glm/glm.hpp>
+#include <glad/glad.h>
 #include <libs/glm/gtc/matrix_transform.hpp>
 #include <numbers>
 #include <stdexcept>
-#include <vector>
 
 namespace
 {
-constexpr int CIRCLE_SEGMENTS = 64;
-constexpr int CORNER_SEGMENTS = 16;
+constexpr float CIRCLE_SEGMENTS = 64.0f;
 constexpr int FLOATS_PER_VERTEX = 6;
 
 void AssertIsGladInitialized(int result)
@@ -22,165 +20,14 @@ void AssertIsGladInitialized(int result)
 	}
 }
 
-void AssertIsShaderCompiled(uint32_t shader)
-{
-	int success;
-	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-	if (!success)
-	{
-		throw std::runtime_error("Ошибка компиляции шейдера");
-	}
-}
-
-void AssertIsProgramLinked(uint32_t program)
-{
-	int success;
-	glGetProgramiv(program, GL_LINK_STATUS, &success);
-	if (!success)
-	{
-		throw std::runtime_error("Ошибка линковки шейдерной программы");
-	}
-}
-
-uint32_t CreateShaderProgram()
-{
-	const char* vertexShaderSource = R"(
-            #version 330 core
-            layout (location = 0) in vec2 aPos;
-            layout (location = 1) in vec4 aColor;
-
-            out vec4 vertexColor;
-            uniform mat4 projection;
-
-            void main()
-            {
-                gl_Position = projection * vec4(aPos, 0.0, 1.0);
-                vertexColor = aColor;
-            }
-        )";
-
-	const char* fragmentShaderSource = R"(
-            #version 330 core
-            in vec4 vertexColor;
-            out vec4 FragColor;
-
-            void main()
-            {
-                FragColor = vertexColor;
-            }
-        )";
-
-	uint32_t vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
-	glCompileShader(vertexShader);
-	AssertIsShaderCompiled(vertexShader);
-
-	uint32_t fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
-	glCompileShader(fragmentShader);
-	AssertIsShaderCompiled(fragmentShader);
-
-	uint32_t shaderProgram = glCreateProgram();
-	glAttachShader(shaderProgram, vertexShader);
-	glAttachShader(shaderProgram, fragmentShader);
-	glLinkProgram(shaderProgram);
-	AssertIsProgramLinked(shaderProgram);
-
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
-
-	return shaderProgram;
-}
-
 void PushVertex(std::vector<float>& data, float x, float y, const Color& color)
 {
 	data.push_back(x);
 	data.push_back(y);
-	data.push_back(static_cast<float>(color.r) / 255.0f);
-	data.push_back(static_cast<float>(color.g) / 255.0f);
-	data.push_back(static_cast<float>(color.b) / 255.0f);
-	data.push_back(static_cast<float>(color.a) / 255.0f);
-}
-
-void AppendCircleTriangles(std::vector<float>& data, const Point2f& center, float radius, const Color& color)
-{
-	for (int i = 0; i < CIRCLE_SEGMENTS; ++i)
-	{
-		float theta1 = 2.0f * std::numbers::pi_v<float> * static_cast<float>(i) / static_cast<float>(CIRCLE_SEGMENTS);
-		float theta2 = 2.0f * std::numbers::pi_v<float> * static_cast<float>(i + 1) / static_cast<float>(CIRCLE_SEGMENTS);
-
-		PushVertex(data, center.x, center.y, color);
-		PushVertex(data, center.x + radius * std::cos(theta1), center.y + radius * std::sin(theta1), color);
-		PushVertex(data, center.x + radius * std::cos(theta2), center.y + radius * std::sin(theta2), color);
-	}
-}
-
-void AppendRectangleTriangles(std::vector<float>& data, const Point2i& pos, const Point2i& size, const Color& color)
-{
-	float x = static_cast<float>(pos.x);
-	float y = static_cast<float>(pos.y);
-	float w = static_cast<float>(size.x);
-	float h = static_cast<float>(size.y);
-
-	PushVertex(data, x, y, color);
-	PushVertex(data, x + w, y, color);
-	PushVertex(data, x, y + h, color);
-
-	PushVertex(data, x + w, y, color);
-	PushVertex(data, x + w, y + h, color);
-	PushVertex(data, x, y + h, color);
-}
-
-void AppendRoundedRectTriangles(std::vector<float>& data, const Point2i& pos, const Point2i& size, float radius, const Color& color)
-{
-	float x = static_cast<float>(pos.x);
-	float y = static_cast<float>(pos.y);
-	float w = static_cast<float>(size.x);
-	float h = static_cast<float>(size.y);
-
-	float safeRadius = std::min({radius, w / 2.0f, h / 2.0f});
-	Point2f center{x + w / 2.0f, y + h / 2.0f};
-
-	std::vector<Point2f> perimeter;
-	Point2f corners[4] = {
-		{x + w - safeRadius, y + h - safeRadius},
-		{x + safeRadius, y + h - safeRadius},
-		{x + safeRadius, y + safeRadius},
-		{x + w - safeRadius, y + safeRadius}};
-
-	for (int c = 0; c < 4; ++c)
-	{
-		float startAngle = static_cast<float>(c) * (std::numbers::pi_v<float> / 2.0f);
-		for (int i = 0; i <= CORNER_SEGMENTS; ++i)
-		{
-			float angle = startAngle + static_cast<float>(i) / static_cast<float>(CORNER_SEGMENTS) * (std::numbers::pi_v<float> / 2.0f);
-			perimeter.push_back({corners[c].x + safeRadius * std::cos(angle),
-				corners[c].y + safeRadius * std::sin(angle)});
-		}
-	}
-
-	for (size_t i = 0; i < perimeter.size(); ++i)
-	{
-		size_t next = (i + 1) % perimeter.size();
-		PushVertex(data, center.x, center.y, color);
-		PushVertex(data, perimeter[i].x, perimeter[i].y, color);
-		PushVertex(data, perimeter[next].x, perimeter[next].y, color);
-	}
-}
-
-void AppendPolygonTriangles(std::vector<float>& data, const std::vector<Point2f>& points, const Color& color)
-{
-	if (points.size() < 3)
-	{
-		return;
-	}
-
-	for (size_t i = 1; i < points.size() - 1; ++i)
-	{
-		PushVertex(data, points[0].x, points[0].y, color);
-		PushVertex(data, points[i].x, points[i].y, color);
-		PushVertex(data, points[i + 1].x, points[i + 1].y, color);
-	}
+	data.push_back(color.GetR());
+	data.push_back(color.GetG());
+	data.push_back(color.GetB());
+	data.push_back(color.GetA());
 }
 } // namespace
 
@@ -194,6 +41,8 @@ OpenglRenderer::OpenglRenderer()
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glEnable(GL_LINE_SMOOTH);
 
 	m_shaderProgram = CreateShaderProgram();
 	m_projectionLocation = glGetUniformLocation(m_shaderProgram, "projection");
@@ -212,6 +61,8 @@ OpenglRenderer::OpenglRenderer()
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+
+	PushTransform();
 }
 
 OpenglRenderer::~OpenglRenderer()
@@ -223,12 +74,7 @@ OpenglRenderer::~OpenglRenderer()
 
 void OpenglRenderer::Clear(const Color& color)
 {
-	glClearColor(
-		static_cast<float>(color.r) / 255.0f,
-		static_cast<float>(color.g) / 255.0f,
-		static_cast<float>(color.b) / 255.0f,
-		static_cast<float>(color.a) / 255.0f);
-
+	glClearColor(color.GetR(), color.GetG(), color.GetB(), color.GetA());
 	glClear(GL_COLOR_BUFFER_BIT);
 }
 
@@ -241,77 +87,251 @@ void OpenglRenderer::Display()
 	}
 }
 
-void OpenglRenderer::DrawCircle(const Point2f& center, float radius, float thickness, const Color& fillColor, const Color& outlineColor)
+void OpenglRenderer::PushTransform()
 {
-	std::vector<float> geometryData;
-
-	if (thickness > 0.0f)
+	if (m_transformStack.empty())
 	{
-		AppendCircleTriangles(geometryData, center, radius + thickness, outlineColor);
+		glm::mat4 ortho = glm::ortho(
+			0.0f,
+			AppConfig::WINDOW_WIDTH,
+			AppConfig::WINDOW_HEIGHT,
+			0.0f,
+			-1.0f,
+			1.0f);
+		m_transformStack.push_back(ortho);
+	}
+	else
+	{
+		m_transformStack.push_back(m_transformStack.back());
+	}
+}
+
+void OpenglRenderer::PopTransform()
+{
+	if (m_transformStack.size() > 1)
+	{
+		m_transformStack.pop_back();
+	}
+}
+
+void OpenglRenderer::SetClipRect(const Point2f& position, const Point2f& size)
+{
+	if (size.x <= 0.0f || size.y <= 0.0f)
+	{
+		glDisable(GL_SCISSOR_TEST);
+		return;
 	}
 
-	AppendCircleTriangles(geometryData, center, radius, fillColor);
-	RenderGeometry(geometryData.data(), geometryData.size() / FLOATS_PER_VERTEX);
+	glEnable(GL_SCISSOR_TEST);
+
+	GLint windowHeight = AppConfig::WINDOW_HEIGHT;
+	GLint scissorY = windowHeight - static_cast<GLint>(position.y + size.y);
+
+	glScissor(
+		static_cast<GLint>(position.x),
+		scissorY,
+		static_cast<GLsizei>(size.x),
+		static_cast<GLsizei>(size.y));
 }
 
-void OpenglRenderer::DrawRectangle(const Point2i& position, const Point2i& size, const Color& color)
+void OpenglRenderer::DrawPoint(const Point2f& position, const Color& color)
 {
-	std::vector<float> geometryData;
-	AppendRectangleTriangles(geometryData, position, size, color);
-	RenderGeometry(geometryData.data(), geometryData.size() / FLOATS_PER_VERTEX);
+	std::vector<float> data;
+	PushVertex(data, position.x, position.y, color);
+	RenderGeometry(data.data(), data.size() / FLOATS_PER_VERTEX, GL_POINTS);
 }
 
-void OpenglRenderer::DrawRoundedRectangle(const Point2i& position, const Point2i& size, float radius, const Color& color, const Color& outlineColor)
+void OpenglRenderer::DrawLine(const Point2f& start, const Point2f& end, const Color& color, float thickness)
 {
-	std::vector<float> geometryData;
-
-	Point2i innerPos{position.x + 2, position.y + 2};
-	Point2i innerSize{size.x - 4, size.y - 4};
-
-	AppendRoundedRectTriangles(geometryData, position, size, radius, outlineColor);
-	AppendRoundedRectTriangles(geometryData, innerPos, innerSize, radius, color);
-
-	RenderGeometry(geometryData.data(), geometryData.size() / FLOATS_PER_VERTEX);
+	glLineWidth(thickness);
+	std::vector<float> data;
+	PushVertex(data, start.x, start.y, color);
+	PushVertex(data, end.x, end.y, color);
+	RenderGeometry(data.data(), data.size() / FLOATS_PER_VERTEX, GL_LINES);
+	glLineWidth(1.0f);
 }
 
-void OpenglRenderer::DrawTextData(const Point2i&, const std::string&, float, const Color&)
+void OpenglRenderer::DrawRect(const Point2f& position, const Point2f& size, const RenderStyle& style)
 {
-	// throw std::runtime_error("Отрисовка текста не реализована. Требуется библиотека FreeType.");
+	std::vector<float> data;
+
+	PushVertex(data, position.x, position.y, style.fillColor);
+	PushVertex(data, position.x + size.x, position.y, style.fillColor);
+	PushVertex(data, position.x, position.y + size.y, style.fillColor);
+
+	PushVertex(data, position.x + size.x, position.y, style.fillColor);
+	PushVertex(data, position.x + size.x, position.y + size.y, style.fillColor);
+	PushVertex(data, position.x, position.y + size.y, style.fillColor);
+
+	RenderGeometry(data.data(), data.size() / FLOATS_PER_VERTEX, GL_TRIANGLES);
 }
 
-void OpenglRenderer::DrawPolygon(const std::vector<Point2f>& points, const Color& color)
+void OpenglRenderer::DrawRoundedRect(const Point2f&, const Point2f&, float, const RenderStyle&)
 {
-	std::vector<float> geometryData;
-	AppendPolygonTriangles(geometryData, points, color);
-	RenderGeometry(geometryData.data(), geometryData.size() / FLOATS_PER_VERTEX);
+	throw std::runtime_error("Отрисовка прямоугольника с закруглением пока не реализована");
 }
-void OpenglRenderer::RenderGeometry(const float* data, size_t count)
+
+void OpenglRenderer::DrawEllipse(const Point2f& center, const Point2f& radius, const RenderStyle& style)
+{
+	std::vector<float> data;
+
+	for (float i = 0; i < CIRCLE_SEGMENTS; ++i)
+	{
+		float theta1 = 2.0f * std::numbers::pi_v<float> * i / CIRCLE_SEGMENTS;
+		float theta2 = 2.0f * std::numbers::pi_v<float> * (i + 1.0f) / CIRCLE_SEGMENTS;
+
+		PushVertex(data, center.x, center.y, style.fillColor);
+		PushVertex(data, center.x + radius.x * std::cos(theta1), center.y + radius.y * std::sin(theta1), style.fillColor);
+		PushVertex(data, center.x + radius.x * std::cos(theta2), center.y + radius.y * std::sin(theta2), style.fillColor);
+	}
+
+	RenderGeometry(data.data(), data.size() / FLOATS_PER_VERTEX, GL_TRIANGLES);
+}
+
+void OpenglRenderer::DrawPolygon(const std::vector<Point2f>& points, const RenderStyle& style)
+{
+	if (points.size() < 3)
+	{
+		return;
+	}
+
+	std::vector<float> data;
+	for (size_t i = 1; i < points.size() - 1; ++i)
+	{
+		PushVertex(data, points[0].x, points[0].y, style.fillColor);
+		PushVertex(data, points[i].x, points[i].y, style.fillColor);
+		PushVertex(data, points[i + 1].x, points[i + 1].y, style.fillColor);
+	}
+
+	RenderGeometry(data.data(), data.size() / FLOATS_PER_VERTEX, GL_TRIANGLES);
+}
+
+void OpenglRenderer::DrawPolyline(const std::vector<Point2f>& points, const Color& color, float thickness)
+{
+	if (points.size() < 2)
+	{
+		return;
+	}
+
+	glLineWidth(thickness);
+	std::vector<float> data;
+	for (const auto& point : points)
+	{
+		PushVertex(data, point.x, point.y, color);
+	}
+
+	RenderGeometry(data.data(), data.size() / FLOATS_PER_VERTEX, GL_LINE_STRIP);
+	glLineWidth(1.0f);
+}
+
+void OpenglRenderer::DrawBezier(const Point2f&, const Point2f&, const Point2f&, const Point2f&, const Color&, float)
+{
+	throw std::runtime_error("Отрисовка кривой Безье пока не реализована");
+}
+
+void OpenglRenderer::DrawTextData(const Point2f&, std::string_view, uint32_t, float, const Color&)
+{
+	throw std::runtime_error("Отрисовка текста не реализована. Требуется менеджер шрифтов.");
+}
+
+void OpenglRenderer::DrawTexture(const Point2f&, const Point2f&, const ITexture*)
+{
+	throw std::runtime_error("Отрисовка текстуры не реализована.");
+}
+
+void OpenglRenderer::DrawTexturePart(const Point2f&, const Point2f&, const Point2f&, const Point2f&, const ITexture*)
+{
+	throw std::runtime_error("Отрисовка части текстуры не реализована.");
+}
+
+void OpenglRenderer::RenderGeometry(const float* data, size_t count, uint32_t drawMode)
 {
 	if (count == 0)
 	{
 		return;
 	}
 
-	int viewport[4];
-	glGetIntegerv(GL_VIEWPORT, viewport);
-
-	glm::mat4 projection = glm::ortho(
-		0.0f,
-		static_cast<float>(viewport[2]),
-		static_cast<float>(viewport[3]),
-		0.0f,
-		-1.0f,
-		1.0f);
-
 	glUseProgram(m_shaderProgram);
-	glUniformMatrix4fv(m_projectionLocation, 1, GL_FALSE, &projection[0][0]);
+
+	glm::mat4 currentTransform = m_transformStack.back();
+	glUniformMatrix4fv(m_projectionLocation, 1, GL_FALSE, &currentTransform[0][0]);
 
 	glBindVertexArray(m_vao);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
 	glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(count * FLOATS_PER_VERTEX * sizeof(float)), data, GL_DYNAMIC_DRAW);
 
-	glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(count));
+	glDrawArrays(drawMode, 0, static_cast<GLsizei>(count));
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+}
+
+void OpenglRenderer::CheckShaderCompilation(uint32_t shader)
+{
+	int success;
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+	if (!success)
+	{
+		throw std::runtime_error("Ошибка компиляции шейдера");
+	}
+}
+
+void OpenglRenderer::CheckProgramLinkage(uint32_t program)
+{
+	int success;
+	glGetProgramiv(program, GL_LINK_STATUS, &success);
+	if (!success)
+	{
+		throw std::runtime_error("Ошибка линковки шейдерной программы");
+	}
+}
+
+uint32_t OpenglRenderer::CreateShaderProgram()
+{
+	auto vertexShaderSource = R"(
+		#version 330 core
+		layout (location = 0) in vec2 aPos;
+		layout (location = 1) in vec4 aColor;
+
+		out vec4 vertexColor;
+		uniform mat4 projection;
+
+		void main()
+		{
+			gl_Position = projection * vec4(aPos, 0.0, 1.0);
+			vertexColor = aColor;
+		}
+	)";
+
+	auto fragmentShaderSource = R"(
+		#version 330 core
+		in vec4 vertexColor;
+		out vec4 FragColor;
+
+		void main()
+		{
+			FragColor = vertexColor;
+		}
+	)";
+
+	uint32_t vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
+	glCompileShader(vertexShader);
+	CheckShaderCompilation(vertexShader);
+
+	uint32_t fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
+	glCompileShader(fragmentShader);
+	CheckShaderCompilation(fragmentShader);
+
+	uint32_t shaderProgram = glCreateProgram();
+	glAttachShader(shaderProgram, vertexShader);
+	glAttachShader(shaderProgram, fragmentShader);
+	glLinkProgram(shaderProgram);
+	CheckProgramLinkage(shaderProgram);
+
+	glDeleteShader(vertexShader);
+	glDeleteShader(fragmentShader);
+
+	return shaderProgram;
 }
