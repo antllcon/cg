@@ -1,8 +1,8 @@
 #include "Windows.h"
-#include "system/Application.h"
-#include "system/AudioManager.h"
-#include "system/GlfwWindow.h"
-#include "system/OpenglRenderer.h"
+#include "system/application/Application.h"
+#include "system/managers/AudioManager.h"
+#include "system/render/OpenglRenderer.h"
+#include "system/window/GlfwWindow.h"
 
 #include <memory>
 

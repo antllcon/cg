@@ -1,5 +1,5 @@
 #include "OpenglRenderer.h"
-#include "AppConfig.h"
+#include "src/system/AppConfig.h"
 #include <GLFW/glfw3.h>
 #include <cmath>
 #include <glad/glad.h>

@@ -1,5 +1,5 @@
 #include "Application.h"
-#include "AppConfig.h"
+#include "src/system/AppConfig.h"
 #include "src/core/types/event/EventHandling.h"
 #include "src/scene/main/MainScene.h"
 #include <chrono>

@@ -1,7 +1,7 @@
 #include "GlfwWindow.h"
-#include "AppConfig.h"
 #include "GLFW/glfw3.h"
 #include "Windows.h"
+#include "src/system/AppConfig.h"
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include "stb_image.h"
 #include <GLFW/glfw3native.h>
