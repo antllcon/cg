@@ -4,8 +4,8 @@
 
 namespace AppConfig
 {
-inline constexpr uint32_t WINDOW_WIDTH = 800;
-inline constexpr uint32_t WINDOW_HEIGHT = 800;
+inline constexpr float WINDOW_WIDTH = 800.0f;
+inline constexpr float WINDOW_HEIGHT = 800.0f;
 inline constexpr auto WINDOW_NAME = "Window";
 
 inline constexpr auto FONT_PATH = "static/font.ttf";

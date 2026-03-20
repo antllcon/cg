@@ -1,5 +1,5 @@
 #pragma once
-#include "src/core/types/Event.h"
+#include "src/core/types/event/Event.h"
 #include "src/model/theme/ThemeModel.h"
 #include <memory>
 #include <vector>

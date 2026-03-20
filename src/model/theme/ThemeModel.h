@@ -1,5 +1,5 @@
 #pragma once
-#include "src/core/types/Color.h"
+#include "src/core/types/color/Color.h"
 #include "src/system/Observer.h"
 
 struct ThemeData

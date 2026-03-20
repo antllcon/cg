@@ -1,7 +1,8 @@
 #include "ThemeView.h"
 #include "src/controller/theme/ThemeController.h"
 #include "src/core/interfaces/IRenderer.h"
-#include "src/core/types/Event.h"
+#include "src/core/types/event/Event.h"
+#include "src/core/types/event/EventHandling.h"
 #include "src/system/AppConfig.h"
 
 ThemeView::ThemeView(std::shared_ptr<ThemeModel> model, std::shared_ptr<ThemeController> controller)
@@ -15,18 +16,24 @@ ThemeView::ThemeView(std::shared_ptr<ThemeModel> model, std::shared_ptr<ThemeCon
 
 void ThemeView::HandleEvent(const Event& event)
 {
-	if (event.type == EventType::KeyPressed && event.key.code == KeyCode::T)
-	{
-		m_controller->OnToggleClicked();
-	}
+	std::visit(Overload{
+				   [this](const KeyPressedEvent&) {
+					   m_controller->OnToggleClicked();
+				   },
+				   [](const auto&) {
+				   }},
+		event);
 }
 
 void ThemeView::Render(IRenderer& renderer) const
 {
-	renderer.DrawRectangle(
-		{0, 0},
-		{static_cast<int>(AppConfig::WINDOW_WIDTH), static_cast<int>(AppConfig::WINDOW_HEIGHT)},
-		m_backgroundColor);
+	Point2f position{0.0f, 0.0f};
+	Point2f size{AppConfig::WINDOW_WIDTH, AppConfig::WINDOW_HEIGHT};
+
+	RenderStyle style;
+	style.fillColor = m_backgroundColor;
+
+	renderer.DrawRect(position, size, style);
 }
 
 void ThemeView::Update(const ThemeData& data, IObservable<ThemeData>*)
