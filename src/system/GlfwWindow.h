@@ -1,7 +1,5 @@
 #pragma once
 #include "src/core/interfaces/IWindow.h"
-#include "src/core/types/color/Color.h"
-#include <filesystem>
 #include <queue>
 
 struct GLFWwindow;
