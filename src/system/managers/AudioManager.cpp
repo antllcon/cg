@@ -1,5 +1,14 @@
 #include "AudioManager.h"
+
+#ifdef _WIN32
+#include <intrin.h>
+#endif
+
+#define MINIAUDIO_IMPLEMENTATION
+#pragma warning(push, 0)
 #include <stb_miniaudio.h>
+#pragma warning(pop)
+
 #include <stdexcept>
 
 namespace
@@ -52,11 +61,6 @@ AudioManager::AudioManager()
 	, m_voiceIndex(0)
 {
 	AssertIsAudioInitialized(ma_engine_init(nullptr, m_engine.get()));
-
-	for (size_t i = 0; i < MAX_VOICES; ++i)
-	{
-		m_voices[i].reset(new ma_sound);
-	}
 }
 
 AudioManager::~AudioManager() = default;
@@ -91,19 +95,18 @@ void AudioManager::PlaySoundFile(const std::filesystem::path& filePath)
 
 	std::string pathKey = filePath.string();
 	ma_sound* sourceSound = m_soundCache[pathKey].get();
-	ma_sound* voice = m_voices[m_voiceIndex].get();
 
-	ma_sound_stop(voice);
-	ma_sound_uninit(voice);
+	auto newVoice = std::unique_ptr<ma_sound, SoundDeleter>(new ma_sound);
 
 	AssertIsSoundLoaded(ma_sound_init_copy(
 		m_engine.get(),
 		sourceSound,
 		0,
 		nullptr,
-		voice));
+		newVoice.get()));
 
-	ma_sound_start(voice);
+	ma_sound_start(newVoice.get());
 
+	m_voices[m_voiceIndex] = std::move(newVoice);
 	m_voiceIndex = (m_voiceIndex + 1) % MAX_VOICES;
 }

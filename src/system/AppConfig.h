@@ -11,6 +11,8 @@ inline constexpr auto WINDOW_NAME = "Window";
 inline constexpr auto FONT_PATH = "static/font.ttf";
 inline constexpr uint32_t FONT_SIZE = 12;
 
+inline constexpr auto PRESS_SOUND = "static/sound.mp3";
+
 inline const Color ICON_COLOR_DARK = Color::FromFloat(0.125f, 0.125f, 0.125f, 1.0f);
 inline const Color ICON_COLOR_LIGHT = Color::FromFloat(0.94f, 0.94f, 0.94f, 1.0f);
 inline constexpr uint32_t ICON_SIZE = 32;

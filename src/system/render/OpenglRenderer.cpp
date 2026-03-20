@@ -1,10 +1,10 @@
 #include "OpenglRenderer.h"
 #include "src/system/AppConfig.h"
+#include <libs/glm/gtc/matrix_transform.hpp>
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <cmath>
 #include <fstream>
-#include <glad/glad.h>
-#include <libs/glm/gtc/matrix_transform.hpp>
 #include <numbers>
 #include <stdexcept>
 
@@ -198,7 +198,7 @@ void OpenglRenderer::SetClipRect(const Point2f& position, const Point2f& size)
 
 	glEnable(GL_SCISSOR_TEST);
 
-	GLint windowHeight = AppConfig::WINDOW_HEIGHT;
+	GLint windowHeight = static_cast<GLint>(AppConfig::WINDOW_HEIGHT);
 	GLint scissorY = windowHeight - static_cast<GLint>(position.y + size.y);
 
 	glScissor(
@@ -231,7 +231,7 @@ uint32_t OpenglRenderer::LoadFont(const std::filesystem::path& path, float fontS
 	stbtt_pack_context pc;
 	AssertIsFontLoaded(stbtt_PackBegin(&pc, pixels.data(), ATLAS_SIZE, ATLAS_SIZE, 0, 1, nullptr));
 
-	stbtt_pack_range ranges[2];
+	stbtt_pack_range ranges[2]{};
 
 	ranges[0].font_size = fontSize;
 	ranges[0].first_unicode_codepoint_in_range = 32;

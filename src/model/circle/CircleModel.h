@@ -8,7 +8,7 @@ struct CircleData
 	Point2f center;
 	Point2f radius;
 	float thickness;
-	Color thicknessColor; // вот это уровень представления VIEW модели должно быть пофиг на цвет, ей важны физические данные!!!
+	Color thicknessColor;
 	Color fillColor;
 };
 

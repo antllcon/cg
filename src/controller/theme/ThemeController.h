@@ -9,6 +9,7 @@ public:
 	explicit ThemeController(std::shared_ptr<ThemeModel> model);
 
 	void Update(float dt) override;
+	void HandleEvent(const Event& event) override;
 	void OnToggleClicked();
 
 private:

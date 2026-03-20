@@ -1,10 +1,5 @@
 #include "ToastModel.h"
 
-ToastModel::ToastModel()
-{
-	m_data.isVisible = false;
-}
-
 void ToastModel::Show(const std::string& message)
 {
 	m_data.message = message;
@@ -19,6 +14,13 @@ void ToastModel::Hide()
 		m_data.isVisible = false;
 		NotifyObservers();
 	}
+}
+
+void ToastModel::UpdateAnimation(float alpha, float offsetY)
+{
+	m_data.alpha = alpha;
+	m_data.offsetY = offsetY;
+	NotifyObservers();
 }
 
 const ToastData& ToastModel::GetData() const

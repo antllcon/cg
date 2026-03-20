@@ -1,4 +1,5 @@
 #pragma once
+#include "src/core/interfaces/IAudioManager.h"
 #include "src/core/types/event/Event.h"
 #include "src/model/theme/ThemeModel.h"
 #include <memory>
@@ -12,7 +13,7 @@ class Scene
 {
 public:
 	virtual ~Scene() = default;
-	virtual void Init(std::shared_ptr<ThemeModel> themeModel);
+	virtual void Init(std::shared_ptr<ThemeModel> themeModel, IAudioManager* audioManager);
 
 	void ProcessEvents(const Event& event);
 	void Update(float dt);

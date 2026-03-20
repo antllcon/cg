@@ -1,7 +1,8 @@
 #pragma once
+#include "src/core/interfaces/IRenderer.h"
 #include "src/model/theme/ThemeModel.h"
-#include "src/view/IView.h"
 #include "src/system/Observer.h"
+#include "src/view/IView.h"
 #include <memory>
 
 class ThemeController;

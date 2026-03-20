@@ -1,7 +1,7 @@
 #include "Application.h"
-#include "src/system/AppConfig.h"
 #include "src/core/types/event/EventHandling.h"
 #include "src/scene/main/MainScene.h"
+#include "src/system/AppConfig.h"
 #include <chrono>
 #include <filesystem>
 #include <stdexcept>
@@ -25,8 +25,8 @@ void SetupWindowProperties(IWindow& window)
 {
 	window.SetTitleBarTheme(true);
 	window.SetVSync(true);
-	// window.SetIconColor(AppConfig::ICON_COLOR_LIGHT);
-	window.SetIconFromFile("static/icon.png");
+	window.SetIconColor(AppConfig::ICON_COLOR_LIGHT);
+	// window.SetIconFromFile("static/icon.png");
 }
 } // namespace
 
@@ -46,6 +46,7 @@ Application::Application(
 void Application::Init()
 {
 	m_themeModel->RegisterObserver(shared_from_this());
+	m_renderer->LoadFont(AppConfig::FONT_PATH, AppConfig::FONT_SIZE);
 	LoadScene(std::make_unique<MainScene>());
 }
 
@@ -63,6 +64,8 @@ void Application::Run()
 		UpdateLogic(dt.count());
 		Render();
 	}
+
+	m_themeModel->RemoveObserver(shared_from_this());
 }
 
 void Application::Update(const ThemeData& data, IObservable<ThemeData>*)
@@ -136,6 +139,6 @@ void Application::LoadScene(std::unique_ptr<Scene> scene)
 
 	if (m_scene)
 	{
-		m_scene->Init(m_themeModel);
+		m_scene->Init(m_themeModel, m_audioManager.get());
 	}
 }

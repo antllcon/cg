@@ -1,22 +1,7 @@
 #include "ToastView.h"
-#include "src/core/interfaces/IRenderer.h"
 #include "src/system/AppConfig.h"
 
-namespace
-{
-constexpr float PADDING_X = 20.0f;
-constexpr float PADDING_Y = 10.0f;
-constexpr float OFFSET_BOTTOM = 30.0f;
-constexpr float CORNER_RADIUS = 12.0f;
-
-float EstimateTextWidth(const std::string& text, uint32_t fontSize)
-{
-	return static_cast<float>(text.length()) * (static_cast<float>(fontSize) * 0.6f);
-}
-} // namespace
-
 ToastView::ToastView(std::shared_ptr<ToastModel> toastModel, std::shared_ptr<ThemeModel> themeModel)
-	: m_isVisible(false)
 {
 	if (toastModel)
 	{
@@ -33,51 +18,48 @@ void ToastView::HandleEvent(const Event&)
 {
 }
 
-void ToastView::Render(IRenderer& renderer) const
-{
-	if (m_isVisible)
-	{
-		renderer.DrawRoundedRectangle(
-			{static_cast<int>(m_position.x), static_cast<int>(m_position.y)},
-			{static_cast<int>(m_size.x), static_cast<int>(m_size.y)},
-			CORNER_RADIUS,
-			m_backgroundColor,
-			m_outlineColor);
-
-		renderer.DrawTextData(
-			{static_cast<int>(m_position.x + PADDING_X), static_cast<int>(m_position.y + PADDING_Y)},
-			m_message,
-			static_cast<float>(AppConfig::FONT_SIZE),
-			m_textColor);
-	}
-}
-
 void ToastView::Update(const ToastData& data, IObservable<ToastData>*)
 {
-	m_isVisible = data.isVisible;
-
-	if (m_isVisible)
-	{
-		m_message = data.message;
-		CalculateBounds();
-	}
+	m_toastData = data;
 }
 
 void ToastView::Update(const ThemeData& data, IObservable<ThemeData>*)
 {
-	m_textColor = data.primaryText;
-	m_backgroundColor = data.surfaceBackground;
-	m_outlineColor = data.surfaceOutline;
+	m_themeData = data;
 }
 
-void ToastView::CalculateBounds()
+void ToastView::Render(IRenderer& renderer) const
 {
-	float textWidth = EstimateTextWidth(m_message, AppConfig::FONT_SIZE);
-	float textHeight = static_cast<float>(AppConfig::FONT_SIZE);
+	if (!m_toastData.isVisible || m_toastData.alpha <= 0.01f)
+	{
+		return;
+	}
 
-	m_size.x = textWidth + PADDING_X * 2.0f;
-	m_size.y = textHeight + PADDING_Y * 2.0f;
+	Point2f size{400.0f, 50.0f};
+	Point2f position{
+		(AppConfig::WINDOW_WIDTH - size.x) / 2.0f,
+		AppConfig::WINDOW_HEIGHT - m_toastData.offsetY};
 
-	m_position.x = (static_cast<float>(AppConfig::WINDOW_WIDTH) - m_size.x) / 2.0f;
-	m_position.y = static_cast<float>(AppConfig::WINDOW_HEIGHT) - m_size.y - OFFSET_BOTTOM;
+	RenderStyle style;
+	style.fillColor = Color::FromFloat(0.9f, 0.2f, 0.2f, m_toastData.alpha);
+
+	renderer.DrawRoundedRect(position, size, 8.0f, style);
+
+	Color textColor = Color::FromFloat(1.0f, 1.0f, 1.0f, m_toastData.alpha);
+
+	std::string displayMessage = m_toastData.message;
+	if (displayMessage.size() > 40)
+	{
+		displayMessage = displayMessage.substr(0, 37) + "...";
+	}
+
+	float approxTextWidth = static_cast<float>(displayMessage.size()) * (static_cast<float>(AppConfig::FONT_SIZE) * 0.55f);
+	float textX = position.x + (size.x - approxTextWidth) / 2.0f;
+	float textY = position.y + 30.0f;
+
+	renderer.DrawTextData(
+		Point2f{textX, textY},
+		displayMessage,
+		1,
+		textColor);
 }

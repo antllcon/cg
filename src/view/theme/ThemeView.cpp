@@ -17,8 +17,11 @@ ThemeView::ThemeView(std::shared_ptr<ThemeModel> model, std::shared_ptr<ThemeCon
 void ThemeView::HandleEvent(const Event& event)
 {
 	std::visit(Overload{
-				   [this](const KeyPressedEvent&) {
-					   m_controller->OnToggleClicked();
+				   [this](const KeyPressedEvent& e) {
+					   if (e.code == KeyCode::T)
+					   {
+						   m_controller->OnToggleClicked();
+					   }
 				   },
 				   [](const auto&) {
 				   }},
