@@ -1,10 +1,6 @@
 #include "AudioManager.h"
-#include <stdexcept>
-
-#define MINIAUDIO_IMPLEMENTATION
-#pragma warning(push, 0)
 #include <miniaudio.h>
-#pragma warning(pop)
+#include <stdexcept>
 
 namespace
 {
@@ -23,45 +19,91 @@ void AssertIsSoundLoaded(int result)
 		throw std::runtime_error("Не удалось загрузить звуковой файл");
 	}
 }
+
+void AssertIsFileExists(const std::filesystem::path& path)
+{
+	if (!std::filesystem::exists(path))
+	{
+		throw std::runtime_error("Файл звука не найден по указанному пути");
+	}
+}
 } // namespace
 
-AudioManager::AudioManager()
-	: m_engine(new ma_engine)
+void AudioManager::EngineDeleter::operator()(ma_engine* engine) const
 {
-	AssertIsAudioInitialized(ma_engine_init(nullptr, m_engine));
+	if (engine)
+	{
+		ma_engine_uninit(engine);
+		delete engine;
+	}
 }
 
-AudioManager::~AudioManager()
+void AudioManager::SoundDeleter::operator()(ma_sound* sound) const
 {
-	for (auto& [path, sound] : m_sounds)
+	if (sound)
 	{
 		ma_sound_uninit(sound);
 		delete sound;
 	}
-
-	ma_engine_uninit(m_engine);
-	delete m_engine;
 }
 
-void AudioManager::PlaySoundFile(const std::string& filePath)
+AudioManager::AudioManager()
+	: m_engine(new ma_engine)
+	, m_voiceIndex(0)
 {
-	if (!m_sounds.contains(filePath))
-	{
-		ma_sound* newSound = new ma_sound;
-		AssertIsSoundLoaded(ma_sound_init_from_file(
-			m_engine,
-			filePath.c_str(),
-			0,
-			nullptr,
-			nullptr,
-			newSound));
+	AssertIsAudioInitialized(ma_engine_init(nullptr, m_engine.get()));
 
-		m_sounds[filePath] = newSound;
+	for (size_t i = 0; i < MAX_VOICES; ++i)
+	{
+		m_voices[i].reset(new ma_sound);
+	}
+}
+
+AudioManager::~AudioManager() = default;
+
+void AudioManager::PreloadSound(const std::filesystem::path& filePath)
+{
+	std::string pathKey = filePath.string();
+
+	if (m_soundCache.contains(pathKey))
+	{
+		return;
 	}
 
-	ma_sound* sound = m_sounds[filePath];
+	AssertIsFileExists(filePath);
 
-	ma_sound_stop(sound);
-	ma_sound_seek_to_pcm_frame(sound, 0);
-	ma_sound_start(sound);
+	auto newSound = std::unique_ptr<ma_sound, SoundDeleter>(new ma_sound);
+
+	AssertIsSoundLoaded(ma_sound_init_from_file(
+		m_engine.get(),
+		pathKey.c_str(),
+		MA_SOUND_FLAG_DECODE,
+		nullptr,
+		nullptr,
+		newSound.get()));
+
+	m_soundCache[pathKey] = std::move(newSound);
+}
+
+void AudioManager::PlaySoundFile(const std::filesystem::path& filePath)
+{
+	PreloadSound(filePath);
+
+	std::string pathKey = filePath.string();
+	ma_sound* sourceSound = m_soundCache[pathKey].get();
+	ma_sound* voice = m_voices[m_voiceIndex].get();
+
+	ma_sound_stop(voice);
+	ma_sound_uninit(voice);
+
+	AssertIsSoundLoaded(ma_sound_init_copy(
+		m_engine.get(),
+		sourceSound,
+		0,
+		nullptr,
+		voice));
+
+	ma_sound_start(voice);
+
+	m_voiceIndex = (m_voiceIndex + 1) % MAX_VOICES;
 }

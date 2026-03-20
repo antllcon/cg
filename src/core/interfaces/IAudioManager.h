@@ -1,9 +1,9 @@
 #pragma once
-#include <string>
+#include <filesystem>
 
 class IAudioManager
 {
 public:
 	virtual ~IAudioManager() = default;
-	virtual void PlaySoundFile(const std::string& filePath) = 0;
+	virtual void PlaySoundFile(const std::filesystem::path& filePath) = 0;
 };
