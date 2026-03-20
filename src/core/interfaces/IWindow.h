@@ -1,6 +1,6 @@
 #pragma once
-#include "src/core/types/Color.h"
-#include "src/core/types/Event.h"
+#include "../types/event/Event.h"
+#include <optional>
 
 class IWindow
 {
@@ -9,7 +9,7 @@ public:
 
 	virtual bool IsOpen() const = 0;
 	virtual void Close() = 0;
-	virtual bool PollEvent(Event& event) = 0;
+	virtual std::optional<Event> PollEvent() = 0;
 
 	virtual Point2i GetSize() const = 0;
 	virtual void SetTitleBarTheme(bool isDark) = 0;
