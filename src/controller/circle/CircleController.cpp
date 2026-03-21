@@ -1,4 +1,5 @@
 #include "CircleController.h"
+#include "src/core/interfaces/INotificationService.h"
 #include "src/core/types/Point.h"
 #include "src/core/types/event/EventHandling.h"
 #include "src/system/AppConfig.h"
@@ -21,16 +22,20 @@ bool IsInsideCircleThickness(const Point2f& pos, const CircleData& data)
 {
 	float dx = pos.x - data.center.x;
 	float dy = pos.y - data.center.y;
-	float totalRadius = data.radius.x + data.thickness;
-	float radiusSq = totalRadius * totalRadius;
+	float distSq = dx * dx + dy * dy;
 
-	return dx * dx + dy * dy <= radiusSq;
+	float innerRadiusSq = data.radius.x * data.radius.x;
+	float totalRadius = data.radius.x + data.thickness;
+	float outerRadiusSq = totalRadius * totalRadius;
+
+	return distSq > innerRadiusSq && distSq <= outerRadiusSq;
 }
 } // namespace
 
-CircleController::CircleController(std::shared_ptr<CircleModel> model, IAudioManager& audioManager)
+CircleController::CircleController(std::shared_ptr<CircleModel> model, IAudioManager& audioManager, INotificationService& notificationService)
 	: m_model(std::move(model))
 	, m_audioManager(audioManager)
+	, m_notificationService(notificationService)
 {
 }
 
@@ -61,11 +66,13 @@ void CircleController::HandleEvent(const Event& event)
 						   if (IsInsideCircle(pos, m_model->GetData()))
 						   {
 							   m_model->RandomFillColor();
+							   m_notificationService.ShowMessage("Fill color changed successfully");
 						   }
 
 						   if (IsInsideCircleThickness(pos, m_model->GetData()))
 						   {
 							   m_model->RandomThicknessColor();
+							   m_notificationService.ShowMessage("The outline color has been successfully changed");
 						   }
 					   }
 					   else if (e.button == MouseButton::Left)
