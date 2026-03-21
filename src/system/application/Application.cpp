@@ -139,6 +139,6 @@ void Application::LoadScene(std::unique_ptr<Scene> scene)
 
 	if (m_scene)
 	{
-		m_scene->Init(m_themeModel, m_audioManager.get());
+		m_scene->Init(m_themeModel, *m_audioManager);
 	}
 }

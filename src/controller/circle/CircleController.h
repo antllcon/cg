@@ -8,13 +8,13 @@
 class CircleController final : public IController
 {
 public:
-	explicit CircleController(std::shared_ptr<CircleModel> model, IAudioManager* audioManager);
+	explicit CircleController(std::shared_ptr<CircleModel> model, IAudioManager& audioManager);
 
 	void Update(float dt) override;
 	void HandleEvent(const Event& event) override;
 
 private:
 	std::shared_ptr<CircleModel> m_model;
-	IAudioManager* m_audioManager;
+	IAudioManager& m_audioManager;
 	bool m_isShiftPressed = false;
 };

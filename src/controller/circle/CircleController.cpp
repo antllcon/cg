@@ -28,7 +28,7 @@ bool IsInsideCircleThickness(const Point2f& pos, const CircleData& data)
 }
 } // namespace
 
-CircleController::CircleController(std::shared_ptr<CircleModel> model, IAudioManager* audioManager)
+CircleController::CircleController(std::shared_ptr<CircleModel> model, IAudioManager& audioManager)
 	: m_model(std::move(model))
 	, m_audioManager(audioManager)
 {
@@ -61,7 +61,6 @@ void CircleController::HandleEvent(const Event& event)
 						   if (IsInsideCircle(pos, m_model->GetData()))
 						   {
 							   m_model->RandomFillColor();
-							   throw std::runtime_error("Changed randomly color circle");
 						   }
 
 						   if (IsInsideCircleThickness(pos, m_model->GetData()))
@@ -72,11 +71,7 @@ void CircleController::HandleEvent(const Event& event)
 					   else if (e.button == MouseButton::Left)
 					   {
 						   m_model->SetCenter(pos);
-
-						   if (m_audioManager)
-						   {
-							   m_audioManager->PlaySoundFile(AppConfig::PRESS_SOUND);
-						   }
+						   m_audioManager.PlaySoundFile(AppConfig::PRESS_SOUND);
 					   }
 				   },
 				   [this](const MouseScrolledEvent& e) {

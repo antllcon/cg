@@ -6,7 +6,7 @@
 #include "src/view/theme/ThemeView.h"
 #include "src/view/toast/ToastView.h"
 
-void MainScene::Init(std::shared_ptr<ThemeModel> themeModel, IAudioManager* audioManager)
+void MainScene::Init(std::shared_ptr<ThemeModel> themeModel, IAudioManager& audioManager)
 {
 	auto themeController = std::make_shared<ThemeController>(themeModel);
 	AddController(themeController);

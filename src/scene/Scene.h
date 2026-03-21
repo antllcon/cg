@@ -13,7 +13,7 @@ class Scene
 {
 public:
 	virtual ~Scene() = default;
-	virtual void Init(std::shared_ptr<ThemeModel> themeModel, IAudioManager* audioManager);
+	virtual void Init(std::shared_ptr<ThemeModel> themeModel, IAudioManager& audioManager);
 
 	void ProcessEvents(const Event& event);
 	void Update(float dt);
