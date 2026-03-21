@@ -12,6 +12,7 @@ constexpr float SHIP_ROTATION_SPEED = 4.0f;
 
 constexpr float BULLET_SPEED = 700.0f;
 constexpr float BULLET_LIFETIME = 1.5f;
+constexpr float SHOOT_COOLDOWN = 0.25f;
 
 constexpr float RESPAWN_DELAY = 2.0f;
 constexpr int INITIAL_ASTEROIDS = 6;
@@ -389,6 +390,7 @@ void ProcessShipCollisions(AsteroidsData& data, float& respawnTimer)
 AsteroidsModel::AsteroidsModel()
 	: m_rotationDirection(RotationDirection::None)
 	, m_respawnTimer(0.0f)
+	, m_shootCooldownTimer(0.0f)
 {
 	RestartGame();
 }
@@ -400,6 +402,11 @@ void AsteroidsModel::UpdatePhysics(float dt)
 	if (m_data.state.isGameOver)
 	{
 		return;
+	}
+
+	if (m_shootCooldownTimer > 0.0f)
+	{
+		m_shootCooldownTimer -= dt;
 	}
 
 	if (!m_data.ship.isAlive)
@@ -444,10 +451,12 @@ void AsteroidsModel::SetShipRotationState(RotationDirection direction)
 
 void AsteroidsModel::Shoot()
 {
-	if (!m_data.ship.isAlive || m_data.state.isGameOver)
+	if (!m_data.ship.isAlive || m_data.state.isGameOver || m_shootCooldownTimer > 0.0f)
 	{
 		return;
 	}
+
+	m_shootCooldownTimer = SHOOT_COOLDOWN;
 
 	Point2f noseLocal = {15.0f, 0.0f};
 	Point2f noseRotated = RotateVector(noseLocal, m_data.ship.angle);
@@ -481,6 +490,7 @@ void AsteroidsModel::RestartGame()
 
 	m_rotationDirection = RotationDirection::None;
 	m_respawnTimer = 0.0f;
+	m_shootCooldownTimer = 0.0f;
 
 	NotifyObservers();
 }

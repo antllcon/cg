@@ -79,4 +79,5 @@ private:
 	AsteroidsData m_data;
 	RotationDirection m_rotationDirection;
 	float m_respawnTimer;
+	float m_shootCooldownTimer;
 };

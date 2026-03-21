@@ -7,10 +7,17 @@
 namespace
 {
 constexpr uint32_t UI_FONT_ID = 1;
+constexpr float FONT_WIDTH_MULTIPLIER = 0.55f;
 
 Color GetTextColor(bool isDark)
 {
 	return isDark ? AppConfig::DarkTheme::PRIMARY_TEXT : AppConfig::LightTheme::PRIMARY_TEXT;
+}
+
+float GetCenteredX(const std::string& text)
+{
+	float approxWidth = static_cast<float>(text.size()) * (static_cast<float>(AppConfig::FONT_SIZE) * FONT_WIDTH_MULTIPLIER);
+	return (AppConfig::WINDOW_WIDTH - approxWidth) / 2.0f;
 }
 
 std::vector<Point2f> TransformVertices(const std::vector<Point2f>& localVertices, const Point2f& position, float angle)
@@ -109,12 +116,13 @@ void RenderUI(IRenderer& renderer, const GameStateData& state, bool isDark)
 	if (state.isGameOver)
 	{
 		std::string gameOverText = "GAME OVER";
-		float textX = AppConfig::WINDOW_WIDTH / 2.0f;
+		float gameOverX = GetCenteredX(gameOverText);
 		float textY = AppConfig::WINDOW_HEIGHT / 2.0f;
-		renderer.DrawTextData({textX, textY}, gameOverText, UI_FONT_ID, textColor);
+		renderer.DrawTextData({gameOverX, textY}, gameOverText, UI_FONT_ID, textColor);
 
 		std::string hintText = "Press ENTER to restart";
-		renderer.DrawTextData({textX, textY + 30.0f}, hintText, UI_FONT_ID, textColor);
+		float hintX = GetCenteredX(hintText);
+		renderer.DrawTextData({hintX, textY + 30.0f}, hintText, UI_FONT_ID, textColor);
 	}
 }
 } // namespace

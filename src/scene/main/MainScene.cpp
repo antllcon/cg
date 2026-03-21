@@ -2,7 +2,7 @@
 #include "src/controller/circle/CircleController.h"
 #include "src/controller/game/AsteroidsController.h"
 #include "src/controller/theme/ThemeController.h"
-#include "src/model/asteroids/AsteroidsModel.h"
+#include "src/model/game/AsteroidsModel.h"
 #include "src/view/circle/CircleView.h"
 #include "src/view/game/AsteroidsView.h"
 #include "src/view/theme/ThemeView.h"

@@ -1,7 +1,7 @@
 #pragma once
 #include "src/controller/IController.h"
 #include "src/core/interfaces/IAudioManager.h"
-#include "src/model/asteroids/AsteroidsModel.h"
+#include "src/model/game/AsteroidsModel.h"
 #include <memory>
 
 class AsteroidsController final : public IController
