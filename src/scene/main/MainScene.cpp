@@ -15,16 +15,6 @@ void MainScene::Init(std::shared_ptr<ThemeModel> themeModel, IAudioManager& audi
 	themeModel->RegisterObserver(themeView);
 	AddView(themeView);
 
-	auto model = std::make_shared<CircleModel>();
-	AddModel(model);
-
-	auto controller = std::make_shared<CircleController>(model, audioManager);
-	AddController(controller);
-
-	auto view = std::make_shared<CircleView>(model, controller);
-	model->RegisterObserver(view);
-	AddView(view);
-
 	auto toastModel = std::make_shared<ToastModel>();
 	AddModel(toastModel);
 
@@ -35,6 +25,16 @@ void MainScene::Init(std::shared_ptr<ThemeModel> themeModel, IAudioManager& audi
 	toastModel->RegisterObserver(toastView);
 	themeModel->RegisterObserver(toastView);
 	AddView(toastView);
+
+	auto model = std::make_shared<CircleModel>();
+	AddModel(model);
+
+	auto controller = std::make_shared<CircleController>(model, audioManager, *m_toastController);
+	AddController(controller);
+
+	auto view = std::make_shared<CircleView>(model, controller);
+	model->RegisterObserver(view);
+	AddView(view);
 }
 
 void MainScene::OnException(const std::exception& e)
