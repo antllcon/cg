@@ -73,6 +73,50 @@ void PushVertex(std::vector<float>& data, float x, float y, const Color& color, 
 	data.push_back(v);
 }
 
+void GenerateEllipseFill(std::vector<float>& data, const Point2f& center, const Point2f& radius, const Color& color)
+{
+	for (float i = 0.0f; i < CIRCLE_SEGMENTS; ++i)
+	{
+		float theta1 = 2.0f * std::numbers::pi_v<float> * i / CIRCLE_SEGMENTS;
+		float theta2 = 2.0f * std::numbers::pi_v<float> * (i + 1.0f) / CIRCLE_SEGMENTS;
+
+		PushVertex(data, center.x, center.y, color);
+		PushVertex(data, center.x + radius.x * std::cos(theta1), center.y + radius.y * std::sin(theta1), color);
+		PushVertex(data, center.x + radius.x * std::cos(theta2), center.y + radius.y * std::sin(theta2), color);
+	}
+}
+
+void GenerateEllipseOutline(std::vector<float>& data, const Point2f& center, const Point2f& radius, float thickness, const Color& color)
+{
+	for (float i = 0.0f; i < CIRCLE_SEGMENTS; ++i)
+	{
+		float theta1 = 2.0f * std::numbers::pi_v<float> * i / CIRCLE_SEGMENTS;
+		float theta2 = 2.0f * std::numbers::pi_v<float> * (i + 1.0f) / CIRCLE_SEGMENTS;
+
+		float cos1 = std::cos(theta1);
+		float sin1 = std::sin(theta1);
+		float x1Inner = center.x + radius.x * cos1;
+		float y1Inner = center.y + radius.y * sin1;
+		float x1Outer = center.x + (radius.x + thickness) * cos1;
+		float y1Outer = center.y + (radius.y + thickness) * sin1;
+
+		float cos2 = std::cos(theta2);
+		float sin2 = std::sin(theta2);
+		float x2Inner = center.x + radius.x * cos2;
+		float y2Inner = center.y + radius.y * sin2;
+		float x2Outer = center.x + (radius.x + thickness) * cos2;
+		float y2Outer = center.y + (radius.y + thickness) * sin2;
+
+		PushVertex(data, x1Inner, y1Inner, color);
+		PushVertex(data, x1Outer, y1Outer, color);
+		PushVertex(data, x2Outer, y2Outer, color);
+
+		PushVertex(data, x1Inner, y1Inner, color);
+		PushVertex(data, x2Outer, y2Outer, color);
+		PushVertex(data, x2Inner, y2Inner, color);
+	}
+}
+
 uint32_t DecodeUtf8(const char*& text, const char* end)
 {
 	if (text >= end) return 0;
@@ -376,21 +420,19 @@ void OpenglRenderer::DrawRoundedRect(const Point2f& position, const Point2f& siz
 
 	DrawPolygon(points, style);
 }
+
 void OpenglRenderer::DrawEllipse(const Point2f& center, const Point2f& radius, const RenderStyle& style)
 {
-	std::vector<float> data;
+	std::vector<float> fillData;
+	GenerateEllipseFill(fillData, center, radius, style.fillColor);
+	RenderGeometry(fillData.data(), fillData.size() / FLOATS_PER_VERTEX, GL_TRIANGLES);
 
-	for (float i = 0; i < CIRCLE_SEGMENTS; ++i)
+	if (style.outlineThickness > 0.0f)
 	{
-		float theta1 = 2.0f * std::numbers::pi_v<float> * i / CIRCLE_SEGMENTS;
-		float theta2 = 2.0f * std::numbers::pi_v<float> * (i + 1.0f) / CIRCLE_SEGMENTS;
-
-		PushVertex(data, center.x, center.y, style.fillColor);
-		PushVertex(data, center.x + radius.x * std::cos(theta1), center.y + radius.y * std::sin(theta1), style.fillColor);
-		PushVertex(data, center.x + radius.x * std::cos(theta2), center.y + radius.y * std::sin(theta2), style.fillColor);
+		std::vector<float> outlineData;
+		GenerateEllipseOutline(outlineData, center, radius, style.outlineThickness, style.outlineColor);
+		RenderGeometry(outlineData.data(), outlineData.size() / FLOATS_PER_VERTEX, GL_TRIANGLES);
 	}
-
-	RenderGeometry(data.data(), data.size() / FLOATS_PER_VERTEX, GL_TRIANGLES);
 }
 
 void OpenglRenderer::DrawPolygon(const std::vector<Point2f>& points, const RenderStyle& style)
