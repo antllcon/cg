@@ -61,6 +61,7 @@ void CircleController::HandleEvent(const Event& event)
 						   if (IsInsideCircle(pos, m_model->GetData()))
 						   {
 							   m_model->RandomFillColor();
+							   throw std::runtime_error("Changed randomly color circle");
 						   }
 
 						   if (IsInsideCircleThickness(pos, m_model->GetData()))

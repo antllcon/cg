@@ -4,10 +4,10 @@
 namespace
 {
 constexpr float MIN_VISIBLE_ALPHA = 0.01f;
-constexpr float TOAST_WIDTH = AppConfig::WINDOW_WIDTH / 2.0f;
-constexpr float TOAST_HEIGHT = 50.0f;
+constexpr float TOAST_WIDTH = AppConfig::WINDOW_WIDTH / 3.0f;
+constexpr float TOAST_HEIGHT = 30.0f;
 constexpr float CORNER_RADIUS = 8.0f;
-constexpr float TEXT_Y_OFFSET = 30.0f;
+constexpr float TEXT_Y_OFFSET = 20.0f;
 constexpr float FONT_WIDTH_MULTIPLIER = 0.55f;
 constexpr size_t MAX_MESSAGE_LENGTH = 40;
 constexpr size_t TRUNCATED_LENGTH = 37;

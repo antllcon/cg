@@ -27,6 +27,7 @@ namespace
 constexpr float CIRCLE_SEGMENTS = 64.0f;
 constexpr int FLOATS_PER_VERTEX = 8;
 constexpr int ATLAS_SIZE = 1024;
+constexpr int CORNER_SEGMENTS = 16;
 
 void AssertIsGladInitialized(int result)
 {
@@ -90,6 +91,18 @@ uint32_t DecodeUtf8(const char*& text, const char* end)
 	if (text >= end) return 0;
 	uint8_t c3 = static_cast<uint8_t>(*text++);
 	return (c0 & 0x07) << 18 | (c1 & 0x3F) << 12 | (c2 & 0x3F) << 6 | c3 & 0x3F;
+}
+
+void GenerateArcPoints(std::vector<Point2f>& points, const Point2f& center, float radius, float startAngle, float endAngle)
+{
+	for (int i = 0; i <= CORNER_SEGMENTS; ++i)
+	{
+		float fraction = static_cast<float>(i) / CORNER_SEGMENTS;
+		float angle = startAngle + fraction * (endAngle - startAngle);
+		float x = center.x + radius * std::cos(angle);
+		float y = center.y + radius * std::sin(angle);
+		points.push_back({x, y});
+	}
 }
 } // namespace
 
@@ -336,10 +349,33 @@ void OpenglRenderer::DrawRect(const Point2f& position, const Point2f& size, cons
 	RenderGeometry(data.data(), data.size() / FLOATS_PER_VERTEX, GL_TRIANGLES);
 }
 
-void OpenglRenderer::DrawRoundedRect(const Point2f&, const Point2f&, float, const RenderStyle&)
+void OpenglRenderer::DrawRoundedRect(const Point2f& position, const Point2f& size, float radius, const RenderStyle& style)
 {
-}
+	// TODO: исправить, это временное решение через DrawPolygon + окружности
+	radius = std::min(radius, std::min(size.x, size.y) / 2.0f);
 
+	if (radius <= 0.0f)
+	{
+		DrawRect(position, size, style);
+		return;
+	}
+
+	std::vector<Point2f> points;
+	points.reserve(CORNER_SEGMENTS * 4 + 4);
+
+	float w = size.x;
+	float h = size.y;
+	float x = position.x;
+	float y = position.y;
+	float pi = std::numbers::pi_v<float>;
+
+	GenerateArcPoints(points, {x + w - radius, y + radius}, radius, 1.5f * pi, 2.0f * pi);
+	GenerateArcPoints(points, {x + w - radius, y + h - radius}, radius, 0.0f, 0.5f * pi);
+	GenerateArcPoints(points, {x + radius, y + h - radius}, radius, 0.5f * pi, pi);
+	GenerateArcPoints(points, {x + radius, y + radius}, radius, pi, 1.5f * pi);
+
+	DrawPolygon(points, style);
+}
 void OpenglRenderer::DrawEllipse(const Point2f& center, const Point2f& radius, const RenderStyle& style)
 {
 	std::vector<float> data;
