@@ -1,8 +1,10 @@
 #include "MainScene.h"
 #include "src/controller/circle/CircleController.h"
+#include "src/controller/game/AsteroidsController.h"
 #include "src/controller/theme/ThemeController.h"
-#include "src/model/circle/CircleModel.h"
+#include "src/model/asteroids/AsteroidsModel.h"
 #include "src/view/circle/CircleView.h"
+#include "src/view/game/AsteroidsView.h"
 #include "src/view/theme/ThemeView.h"
 #include "src/view/toast/ToastView.h"
 
@@ -26,15 +28,16 @@ void MainScene::Init(std::shared_ptr<ThemeModel> themeModel, IAudioManager& audi
 	themeModel->RegisterObserver(toastView);
 	AddView(toastView);
 
-	auto model = std::make_shared<CircleModel>();
-	AddModel(model);
+	auto asteroidsModel = std::make_shared<AsteroidsModel>();
+	AddModel(asteroidsModel);
 
-	auto controller = std::make_shared<CircleController>(model, audioManager, *m_toastController);
-	AddController(controller);
+	auto asteroidsController = std::make_shared<AsteroidsController>(asteroidsModel, audioManager);
+	AddController(asteroidsController);
 
-	auto view = std::make_shared<CircleView>(model, controller);
-	model->RegisterObserver(view);
-	AddView(view);
+	auto asteroidsView = std::make_shared<AsteroidsView>(asteroidsModel, asteroidsController, themeModel);
+	asteroidsModel->RegisterObserver(asteroidsView);
+	themeModel->RegisterObserver(asteroidsView);
+	AddView(asteroidsView);
 }
 
 void MainScene::OnException(const std::exception& e)

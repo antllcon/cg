@@ -8,6 +8,7 @@
 #include <numbers>
 #include <stdexcept>
 
+// Подсмотрено у Dav1dde
 #define STB_TRUETYPE_IMPLEMENTATION
 #pragma warning(push, 0)
 #include <ranges>
