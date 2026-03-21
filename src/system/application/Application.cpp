@@ -123,7 +123,7 @@ void Application::UpdateLogic(float dt)
 
 void Application::Render()
 {
-	m_renderer->Clear(m_themeModel->GetData().windowBackground);
+	m_renderer->Clear(AppConfig::LightTheme::WINDOW_BG);
 
 	if (m_scene)
 	{

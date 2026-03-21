@@ -5,6 +5,19 @@
 #include "src/core/types/event/EventHandling.h"
 #include "src/system/AppConfig.h"
 
+namespace
+{
+Color GetBackgroundColor(bool isDark)
+{
+	if (isDark)
+	{
+		return AppConfig::DarkTheme::WINDOW_BG;
+	}
+
+	return AppConfig::LightTheme::WINDOW_BG;
+}
+} // namespace
+
 ThemeView::ThemeView(std::shared_ptr<ThemeModel> model, std::shared_ptr<ThemeController> controller)
 	: m_controller(std::move(controller))
 {
@@ -41,5 +54,5 @@ void ThemeView::Render(IRenderer& renderer) const
 
 void ThemeView::Update(const ThemeData& data, IObservable<ThemeData>*)
 {
-	m_backgroundColor = data.windowBackground;
+	m_backgroundColor = GetBackgroundColor(data.isDark);
 }
