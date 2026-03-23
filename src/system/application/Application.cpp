@@ -25,8 +25,8 @@ void SetupWindowProperties(IWindow& window)
 {
 	window.SetTitleBarTheme(true);
 	window.SetVSync(true);
-	window.SetIconColor(AppConfig::ICON_COLOR_LIGHT);
-	// window.SetIconFromFile("static/icon.png");
+	// window.SetIconColor(AppConfig::ICON_COLOR_LIGHT);
+	window.SetIconFromFile("static/icon.png");
 }
 } // namespace
 
