@@ -1,9 +1,9 @@
 #include "OpenglRenderer.h"
 #include "src/system/AppConfig.h"
-#include <GLFW/glfw3.h>
 #include <cmath>
 #include <fstream>
 #include <glad/glad.h>
+#include <GLFW/glfw3.h>
 #include <libs/glm/gtc/matrix_transform.hpp>
 #include <libs/glm/gtc/type_ptr.hpp>
 #include <numbers>
@@ -65,12 +65,18 @@ void AssertIsFontExists(bool result)
 
 void AssertIsShaderCompiled(uint32_t shader)
 {
-	int success;
-	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-	if (!success)
+	int isCompiled = 0;
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &isCompiled);
+	if (isCompiled == GL_FALSE)
 	{
+		int maxLength = 0;
+		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
+
+		std::string errorLog(maxLength, '\0');
+		glGetShaderInfoLog(shader, maxLength, &maxLength, errorLog.data());
+
 		glDeleteShader(shader);
-		throw std::runtime_error("Ошибка компиляции встроенного шейдера рендерера");
+		throw std::runtime_error("Ошибка компиляции внешнего шейдера: " + errorLog);
 	}
 }
 
@@ -213,74 +219,70 @@ void GenerateArcPoints(std::vector<Point2f>& points, const Point2f& center, floa
 	}
 }
 
-const std::string SHADER_2D_VERT = R"(
-	#version 330 core
-	layout (location = 0) in vec2 aPos;
-	layout (location = 1) in vec4 aColor;
-	layout (location = 2) in vec2 aTexCoord;
+const std::string SHADER_2D_VERT = R"(#version 330 core
+layout (location = 0) in vec2 aPos;
+layout (location = 1) in vec4 aColor;
+layout (location = 2) in vec2 aTexCoord;
 
-	out vec4 vertexColor;
-	out vec2 texCoord;
+out vec4 vertexColor;
+out vec2 texCoord;
 
-	uniform mat4 projection;
+uniform mat4 projection;
 
-	void main()
-	{
-		gl_Position = projection * vec4(aPos, 0.0, 1.0);
-		vertexColor = aColor;
-		texCoord = aTexCoord;
-	}
+void main()
+{
+	gl_Position = projection * vec4(aPos, 0.0, 1.0);
+	vertexColor = aColor;
+	texCoord = aTexCoord;
+}
 )";
 
-const std::string SHADER_2D_FRAG = R"(
-	#version 330 core
-	in vec4 vertexColor;
-	in vec2 texCoord;
-	out vec4 FragColor;
+const std::string SHADER_2D_FRAG = R"(#version 330 core
+in vec4 vertexColor;
+in vec2 texCoord;
+out vec4 FragColor;
 
-	uniform sampler2D uTexture;
-	uniform int uRenderMode;
+uniform sampler2D uTexture;
+uniform int uRenderMode;
 
-	void main()
+void main()
+{
+	if (uRenderMode == 1)
 	{
-		if (uRenderMode == 1)
-		{
-			float alpha = texture(uTexture, texCoord).r;
-			FragColor = vec4(vertexColor.rgb, vertexColor.a * alpha);
-		}
-		else
-		{
-			FragColor = vertexColor;
-		}
+		float alpha = texture(uTexture, texCoord).r;
+		FragColor = vec4(vertexColor.rgb, vertexColor.a * alpha);
 	}
-)";
-
-const std::string SHADER_LINE_3D_VERT = R"(
-	#version 330 core
-	layout (location = 0) in vec3 aPos;
-	layout (location = 1) in vec4 aColor;
-
-	out vec4 vertexColor;
-
-	uniform mat4 u_Projection;
-	uniform mat4 u_View;
-
-	void main()
-	{
-		gl_Position = u_Projection * u_View * vec4(aPos, 1.0);
-		vertexColor = aColor;
-	}
-)";
-
-const std::string SHADER_LINE_3D_FRAG = R"(
-	#version 330 core
-	in vec4 vertexColor;
-	out vec4 FragColor;
-
-	void main()
+	else
 	{
 		FragColor = vertexColor;
 	}
+}
+)";
+
+const std::string SHADER_LINE_3D_VERT = R"(#version 330 core
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec4 aColor;
+
+out vec4 vertexColor;
+
+uniform mat4 u_Projection;
+uniform mat4 u_View;
+
+void main()
+{
+	gl_Position = u_Projection * u_View * vec4(aPos, 1.0);
+	vertexColor = aColor;
+}
+)";
+
+const std::string SHADER_LINE_3D_FRAG = R"(#version 330 core
+in vec4 vertexColor;
+out vec4 FragColor;
+
+void main()
+{
+	FragColor = vertexColor;
+}
 )";
 } // namespace
 
@@ -358,6 +360,15 @@ void OpenglRenderer::SetClearColor(const Color& color)
 void OpenglRenderer::Clear()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void OpenglRenderer::Display()
+{
+	GLFWwindow* window = glfwGetCurrentContext();
+	if (window)
+	{
+		glfwSwapBuffers(window);
+	}
 }
 
 void OpenglRenderer::BeginFrame(const CameraData& camera)

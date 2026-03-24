@@ -17,7 +17,7 @@ public:
 
 	void ProcessEvents(const Event& event);
 	void Update(float dt);
-	void Render(IRenderer& renderer) const;
+	virtual void Render(IRenderer& renderer) const;
 	virtual void OnException(const std::exception& e);
 
 protected:

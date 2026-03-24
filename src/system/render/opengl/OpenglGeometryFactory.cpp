@@ -79,8 +79,8 @@ std::shared_ptr<IMesh> OpenglGeometryFactory::CreateCube(float size)
 
 	PushCubeFace(vertices, indices, {0.0f, 0.0f, halfSize}, {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, halfSize);
 	PushCubeFace(vertices, indices, {0.0f, 0.0f, -halfSize}, {-1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, halfSize);
-	PushCubeFace(vertices, indices, {-halfSize, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 1.0f, 0.0f}, {-1.0f, 0.0f, 0.0f}, halfSize);
-	PushCubeFace(vertices, indices, {halfSize, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, halfSize);
+	PushCubeFace(vertices, indices, {-halfSize, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f}, {-1.0f, 0.0f, 0.0f}, halfSize);
+	PushCubeFace(vertices, indices, {halfSize, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, halfSize);
 	PushCubeFace(vertices, indices, {0.0f, halfSize, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 1.0f, 0.0f}, halfSize);
 	PushCubeFace(vertices, indices, {0.0f, -halfSize, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, -1.0f, 0.0f}, halfSize);
 

@@ -26,6 +26,7 @@ public:
 
 	virtual void SetClearColor(const Color& color) = 0;
 	virtual void Clear() = 0;
+	virtual void Display() = 0;
 
 	virtual void BeginFrame(const CameraData& camera) = 0;
 	virtual void EndFrame() = 0;

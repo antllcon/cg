@@ -68,6 +68,7 @@ void Application::Run()
 	m_themeModel->RemoveObserver(shared_from_this());
 }
 
+
 void Application::Update(const ThemeData& data, IObservable<ThemeData>*)
 {
 	if (m_window)
@@ -75,6 +76,12 @@ void Application::Update(const ThemeData& data, IObservable<ThemeData>*)
 		m_window->SetTitleBarTheme(data.isDark);
 		Color iconColor = data.isDark ? AppConfig::ICON_COLOR_LIGHT : AppConfig::ICON_COLOR_DARK;
 		m_window->SetIconColor(iconColor);
+	}
+
+	if (m_renderer)
+	{
+		Color bgColor = data.isDark ? AppConfig::DarkTheme::WINDOW_BG : AppConfig::LightTheme::WINDOW_BG;
+		m_renderer->SetClearColor(bgColor);
 	}
 }
 
@@ -123,7 +130,7 @@ void Application::UpdateLogic(float dt)
 
 void Application::Render()
 {
-	m_renderer->Clear(AppConfig::DarkTheme::WINDOW_BG);
+	m_renderer->Clear();
 
 	if (m_scene)
 	{

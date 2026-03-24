@@ -31,6 +31,7 @@ public:
 
 	void SetClearColor(const Color& color) override;
 	void Clear() override;
+	void Display() override;
 
 	void BeginFrame(const CameraData& camera) override;
 	void EndFrame() override;
