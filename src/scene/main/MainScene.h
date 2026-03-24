@@ -1,8 +1,9 @@
 #pragma once
 #include "src/controller/toast/ToastController.h"
-#include "src/core/types/scene/CameraData.h"
 #include "src/core/types/scene/LightData.h"
+#include "src/model/camera/CameraModel.h"
 #include "src/scene/Scene.h"
+#include "src/view/camera/CameraView.h"
 #include "src/view/cube/CubeView.h"
 #include "src/view/theme/ThemeView.h"
 #include "src/view/toast/ToastView.h"
@@ -20,7 +21,8 @@ private:
 	std::shared_ptr<ThemeView> m_themeView;
 	std::shared_ptr<ToastView> m_toastView;
 	std::shared_ptr<CubeView> m_cubeView;
+	std::shared_ptr<CameraView> m_cameraView;
 
-	CameraData m_camera;
+	std::shared_ptr<CameraModel> m_cameraModel;
 	LightData m_light;
 };

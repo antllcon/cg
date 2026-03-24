@@ -1,4 +1,5 @@
 #include "MainScene.h"
+#include "src/controller/camera/CameraController.h"
 #include "src/controller/cube/CubeController.h"
 #include "src/controller/theme/ThemeController.h"
 #include "src/core/utils/FileReader.h"
@@ -6,13 +7,19 @@
 #include "src/system/render/opengl/OpenglGeometryFactory.h"
 #include "src/system/render/opengl/OpenglMaterial.h"
 #include "src/system/render/opengl/OpenglShader.h"
-#include <libs/glm/gtc/matrix_transform.hpp>
 
 void MainScene::Init(std::shared_ptr<ThemeModel> themeModel, IAudioManager&)
 {
-	m_camera.position = {0.0f, 2.0f, 6.0f};
-	m_camera.viewMatrix = glm::lookAt(m_camera.position, Point3f{0.0f, 0.0f, 0.0f}, Point3f{0.0f, 1.0f, 0.0f});
-	m_camera.projectionMatrix = glm::perspective(glm::radians(45.0f), AppConfig::WINDOW_WIDTH / AppConfig::WINDOW_HEIGHT, 0.1f, 100.0f);
+	m_cameraModel = std::make_shared<CameraModel>();
+	m_cameraModel->Init({0.0f, 2.0f, 6.0f}, 45.0f, AppConfig::WINDOW_WIDTH / AppConfig::WINDOW_HEIGHT, 0.1f, 100.0f);
+	AddModel(m_cameraModel);
+
+	auto cameraController = std::make_shared<CameraController>(m_cameraModel);
+	AddController(cameraController);
+
+	m_cameraView = std::make_shared<CameraView>(m_cameraModel, cameraController);
+	m_cameraModel->RegisterObserver(m_cameraView);
+	AddView(m_cameraView);
 
 	m_light.position = {3.0f, 5.0f, 4.0f};
 	m_light.color = Color::FromFloat(1.0f, 1.0f, 1.0f, 1.0f);
@@ -59,13 +66,14 @@ void MainScene::Init(std::shared_ptr<ThemeModel> themeModel, IAudioManager&)
 
 void MainScene::Render(IRenderer& renderer) const
 {
-	renderer.BeginFrame(m_camera);
+	renderer.BeginFrame(m_cameraModel->GetData());
 	renderer.SubmitLight(m_light);
 	m_cubeView->Render(renderer);
 	renderer.EndFrame();
 
 	renderer.BeginUI();
 	m_themeView->Render(renderer);
+	m_cameraView->Render(renderer);
 	m_toastView->Render(renderer);
 	renderer.EndUI();
 }
