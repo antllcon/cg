@@ -24,7 +24,7 @@ void AssertIsWindowValid(const IWindow* window)
 void SetupWindowProperties(IWindow& window)
 {
 	window.SetTitleBarTheme(true);
-	window.SetVSync(true);
+	window.SetVSync(false);
 	window.SetIconColor(AppConfig::ICON_COLOR_LIGHT);
 	// window.SetIconFromFile("static/icon.png");
 }
@@ -46,6 +46,7 @@ Application::Application(
 void Application::Init()
 {
 	m_themeModel->RegisterObserver(shared_from_this());
+	Update(m_themeModel->GetData(), nullptr);
 	m_renderer->LoadFont(AppConfig::FONT_PATH, AppConfig::FONT_SIZE);
 	LoadScene(std::make_unique<MainScene>());
 }

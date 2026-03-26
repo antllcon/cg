@@ -3,24 +3,27 @@
 #include "src/core/types/math/Transform.h"
 #include "src/system/Observer.h"
 
-struct CubeData
+struct EntityData
 {
 	Transform transform;
 	Color color;
 };
 
-class CubeModel final : public CObservable<CubeData>
+class EntityModel final : public CObservable<EntityData>
 {
 public:
-	CubeModel();
+	EntityModel();
 
+	void SetPosition(const Point3f& position);
+	void SetScale(const Point3f& scale);
 	void Rotate(float angle, const Point3f& axis);
 	void SetColor(const Color& color);
-	const CubeData& GetData() const;
+
+	const EntityData& GetData() const;
 
 protected:
-	CubeData GetChangedData() const override;
+	EntityData GetChangedData() const override;
 
 private:
-	CubeData m_data;
+	EntityData m_data;
 };

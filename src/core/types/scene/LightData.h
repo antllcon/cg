@@ -1,6 +1,4 @@
 #pragma once
-#include "src/core/types/Point.h"
-#include "src/core/types/color/Color.h"
 
 enum class LightType
 {

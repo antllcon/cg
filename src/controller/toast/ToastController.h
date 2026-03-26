@@ -19,5 +19,4 @@ public:
 
 private:
 	std::shared_ptr<ToastModel> m_model;
-	float m_timer;
 };

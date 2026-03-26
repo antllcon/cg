@@ -1,9 +1,9 @@
-#include "CubeView.h"
-#include "src/controller/cube/CubeController.h"
+#include "EntityView.h"
+#include "src/controller/entity/EntityController.h"
 
-CubeView::CubeView(
-	std::shared_ptr<CubeModel> model,
-	std::shared_ptr<CubeController> controller,
+EntityView::EntityView(
+	std::shared_ptr<EntityModel> model,
+	std::shared_ptr<EntityController> controller,
 	std::shared_ptr<IMesh> mesh,
 	std::shared_ptr<IMaterial> material)
 	: m_controller(std::move(controller))
@@ -16,17 +16,17 @@ CubeView::CubeView(
 	}
 }
 
-void CubeView::HandleEvent(const Event& event)
+void EntityView::HandleEvent(const Event& event)
 {
 	m_controller->HandleEvent(event);
 }
 
-void CubeView::Render(IRenderer& renderer) const
+void EntityView::Render(IRenderer& renderer) const
 {
 	renderer.SubmitMesh(m_mesh, m_material, m_data.transform);
 }
 
-void CubeView::Update(const CubeData& data, IObservable<CubeData>*)
+void EntityView::Update(const EntityData& data, IObservable<EntityData>*)
 {
 	m_data = data;
 	m_material->SetDiffuseColor(m_data.color);

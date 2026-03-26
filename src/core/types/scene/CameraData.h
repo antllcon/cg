@@ -1,6 +1,4 @@
 #pragma once
-#include "src/core/types/Point.h"
-#include <libs/glm/mat4x4.hpp>
 
 struct CameraData
 {

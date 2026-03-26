@@ -219,6 +219,14 @@ void GenerateArcPoints(std::vector<Point2f>& points, const Point2f& center, floa
 	}
 }
 
+float GetSquaredDistance(const Point3f& p1, const Point3f& p2)
+{
+	float dx = p1.x - p2.x;
+	float dy = p1.y - p2.y;
+	float dz = p1.z - p2.z;
+	return dx * dx + dy * dy + dz * dz;
+}
+
 const std::string SHADER_2D_VERT = R"(#version 330 core
 layout (location = 0) in vec2 aPos;
 layout (location = 1) in vec4 aColor;
@@ -401,14 +409,26 @@ void OpenglRenderer::EndFrame()
 	glCullFace(GL_BACK);
 	glFrontFace(GL_CCW);
 
-	for (const auto& cmd : m_meshCommands)
+	std::ranges::sort(m_meshCommands, [this](const MeshCommand& a, const MeshCommand& b) {
+		if (a.material != b.material)
+		{
+			return a.material < b.material;
+		}
+
+		float distA = GetSquaredDistance(m_camera.position, a.transform.GetPosition());
+		float distB = GetSquaredDistance(m_camera.position, b.transform.GetPosition());
+
+		return distA < distB;
+	});
+
+	for (const auto& [mesh, material, transform] : m_meshCommands)
 	{
-		cmd.material->Bind();
-		auto shader = cmd.material->GetShader();
+		material->Bind();
+		auto shader = material->GetShader();
 
 		shader->SetMat4("u_View", m_camera.viewMatrix);
 		shader->SetMat4("u_Projection", m_camera.projectionMatrix);
-		shader->SetMat4("u_Model", cmd.transform.GetMatrix());
+		shader->SetMat4("u_Model", transform.GetMatrix());
 		shader->SetFloat3("u_ViewPos", m_camera.position);
 
 		int lightIndex = 0;
@@ -425,11 +445,11 @@ void OpenglRenderer::EndFrame()
 
 		shader->SetInt("u_LightCount", lightIndex);
 
-		cmd.mesh->Bind();
-		glDrawElements(GL_TRIANGLES, cmd.mesh->GetIndexCount(), GL_UNSIGNED_INT, nullptr);
-		cmd.mesh->Unbind();
+		mesh->Bind();
+		glDrawElements(GL_TRIANGLES, mesh->GetIndexCount(), GL_UNSIGNED_INT, nullptr);
+		mesh->Unbind();
 
-		cmd.material->Unbind();
+		material->Unbind();
 	}
 
 	Flush3DLines();
@@ -449,13 +469,13 @@ void OpenglRenderer::Flush3DLines()
 	glBindVertexArray(m_vaoLines3D);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vboLines3D);
 
-	for (const auto& cmd : m_lineCommands)
+	for (const auto& [start, end, color, thickness] : m_lineCommands)
 	{
 		std::vector<float> data;
-		PushVertex3D(data, cmd.start, cmd.color);
-		PushVertex3D(data, cmd.end, cmd.color);
+		PushVertex3D(data, start, color);
+		PushVertex3D(data, end, color);
 
-		glLineWidth(cmd.thickness);
+		glLineWidth(thickness);
 		glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(data.size() * sizeof(float)), data.data(), GL_DYNAMIC_DRAW);
 		glDrawArrays(GL_LINES, 0, 2);
 	}

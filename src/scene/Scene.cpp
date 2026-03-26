@@ -1,6 +1,10 @@
 #include "Scene.h"
-#include "src/controller/IController.h"
-#include "src/view/IView.h"
+
+Scene::Scene()
+	: m_sceneModel(std::make_shared<SceneModel>())
+	, m_sceneController(std::make_shared<SceneController>())
+{
+}
 
 void Scene::Init(std::shared_ptr<ThemeModel>, IAudioManager&)
 {
@@ -8,36 +12,12 @@ void Scene::Init(std::shared_ptr<ThemeModel>, IAudioManager&)
 
 void Scene::ProcessEvents(const Event& event)
 {
-	for (auto& view : m_views)
-	{
-		view->HandleEvent(event);
-	}
+	m_sceneController->HandleEvent(event);
 }
 
 void Scene::Update(float dt)
 {
-	for (auto& controller : m_controllers)
-	{
-		controller->Update(dt);
-	}
-}
-
-void Scene::Render(IRenderer& renderer) const
-{
-	for (auto& view : m_views)
-	{
-		view->Render(renderer);
-	}
-}
-
-void Scene::AddView(std::shared_ptr<IView> view)
-{
-	m_views.push_back(std::move(view));
-}
-
-void Scene::AddController(std::shared_ptr<IController> controller)
-{
-	m_controllers.push_back(std::move(controller));
+	m_sceneController->Update(dt);
 }
 
 void Scene::OnException(const std::exception&)

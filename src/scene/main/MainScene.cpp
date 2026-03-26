@@ -1,80 +1,110 @@
 #include "MainScene.h"
 #include "src/controller/camera/CameraController.h"
-#include "src/controller/cube/CubeController.h"
+#include "src/controller/entity/EntityController.h"
 #include "src/controller/theme/ThemeController.h"
 #include "src/core/utils/FileReader.h"
+#include "src/model/sun/SunModel.h"
 #include "src/system/AppConfig.h"
 #include "src/system/render/opengl/OpenglGeometryFactory.h"
 #include "src/system/render/opengl/OpenglMaterial.h"
 #include "src/system/render/opengl/OpenglShader.h"
+#include "src/view/camera/CameraView.h"
+#include "src/view/entity/EntityView.h"
+#include "src/view/theme/ThemeView.h"
+#include "src/view/toast/ToastView.h"
 
 void MainScene::Init(std::shared_ptr<ThemeModel> themeModel, IAudioManager&)
 {
 	m_cameraModel = std::make_shared<CameraModel>();
 	m_cameraModel->Init({0.0f, 2.0f, 6.0f}, 45.0f, AppConfig::WINDOW_WIDTH / AppConfig::WINDOW_HEIGHT, 0.1f, 100.0f);
-	AddModel(m_cameraModel);
 
 	auto cameraController = std::make_shared<CameraController>(m_cameraModel);
-	AddController(cameraController);
+	m_sceneController->AddController(cameraController);
 
-	m_cameraView = std::make_shared<CameraView>(m_cameraModel, cameraController);
-	m_cameraModel->RegisterObserver(m_cameraView);
-	AddView(m_cameraView);
+	auto cameraView = std::make_shared<CameraView>(m_cameraModel, cameraController);
+	m_cameraModel->RegisterObserver(cameraView);
+	m_uiViews.push_back(cameraView);
 
-	m_light.position = {3.0f, 5.0f, 4.0f};
-	m_light.color = Color::FromFloat(1.0f, 1.0f, 1.0f, 1.0f);
-	m_light.intensity = 1.0f;
+	auto sunModel = std::make_shared<SunModel>();
+	m_sceneModel->AddLight(sunModel);
 
 	auto themeController = std::make_shared<ThemeController>(themeModel);
-	AddController(themeController);
+	m_sceneController->AddController(themeController);
 
-	m_themeView = std::make_shared<ThemeView>(themeModel, themeController);
-	themeModel->RegisterObserver(m_themeView);
-	AddView(m_themeView);
+	auto themeView = std::make_shared<ThemeView>(themeModel, themeController);
+	themeModel->RegisterObserver(themeView);
+	m_uiViews.push_back(themeView);
 
 	auto toastModel = std::make_shared<ToastModel>();
-	AddModel(toastModel);
 
 	m_toastController = std::make_shared<ToastController>(toastModel);
-	AddController(m_toastController);
+	m_sceneController->AddController(m_toastController);
 
-	m_toastView = std::make_shared<ToastView>(toastModel, themeModel);
-	toastModel->RegisterObserver(m_toastView);
-	themeModel->RegisterObserver(m_toastView);
-	AddView(m_toastView);
+	auto toastView = std::make_shared<ToastView>(toastModel, themeModel);
+	toastModel->RegisterObserver(toastView);
+	themeModel->RegisterObserver(toastView);
+	m_uiViews.push_back(toastView);
 
 	OpenglGeometryFactory geometryFactory;
-	auto cubeMesh = geometryFactory.CreateCube(2.0f);
-
 	std::string vertSource = FileReader::ReadFileToString("static/shaders/phong.vert");
 	std::string fragSource = FileReader::ReadFileToString("static/shaders/phong.frag");
-	auto cubeShader = std::make_shared<OpenglShader>(vertSource, fragSource);
+	auto sharedShader = std::make_shared<OpenglShader>(vertSource, fragSource);
 
+	auto planeMesh = geometryFactory.CreatePlane(100.0f, 100.0f);
+	auto planeMaterial = std::make_shared<OpenglMaterial>();
+	planeMaterial->SetShader(sharedShader);
+
+	auto planeModel = std::make_shared<EntityModel>();
+	planeModel->SetColor(Color::FromFloat(0.2f, 0.8f, 0.2f, 1.0f));
+	planeModel->SetPosition({0.0f, -1.0f, 0.0f});
+	m_sceneModel->AddEntity(planeModel);
+
+	auto planeController = std::make_shared<EntityController>(planeModel);
+	m_sceneController->AddController(planeController);
+
+	auto planeView = std::make_shared<EntityView>(planeModel, planeController, planeMesh, planeMaterial);
+	planeModel->RegisterObserver(planeView);
+	m_entityViews.push_back(planeView);
+
+	auto cubeMesh = geometryFactory.CreateCube(2.0f);
 	auto cubeMaterial = std::make_shared<OpenglMaterial>();
-	cubeMaterial->SetShader(cubeShader);
+	cubeMaterial->SetShader(sharedShader);
 
-	auto cubeModel = std::make_shared<CubeModel>();
-	AddModel(cubeModel);
+	auto cubeModel = std::make_shared<EntityModel>();
+	cubeModel->SetColor(Color::FromFloat(0.8f, 0.2f, 0.2f, 1.0f));
+	m_sceneModel->AddEntity(cubeModel);
 
-	auto cubeController = std::make_shared<CubeController>(cubeModel);
-	AddController(cubeController);
+	auto cubeController = std::make_shared<EntityController>(cubeModel);
+	m_sceneController->AddController(cubeController);
 
-	m_cubeView = std::make_shared<CubeView>(cubeModel, cubeController, cubeMesh, cubeMaterial);
-	cubeModel->RegisterObserver(m_cubeView);
-	AddView(m_cubeView);
+	auto cubeView = std::make_shared<EntityView>(cubeModel, cubeController, cubeMesh, cubeMaterial);
+	cubeModel->RegisterObserver(cubeView);
+	m_entityViews.push_back(cubeView);
 }
 
 void MainScene::Render(IRenderer& renderer) const
 {
 	renderer.BeginFrame(m_cameraModel->GetData());
-	renderer.SubmitLight(m_light);
-	m_cubeView->Render(renderer);
+
+	for (const auto& light : m_sceneModel->GetLights())
+	{
+		renderer.SubmitLight(light->GetData());
+	}
+
+	for (const auto& view : m_entityViews)
+	{
+		view->Render(renderer);
+	}
+
 	renderer.EndFrame();
 
 	renderer.BeginUI();
-	m_themeView->Render(renderer);
-	m_cameraView->Render(renderer);
-	m_toastView->Render(renderer);
+
+	for (const auto& uiView : m_uiViews)
+	{
+		uiView->Render(renderer);
+	}
+
 	renderer.EndUI();
 }
 
