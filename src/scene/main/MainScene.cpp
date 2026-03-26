@@ -1,16 +1,15 @@
 #include "MainScene.h"
 #include "src/controller/camera/CameraController.h"
 #include "src/controller/entity/EntityController.h"
+#include "src/controller/sun/SunController.h"
 #include "src/controller/theme/ThemeController.h"
 #include "src/controller/window/WindowController.h"
 #include "src/core/utils/FileReader.h"
-#include "src/model/sun/SunModel.h"
 #include "src/system/AppConfig.h"
 #include "src/system/render/opengl/OpenglGeometryFactory.h"
 #include "src/system/render/opengl/OpenglMaterial.h"
 #include "src/system/render/opengl/OpenglShader.h"
 #include "src/view/camera/CameraView.h"
-#include "src/view/entity/EntityView.h"
 #include "src/view/theme/ThemeView.h"
 #include "src/view/toast/ToastView.h"
 
@@ -21,23 +20,35 @@ void MainScene::Init(std::shared_ptr<ThemeModel> themeModel, IAudioManager&, IWi
 
 	m_cameraModel = std::make_shared<CameraModel>();
 	m_cameraModel->Init({0.0f, 2.0f, 6.0f}, 45.0f, AppConfig::WINDOW_WIDTH / AppConfig::WINDOW_HEIGHT, 0.1f, 100.0f);
+	m_sceneView->SetCamera(m_cameraModel);
 
 	auto cameraController = std::make_shared<CameraController>(m_cameraModel, window);
 	m_sceneController->AddController(cameraController);
 
 	auto cameraView = std::make_shared<CameraView>(m_cameraModel, cameraController);
 	m_cameraModel->RegisterObserver(cameraView);
-	m_uiViews.push_back(cameraView);
+	m_sceneView->AddUiView(cameraView);
 
 	auto sunModel = std::make_shared<SunModel>();
 	m_sceneModel->AddLight(sunModel);
+
+	auto sunController = std::make_shared<SunController>(sunModel);
+	m_sceneController->AddController(sunController);
+
+	auto torchModel = std::make_shared<LightModel>();
+	torchModel->SetType(LightType::Point);
+	torchModel->SetColor(Color::FromFloat(1.0f, 0.4f, 0.1f, 1.0f));
+	torchModel->SetPosition({2.0f, 1.0f, 2.0f});
+	torchModel->SetIntensity(2.0f);
+	torchModel->SetRange(15.0f);
+	m_sceneModel->AddLight(torchModel);
 
 	auto themeController = std::make_shared<ThemeController>(themeModel);
 	m_sceneController->AddController(themeController);
 
 	auto themeView = std::make_shared<ThemeView>(themeModel, themeController);
 	themeModel->RegisterObserver(themeView);
-	m_uiViews.push_back(themeView);
+	m_sceneView->AddUiView(themeView);
 
 	auto toastModel = std::make_shared<ToastModel>();
 
@@ -47,7 +58,7 @@ void MainScene::Init(std::shared_ptr<ThemeModel> themeModel, IAudioManager&, IWi
 	auto toastView = std::make_shared<ToastView>(toastModel, themeModel);
 	toastModel->RegisterObserver(toastView);
 	themeModel->RegisterObserver(toastView);
-	m_uiViews.push_back(toastView);
+	m_sceneView->AddUiView(toastView);
 
 	OpenglGeometryFactory geometryFactory;
 	std::string vertSource = FileReader::ReadFileToString("static/shaders/phong.vert");
@@ -66,9 +77,7 @@ void MainScene::Init(std::shared_ptr<ThemeModel> themeModel, IAudioManager&, IWi
 	auto planeController = std::make_shared<EntityController>(planeModel);
 	m_sceneController->AddController(planeController);
 
-	auto planeView = std::make_shared<EntityView>(planeModel, planeController, planeMesh, planeMaterial);
-	planeModel->RegisterObserver(planeView);
-	m_entityViews.push_back(planeView);
+	m_sceneView->RegisterEntityVisuals(planeModel, planeMesh, planeMaterial);
 
 	auto cubeMesh = geometryFactory.CreateCube(2.0f);
 	auto cubeMaterial = std::make_shared<OpenglMaterial>();
@@ -81,35 +90,7 @@ void MainScene::Init(std::shared_ptr<ThemeModel> themeModel, IAudioManager&, IWi
 	auto cubeController = std::make_shared<EntityController>(cubeModel);
 	m_sceneController->AddController(cubeController);
 
-	auto cubeView = std::make_shared<EntityView>(cubeModel, cubeController, cubeMesh, cubeMaterial);
-	cubeModel->RegisterObserver(cubeView);
-	m_entityViews.push_back(cubeView);
-}
-
-void MainScene::Render(IRenderer& renderer) const
-{
-	renderer.BeginFrame(m_cameraModel->GetData());
-
-	for (const auto& light : m_sceneModel->GetLights())
-	{
-		renderer.SubmitLight(light->GetData());
-	}
-
-	for (const auto& view : m_entityViews)
-	{
-		view->Render(renderer);
-	}
-
-	renderer.EndFrame();
-
-	renderer.BeginUI();
-
-	for (const auto& uiView : m_uiViews)
-	{
-		uiView->Render(renderer);
-	}
-
-	renderer.EndUI();
+	m_sceneView->RegisterEntityVisuals(cubeModel, cubeMesh, cubeMaterial);
 }
 
 void MainScene::OnException(const std::exception& e)
