@@ -20,4 +20,7 @@ public:
 
 	virtual void SetVSync(bool enabled) = 0;
 	virtual void SetFullscreen(bool isFullscreen) = 0;
+
+	virtual void SetCursorCaptured(bool captured) = 0;
+	virtual bool IsCursorCaptured() const = 0;
 };

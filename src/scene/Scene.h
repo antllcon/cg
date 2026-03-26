@@ -1,6 +1,7 @@
 #pragma once
 #include "src/controller/scene/SceneController.h"
 #include "src/core/interfaces/IAudioManager.h"
+#include "src/core/interfaces/IWindow.h"
 #include "src/core/types/event/Event.h"
 #include "src/model/scene/SceneModel.h"
 #include "src/model/theme/ThemeModel.h"
@@ -14,7 +15,7 @@ public:
 	Scene();
 	virtual ~Scene() = default;
 
-	virtual void Init(std::shared_ptr<ThemeModel> themeModel, IAudioManager& audioManager);
+	virtual void Init(std::shared_ptr<ThemeModel> themeModel, IAudioManager& audioManager, IWindow& window);
 
 	virtual void ProcessEvents(const Event& event);
 	virtual void Update(float dt);

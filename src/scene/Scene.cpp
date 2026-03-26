@@ -6,7 +6,7 @@ Scene::Scene()
 {
 }
 
-void Scene::Init(std::shared_ptr<ThemeModel>, IAudioManager&)
+void Scene::Init(std::shared_ptr<ThemeModel>, IAudioManager&, IWindow&)
 {
 }
 

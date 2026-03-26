@@ -404,3 +404,14 @@ void GlfwWindow::SetFullscreen(bool isFullscreen)
 {
 	(void)isFullscreen;
 }
+
+void GlfwWindow::SetCursorCaptured(bool captured)
+{
+	m_isCursorCaptured = captured;
+	glfwSetInputMode(m_window, GLFW_CURSOR, captured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+}
+
+bool GlfwWindow::IsCursorCaptured() const
+{
+	return m_isCursorCaptured;
+}

@@ -28,7 +28,7 @@ Color LerpColor(const Color& a, const Color& b, float t)
 }
 
 SunModel::SunModel()
-	: m_timeOfDay(12.0f)
+	: m_timeOfDay(10.0f)
 	, m_timeScale(1.0f)
 {
 	m_data.type = LightType::Directional;

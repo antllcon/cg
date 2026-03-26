@@ -2,6 +2,7 @@
 #include "src/controller/camera/CameraController.h"
 #include "src/controller/entity/EntityController.h"
 #include "src/controller/theme/ThemeController.h"
+#include "src/controller/window/WindowController.h"
 #include "src/core/utils/FileReader.h"
 #include "src/model/sun/SunModel.h"
 #include "src/system/AppConfig.h"
@@ -13,12 +14,15 @@
 #include "src/view/theme/ThemeView.h"
 #include "src/view/toast/ToastView.h"
 
-void MainScene::Init(std::shared_ptr<ThemeModel> themeModel, IAudioManager&)
+void MainScene::Init(std::shared_ptr<ThemeModel> themeModel, IAudioManager&, IWindow& window)
 {
+	auto windowController = std::make_shared<WindowController>(window);
+	m_sceneController->AddController(windowController);
+
 	m_cameraModel = std::make_shared<CameraModel>();
 	m_cameraModel->Init({0.0f, 2.0f, 6.0f}, 45.0f, AppConfig::WINDOW_WIDTH / AppConfig::WINDOW_HEIGHT, 0.1f, 100.0f);
 
-	auto cameraController = std::make_shared<CameraController>(m_cameraModel);
+	auto cameraController = std::make_shared<CameraController>(m_cameraModel, window);
 	m_sceneController->AddController(cameraController);
 
 	auto cameraView = std::make_shared<CameraView>(m_cameraModel, cameraController);

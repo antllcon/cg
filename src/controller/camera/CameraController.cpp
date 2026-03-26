@@ -1,8 +1,10 @@
 #include "CameraController.h"
+#include "src/core/interfaces/IWindow.h"
 #include "src/core/types/event/EventHandling.h"
 
-CameraController::CameraController(std::shared_ptr<CameraModel> model)
+CameraController::CameraController(std::shared_ptr<CameraModel> model, const IWindow& window)
 	: m_model(std::move(model))
+	, m_window(window)
 {
 }
 
@@ -33,17 +35,38 @@ void CameraController::HandleEvent(const Event& event)
 				   [this](const MouseButtonPressedEvent& e) {
 					   if (e.button == MouseButton::Right)
 					   {
-						   m_model->SetMousePressed(true, Point2f(static_cast<float>(e.position.x), static_cast<float>(e.position.y)));
+						   m_isRightMousePressed = true;
+						   if (!m_window.IsCursorCaptured())
+						   {
+							   m_model->SetMousePressed(true, Point2f(static_cast<float>(e.position.x), static_cast<float>(e.position.y)));
+						   }
 					   }
 				   },
 				   [this](const MouseButtonReleasedEvent& e) {
 					   if (e.button == MouseButton::Right)
 					   {
-						   m_model->SetMousePressed(false, Point2f(static_cast<float>(e.position.x), static_cast<float>(e.position.y)));
+						   m_isRightMousePressed = false;
+						   if (!m_window.IsCursorCaptured())
+						   {
+							   m_model->SetMousePressed(false, Point2f(static_cast<float>(e.position.x), static_cast<float>(e.position.y)));
+						   }
 					   }
 				   },
 				   [this](const MouseMovedEvent& e) {
-					   m_model->ProcessMouseMovement(Point2f(static_cast<float>(e.position.x), static_cast<float>(e.position.y)));
+					   Point2f pos(static_cast<float>(e.position.x), static_cast<float>(e.position.y));
+					   bool isCaptured = m_window.IsCursorCaptured();
+
+					   if (isCaptured && !m_wasCaptured)
+					   {
+						   m_model->SetMousePressed(true, pos);
+					   }
+					   else if (!isCaptured && m_wasCaptured && !m_isRightMousePressed)
+					   {
+						   m_model->SetMousePressed(false, pos);
+					   }
+
+					   m_wasCaptured = isCaptured;
+					   m_model->ProcessMouseMovement(pos);
 				   },
 				   [this](const MouseScrolledEvent& e) {
 					   m_model->AddSpeedMultiplier(e.delta);

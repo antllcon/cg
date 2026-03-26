@@ -25,7 +25,11 @@ public:
 	void SetVSync(bool enabled) override;
 	void SetFullscreen(bool isFullscreen) override;
 
+	void SetCursorCaptured(bool captured) override;
+	bool IsCursorCaptured() const override;
+
 private:
 	GLFWwindow* m_window;
 	std::queue<Event> m_events;
+	bool m_isCursorCaptured{false};
 };
