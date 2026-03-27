@@ -65,8 +65,7 @@ void MainScene::Init(std::shared_ptr<ThemeModel> themeModel, IAudioManager&, IWi
 	auto sharedShader = std::make_shared<OpenglShader>(vertSource, fragSource);
 
 	auto planeMesh = geometryFactory.CreatePlane(100.0f, 100.0f);
-	auto cubeMesh = geometryFactory.CreateCube(2.0f);
-	auto barrelMesh = geometryFactory.CreateFromObj("static/models/barrel.obj");
+	auto hexecontahedronMesh = geometryFactory.CreateFromObj("static/models/pentagonal-hexecontahedron.obj");
 
 	auto planeMaterial = std::make_shared<OpenglMaterial>();
 	planeMaterial->SetShader(sharedShader);
@@ -77,34 +76,15 @@ void MainScene::Init(std::shared_ptr<ThemeModel> themeModel, IAudioManager&, IWi
 	m_sceneModel->AddEntity(planeModel);
 	m_sceneView->RegisterEntityVisuals(planeModel, planeMesh, planeMaterial);
 
-	auto cubeMaterial = std::make_shared<OpenglMaterial>();
-	cubeMaterial->SetShader(sharedShader);
+	auto hexecontahedronMaterial = std::make_shared<OpenglMaterial>();
+	hexecontahedronMaterial->SetShader(sharedShader);
 
-	auto cubeModel = std::make_shared<EntityModel>();
-	cubeModel->SetPosition({0.0f, 0.0f, 0.0f});
-	cubeModel->SetColor(Color::FromFloat(0.4f, 0.2f, 0.2f, 1.0f));
-	m_sceneModel->AddEntity(cubeModel);
-	m_sceneView->RegisterEntityVisuals(cubeModel, cubeMesh, cubeMaterial);
-
-	auto barrel1Material = std::make_shared<OpenglMaterial>();
-	barrel1Material->SetShader(sharedShader);
-
-	auto barrel1 = std::make_shared<EntityModel>();
-	barrel1->SetPosition({2.0f, 0.0f, 0.0f});
-	barrel1->SetScale({0.05f, 0.05f, 0.05f});
-	barrel1->SetColor(Color::FromFloat(0.5f, 0.3f, 0.1f, 1.0f));
-	m_sceneModel->AddEntity(barrel1);
-	m_sceneView->RegisterEntityVisuals(barrel1, barrelMesh, barrel1Material);
-
-	auto barrel2Material = std::make_shared<OpenglMaterial>();
-	barrel2Material->SetShader(sharedShader);
-
-	auto barrel2 = std::make_shared<EntityModel>();
-	barrel2->SetPosition({-2.0f, 0.0f, 0.0f});
-	barrel2->SetScale({0.05f, 0.05f, 0.05f});
-	barrel2->SetColor(Color::FromFloat(0.6f, 0.4f, 0.2f, 1.0f));
-	m_sceneModel->AddEntity(barrel2);
-	m_sceneView->RegisterEntityVisuals(barrel2, barrelMesh, barrel2Material);
+	auto hexecontahedron = std::make_shared<EntityModel>();
+	hexecontahedron->SetPosition({2.0f, 0.0f, 0.0f});
+	hexecontahedron->SetScale({0.05f, 0.05f, 0.05f});
+	hexecontahedron->SetColor(Color::FromRGBA(102, 102, 255));
+	m_sceneModel->AddEntity(hexecontahedron);
+	m_sceneView->RegisterEntityVisuals(hexecontahedron, hexecontahedronMesh, hexecontahedronMaterial);
 }
 
 void MainScene::Update(float dt)
