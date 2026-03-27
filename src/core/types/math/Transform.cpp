@@ -13,7 +13,7 @@ void Transform::SetPosition(const Point3f& position) noexcept
 	m_position = position;
 }
 
-void Transform::SetRotation(const glm::quat& rotation) noexcept
+void Transform::SetRotation(const Quat& rotation) noexcept
 {
 	m_rotation = rotation;
 }
@@ -28,7 +28,7 @@ Point3f Transform::GetPosition() const noexcept
 	return m_position;
 }
 
-glm::quat Transform::GetRotation() const noexcept
+Quat Transform::GetRotation() const noexcept
 {
 	return m_rotation;
 }
@@ -42,7 +42,7 @@ Mat4 Transform::GetMatrix() const noexcept
 {
 	Mat4 translationMatrix = Math::Translate(Mat4(1.0f), m_position);
 	Mat4 rotationMatrix = Math::Mat4Cast(m_rotation);
-	glm::mat4 scaleMatrix = Math::Scale(glm::mat4(1.0f), m_scale);
+	Mat4 scaleMatrix = Math::Scale(Mat4(1.0f), m_scale);
 
 	return translationMatrix * rotationMatrix * scaleMatrix;
 }

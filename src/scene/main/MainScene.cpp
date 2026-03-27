@@ -10,6 +10,7 @@
 #include "src/system/render/opengl/OpenglMaterial.h"
 #include "src/system/render/opengl/OpenglShader.h"
 #include "src/view/camera/CameraView.h"
+#include "src/view/fps/FpsView.h"
 #include "src/view/theme/ThemeView.h"
 #include "src/view/toast/ToastView.h"
 
@@ -19,7 +20,6 @@ void MainScene::Init(std::shared_ptr<ThemeModel> themeModel, IAudioManager&, IWi
 	m_sceneController->AddController(windowController);
 
 	m_cameraModel = std::make_shared<CameraModel>();
-	m_cameraModel->Init({0.0f, 2.0f, 6.0f}, 45.0f, AppConfig::WINDOW_WIDTH / AppConfig::WINDOW_HEIGHT, 0.1f, 100.0f);
 	m_sceneView->SetCamera(m_cameraModel);
 
 	auto cameraController = std::make_shared<CameraController>(m_cameraModel, window);
@@ -52,6 +52,11 @@ void MainScene::Init(std::shared_ptr<ThemeModel> themeModel, IAudioManager&, IWi
 	toastModel->RegisterObserver(toastView);
 	themeModel->RegisterObserver(toastView);
 	m_sceneView->AddUiView(toastView);
+
+	m_fpsModel = std::make_shared<FpsModel>();
+	auto fpsView = std::make_shared<FpsView>(m_fpsModel);
+	m_fpsModel->RegisterObserver(fpsView);
+	m_sceneView->AddUiView(fpsView);
 
 	OpenglGeometryFactory geometryFactory;
 
@@ -100,6 +105,16 @@ void MainScene::Init(std::shared_ptr<ThemeModel> themeModel, IAudioManager&, IWi
 	barrel2->SetColor(Color::FromFloat(0.6f, 0.4f, 0.2f, 1.0f));
 	m_sceneModel->AddEntity(barrel2);
 	m_sceneView->RegisterEntityVisuals(barrel2, barrelMesh, barrel2Material);
+}
+
+void MainScene::Update(float dt)
+{
+	Scene::Update(dt);
+
+	if (m_fpsModel)
+	{
+		m_fpsModel->Update(dt);
+	}
 }
 
 void MainScene::OnException(const std::exception& e)
