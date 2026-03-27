@@ -1,6 +1,6 @@
 #include "OpenglShader.h"
+#include "src/core/types/math/Math.h"
 #include <glad/glad.h>
-#include <libs/glm/gtc/type_ptr.hpp>
 #include <stdexcept>
 
 namespace
@@ -96,9 +96,9 @@ void OpenglShader::SetFloat4(const std::string& name, const Point4f& value)
 	glUniform4f(GetUniformLocation(name), value.x, value.y, value.z, value.w);
 }
 
-void OpenglShader::SetMat4(const std::string& name, const glm::mat4& value)
+void OpenglShader::SetMat4(const std::string& name, const Mat4& value)
 {
-	glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(value));
+	glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, Math::ValuePtr(value));
 }
 
 void OpenglShader::SetColor(const std::string& name, const Color& color)

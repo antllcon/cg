@@ -1,5 +1,5 @@
 #pragma once
-#include "src/core/types/Point.h"
+#include "../types/math/Point.h"
 #include "src/core/types/color/Color.h"
 #include <string>
 
@@ -16,6 +16,6 @@ public:
 	virtual void SetFloat2(const std::string& name, const Point2f& value) = 0;
 	virtual void SetFloat3(const std::string& name, const Point3f& value) = 0;
 	virtual void SetFloat4(const std::string& name, const Point4f& value) = 0;
-	virtual void SetMat4(const std::string& name, const glm::mat4& value) = 0;
+	virtual void SetMat4(const std::string& name, const Mat4& value) = 0;
 	virtual void SetColor(const std::string& name, const Color& color) = 0;
 };

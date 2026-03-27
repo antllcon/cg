@@ -33,15 +33,9 @@ void MainScene::Init(std::shared_ptr<ThemeModel> themeModel, IAudioManager&, IWi
 	m_sceneModel->AddLight(sunModel);
 
 	auto sunController = std::make_shared<SunController>(sunModel);
+	sunController->SetTimeScale(0.0f);
+	sunController->SetTimeOfDay(12.0f);
 	m_sceneController->AddController(sunController);
-
-	auto torchModel = std::make_shared<LightModel>();
-	torchModel->SetType(LightType::Point);
-	torchModel->SetColor(Color::FromFloat(1.0f, 0.4f, 0.1f, 1.0f));
-	torchModel->SetPosition({2.0f, 1.0f, 2.0f});
-	torchModel->SetIntensity(2.0f);
-	torchModel->SetRange(15.0f);
-	m_sceneModel->AddLight(torchModel);
 
 	auto themeController = std::make_shared<ThemeController>(themeModel);
 	m_sceneController->AddController(themeController);
@@ -51,7 +45,6 @@ void MainScene::Init(std::shared_ptr<ThemeModel> themeModel, IAudioManager&, IWi
 	m_sceneView->AddUiView(themeView);
 
 	auto toastModel = std::make_shared<ToastModel>();
-
 	m_toastController = std::make_shared<ToastController>(toastModel);
 	m_sceneController->AddController(m_toastController);
 
@@ -61,36 +54,52 @@ void MainScene::Init(std::shared_ptr<ThemeModel> themeModel, IAudioManager&, IWi
 	m_sceneView->AddUiView(toastView);
 
 	OpenglGeometryFactory geometryFactory;
+
 	std::string vertSource = FileReader::ReadFileToString("static/shaders/phong.vert");
 	std::string fragSource = FileReader::ReadFileToString("static/shaders/phong.frag");
 	auto sharedShader = std::make_shared<OpenglShader>(vertSource, fragSource);
 
 	auto planeMesh = geometryFactory.CreatePlane(100.0f, 100.0f);
+	auto cubeMesh = geometryFactory.CreateCube(2.0f);
+	auto barrelMesh = geometryFactory.CreateFromObj("static/models/barrel.obj");
+
 	auto planeMaterial = std::make_shared<OpenglMaterial>();
 	planeMaterial->SetShader(sharedShader);
 
 	auto planeModel = std::make_shared<EntityModel>();
-	planeModel->SetColor(Color::FromFloat(0.2f, 0.8f, 0.2f, 1.0f));
 	planeModel->SetPosition({0.0f, -1.0f, 0.0f});
+	planeModel->SetColor(Color::FromRGBA(166, 181, 128));
 	m_sceneModel->AddEntity(planeModel);
-
-	auto planeController = std::make_shared<EntityController>(planeModel);
-	m_sceneController->AddController(planeController);
-
 	m_sceneView->RegisterEntityVisuals(planeModel, planeMesh, planeMaterial);
 
-	auto cubeMesh = geometryFactory.CreateCube(2.0f);
 	auto cubeMaterial = std::make_shared<OpenglMaterial>();
 	cubeMaterial->SetShader(sharedShader);
 
 	auto cubeModel = std::make_shared<EntityModel>();
-	cubeModel->SetColor(Color::FromFloat(0.8f, 0.2f, 0.2f, 1.0f));
+	cubeModel->SetPosition({0.0f, 0.0f, 0.0f});
+	cubeModel->SetColor(Color::FromFloat(0.4f, 0.2f, 0.2f, 1.0f));
 	m_sceneModel->AddEntity(cubeModel);
-
-	auto cubeController = std::make_shared<EntityController>(cubeModel);
-	m_sceneController->AddController(cubeController);
-
 	m_sceneView->RegisterEntityVisuals(cubeModel, cubeMesh, cubeMaterial);
+
+	auto barrel1Material = std::make_shared<OpenglMaterial>();
+	barrel1Material->SetShader(sharedShader);
+
+	auto barrel1 = std::make_shared<EntityModel>();
+	barrel1->SetPosition({2.0f, 0.0f, 0.0f});
+	barrel1->SetScale({0.05f, 0.05f, 0.05f});
+	barrel1->SetColor(Color::FromFloat(0.5f, 0.3f, 0.1f, 1.0f));
+	m_sceneModel->AddEntity(barrel1);
+	m_sceneView->RegisterEntityVisuals(barrel1, barrelMesh, barrel1Material);
+
+	auto barrel2Material = std::make_shared<OpenglMaterial>();
+	barrel2Material->SetShader(sharedShader);
+
+	auto barrel2 = std::make_shared<EntityModel>();
+	barrel2->SetPosition({-2.0f, 0.0f, 0.0f});
+	barrel2->SetScale({0.05f, 0.05f, 0.05f});
+	barrel2->SetColor(Color::FromFloat(0.6f, 0.4f, 0.2f, 1.0f));
+	m_sceneModel->AddEntity(barrel2);
+	m_sceneView->RegisterEntityVisuals(barrel2, barrelMesh, barrel2Material);
 }
 
 void MainScene::OnException(const std::exception& e)

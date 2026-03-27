@@ -13,3 +13,13 @@ void SunController::Update(float dt)
 void SunController::HandleEvent(const Event&)
 {
 }
+
+void SunController::SetTimeScale(float timeScale)
+{
+	m_model->SetTimeScale(timeScale);
+}
+
+void SunController::SetTimeOfDay(float timeOfDay)
+{
+	m_model->SetTimeOfDay(timeOfDay);
+}

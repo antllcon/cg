@@ -4,14 +4,14 @@
 #include <fstream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <libs/glm/gtc/matrix_transform.hpp>
-#include <libs/glm/gtc/type_ptr.hpp>
 #include <numbers>
 #include <ranges>
 #include <stdexcept>
 
 #define STB_TRUETYPE_IMPLEMENTATION
 #pragma warning(push, 0)
+#include "src/core/types/math/Math.h"
+
 #include <stb_truetype.h>
 #pragma warning(pop)
 
@@ -463,8 +463,8 @@ void OpenglRenderer::Flush3DLines()
 	}
 
 	glUseProgram(m_shaderLines3D);
-	glUniformMatrix4fv(m_projectionLocationLines3D, 1, GL_FALSE, glm::value_ptr(m_camera.projectionMatrix));
-	glUniformMatrix4fv(m_viewLocationLines3D, 1, GL_FALSE, glm::value_ptr(m_camera.viewMatrix));
+	glUniformMatrix4fv(m_projectionLocationLines3D, 1, GL_FALSE, Math::ValuePtr(m_camera.projectionMatrix));
+	glUniformMatrix4fv(m_viewLocationLines3D, 1, GL_FALSE, Math::ValuePtr(m_camera.viewMatrix));
 
 	glBindVertexArray(m_vaoLines3D);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vboLines3D);
@@ -709,8 +709,8 @@ void OpenglRenderer::Render2DGeometry(const float* data, size_t count, uint32_t 
 
 	glUseProgram(m_shader2D);
 
-	glm::mat4 ortho = glm::ortho(0.0f, AppConfig::WINDOW_WIDTH, AppConfig::WINDOW_HEIGHT, 0.0f, -1.0f, 1.0f);
-	glUniformMatrix4fv(m_projectionLocation2D, 1, GL_FALSE, glm::value_ptr(ortho));
+	Mat4 ortho = Math::Ortho(0.0f, AppConfig::WINDOW_WIDTH, AppConfig::WINDOW_HEIGHT, 0.0f, -1.0f, 1.0f);
+	glUniformMatrix4fv(m_projectionLocation2D, 1, GL_FALSE, Math::ValuePtr(ortho));
 	glUniform1i(m_renderModeLocation2D, renderMode);
 
 	if (renderMode == 1)

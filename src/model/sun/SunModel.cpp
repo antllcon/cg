@@ -1,4 +1,5 @@
 #include "SunModel.h"
+#include "src/core/types/math/Math.h"
 #include <algorithm>
 #include <cmath>
 #include <numbers>
@@ -25,7 +26,7 @@ Color LerpColor(const Color& a, const Color& b, float t)
 	float b_channel = std::lerp(a.GetB(), b.GetB(), t);
 	return Color::FromFloat(r, g, b_channel, 1.0f);
 }
-}
+} // namespace
 
 SunModel::SunModel()
 	: m_timeOfDay(10.0f)
@@ -74,16 +75,16 @@ float SunModel::GetTimeScale() const noexcept
 
 void SunModel::RecalculateSun()
 {
-	float angle = (m_timeOfDay / HOURS_IN_DAY) * 2.0f * std::numbers::pi_v<float>;
+	float angle = (m_timeOfDay - SUNRISE_HOUR) / DAY_DURATION * std::numbers::pi_v<float>;
 
 	Point3f sunDir;
 	sunDir.x = -std::cos(angle);
 	sunDir.y = -std::sin(angle);
 	sunDir.z = -0.3f;
 
-	m_data.direction = sunDir;
+	m_data.direction = Math::Normalize(sunDir);
 
-	float sunHeight = std::sin((m_timeOfDay - SUNRISE_HOUR) / DAY_DURATION * std::numbers::pi_v<float>);
+	float sunHeight = std::sin(angle);
 	float intensity = std::clamp(sunHeight, 0.1f, 1.2f);
 	m_data.intensity = intensity;
 

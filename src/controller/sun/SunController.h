@@ -11,6 +11,8 @@ public:
 
 	void Update(float dt) override;
 	void HandleEvent(const Event& event) override;
+	void SetTimeScale(float timeScale);
+	void SetTimeOfDay(float timeOfDay);
 
 private:
 	std::shared_ptr<SunModel> m_model;

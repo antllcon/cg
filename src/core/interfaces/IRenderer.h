@@ -1,5 +1,5 @@
 #pragma once
-#include "src/core/types/Point.h"
+#include "../types/math/Point.h"
 #include "src/core/types/color/Color.h"
 #include "src/core/types/math/Transform.h"
 #include "src/core/types/scene/CameraData.h"

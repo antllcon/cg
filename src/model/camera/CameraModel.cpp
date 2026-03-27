@@ -1,7 +1,7 @@
 #include "CameraModel.h"
+#include "src/core/types/math/Math.h"
 #include <algorithm>
 #include <cmath>
-#include <libs/glm/gtc/matrix_transform.hpp>
 #include <stdexcept>
 
 namespace
@@ -175,19 +175,19 @@ CameraData CameraModel::GetChangedData() const
 void CameraModel::UpdateVectors()
 {
 	Point3f front;
-	front.x = std::cos(glm::radians(m_yaw)) * std::cos(glm::radians(m_pitch));
-	front.y = std::sin(glm::radians(m_pitch));
-	front.z = std::sin(glm::radians(m_yaw)) * std::cos(glm::radians(m_pitch));
+	front.x = std::cos(Math::Radians(m_yaw)) * std::cos(Math::Radians(m_pitch));
+	front.y = std::sin(Math::Radians(m_pitch));
+	front.z = std::sin(Math::Radians(m_yaw)) * std::cos(Math::Radians(m_pitch));
 
-	m_forward = glm::normalize(front);
-	m_right = glm::normalize(glm::cross(m_forward, m_worldUp));
-	m_up = glm::normalize(glm::cross(m_right, m_forward));
+	m_forward = Math::Normalize(front);
+	m_right = Math::Normalize(Math::Cross(m_forward, m_worldUp));
+	m_up = Math::Normalize(Math::Cross(m_right, m_forward));
 
 	UpdateMatrices();
 }
 
 void CameraModel::UpdateMatrices()
 {
-	m_data.viewMatrix = glm::lookAt(m_data.position, m_data.position + m_forward, m_up);
-	m_data.projectionMatrix = glm::perspective(glm::radians(m_fov), m_aspect, m_near, m_far);
+	m_data.viewMatrix = Math::LookAt(m_data.position, m_data.position + m_forward, m_up);
+	m_data.projectionMatrix = Math::Perspective(Math::Radians(m_fov), m_aspect, m_near, m_far);
 }

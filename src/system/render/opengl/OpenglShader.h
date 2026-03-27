@@ -16,7 +16,7 @@ public:
 	void SetFloat2(const std::string& name, const Point2f& value) override;
 	void SetFloat3(const std::string& name, const Point3f& value) override;
 	void SetFloat4(const std::string& name, const Point4f& value) override;
-	void SetMat4(const std::string& name, const glm::mat4& value) override;
+	void SetMat4(const std::string& name, const Mat4& value) override;
 	void SetColor(const std::string& name, const Color& color) override;
 
 private:

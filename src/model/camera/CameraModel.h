@@ -1,5 +1,5 @@
 #pragma once
-#include "src/core/types/Point.h"
+#include "../../core/types/math/Point.h"
 #include "src/core/types/scene/CameraData.h"
 #include "src/system/Observer.h"
 

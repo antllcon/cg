@@ -1,5 +1,5 @@
 #include "EntityModel.h"
-#include <libs/glm/gtc/quaternion.hpp>
+#include "src/core/types/math/Math.h"
 
 EntityModel::EntityModel()
 {
@@ -20,8 +20,8 @@ void EntityModel::SetScale(const Point3f& scale)
 
 void EntityModel::Rotate(float angle, const Point3f& axis)
 {
-	glm::quat currentRotation = m_data.transform.GetRotation();
-	glm::quat deltaRotation = glm::angleAxis(angle, glm::normalize(axis));
+	Quat currentRotation = m_data.transform.GetRotation();
+	Quat deltaRotation = Math::AngleAxis(angle, Math::Normalize(axis));
 
 	m_data.transform.SetRotation(currentRotation * deltaRotation);
 	NotifyObservers();

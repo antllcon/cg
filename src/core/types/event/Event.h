@@ -1,5 +1,5 @@
 #pragma once
-#include "src/core/types/Point.h"
+#include "../math/Point.h"
 #include <variant>
 
 enum class MouseButton
