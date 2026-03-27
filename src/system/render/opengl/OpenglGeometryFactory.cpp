@@ -1,11 +1,9 @@
 #include "OpenglGeometryFactory.h"
-
 #include "../../../core/types/math/Point.h"
 #include "src/system/render/opengl/OpenglIndexBuffer.h"
 #include "src/system/render/opengl/OpenglMesh.h"
 #include "src/system/render/opengl/OpenglVertexArray.h"
 #include "src/system/render/opengl/OpenglVertexBuffer.h"
-
 #include <fstream>
 #include <stdexcept>
 

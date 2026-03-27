@@ -387,21 +387,6 @@ void OpenglRenderer::BeginFrame(const CameraData& camera)
 	m_lineCommands.clear();
 }
 
-void OpenglRenderer::SubmitLight(const LightData& light)
-{
-	m_lights.push_back(light);
-}
-
-void OpenglRenderer::SubmitMesh(const std::shared_ptr<IMesh>& mesh, const std::shared_ptr<IMaterial>& material, const Transform& transform)
-{
-	m_meshCommands.push_back({mesh, material, transform});
-}
-
-void OpenglRenderer::DrawLine3D(const Point3f& start, const Point3f& end, const Color& color, float thickness)
-{
-	m_lineCommands.push_back({start, end, color, thickness});
-}
-
 void OpenglRenderer::EndFrame()
 {
 	glEnable(GL_DEPTH_TEST);
@@ -455,35 +440,19 @@ void OpenglRenderer::EndFrame()
 	Flush3DLines();
 }
 
-void OpenglRenderer::Flush3DLines()
+void OpenglRenderer::SubmitLight(const LightData& light)
 {
-	if (m_lineCommands.empty())
-	{
-		return;
-	}
+	m_lights.push_back(light);
+}
 
-	glUseProgram(m_shaderLines3D);
-	glUniformMatrix4fv(m_projectionLocationLines3D, 1, GL_FALSE, Math::ValuePtr(m_camera.projectionMatrix));
-	glUniformMatrix4fv(m_viewLocationLines3D, 1, GL_FALSE, Math::ValuePtr(m_camera.viewMatrix));
+void OpenglRenderer::SubmitMesh(const std::shared_ptr<IMesh>& mesh, const std::shared_ptr<IMaterial>& material, const Transform& transform)
+{
+	m_meshCommands.push_back({mesh, material, transform});
+}
 
-	glBindVertexArray(m_vaoLines3D);
-	glBindBuffer(GL_ARRAY_BUFFER, m_vboLines3D);
-
-	for (const auto& [start, end, color, thickness] : m_lineCommands)
-	{
-		std::vector<float> data;
-		PushVertex3D(data, start, color);
-		PushVertex3D(data, end, color);
-
-		glLineWidth(thickness);
-		glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(data.size() * sizeof(float)), data.data(), GL_DYNAMIC_DRAW);
-		glDrawArrays(GL_LINES, 0, 2);
-	}
-
-	glLineWidth(1.0f);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-	glUseProgram(0);
+void OpenglRenderer::DrawLine3D(const Point3f& start, const Point3f& end, const Color& color, float thickness)
+{
+	m_lineCommands.push_back({start, end, color, thickness});
 }
 
 void OpenglRenderer::BeginUI()
@@ -726,6 +695,37 @@ void OpenglRenderer::Render2DGeometry(const float* data, size_t count, uint32_t 
 
 	glDrawArrays(drawMode, 0, static_cast<GLsizei>(count));
 
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+	glUseProgram(0);
+}
+
+void OpenglRenderer::Flush3DLines()
+{
+	if (m_lineCommands.empty())
+	{
+		return;
+	}
+
+	glUseProgram(m_shaderLines3D);
+	glUniformMatrix4fv(m_projectionLocationLines3D, 1, GL_FALSE, Math::ValuePtr(m_camera.projectionMatrix));
+	glUniformMatrix4fv(m_viewLocationLines3D, 1, GL_FALSE, Math::ValuePtr(m_camera.viewMatrix));
+
+	glBindVertexArray(m_vaoLines3D);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vboLines3D);
+
+	for (const auto& [start, end, color, thickness] : m_lineCommands)
+	{
+		std::vector<float> data;
+		PushVertex3D(data, start, color);
+		PushVertex3D(data, end, color);
+
+		glLineWidth(thickness);
+		glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(data.size() * sizeof(float)), data.data(), GL_DYNAMIC_DRAW);
+		glDrawArrays(GL_LINES, 0, 2);
+	}
+
+	glLineWidth(1.0f);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	glUseProgram(0);
