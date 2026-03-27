@@ -1,6 +1,7 @@
 #include "CameraController.h"
 #include "src/core/interfaces/IWindow.h"
 #include "src/core/types/event/EventHandling.h"
+#include "src/core/types/math/Math.h"
 #include <algorithm>
 
 namespace
@@ -10,11 +11,23 @@ constexpr float MOUSE_SENSITIVITY = 0.15f;
 constexpr float SPEED_MULTIPLIER_STEP = 0.2f;
 constexpr float MIN_SPEED_MULTIPLIER = 0.1f;
 constexpr float MAX_SPEED_MULTIPLIER = 10.0f;
+constexpr float COLLISION_RADIUS = 0.35f;
+
+bool IsPositionValid(const std::shared_ptr<MazeModel>& maze, const Point3f& pos, float radius)
+{
+	return maze->CanMoveTo(Point3f(pos.x + radius, pos.y, pos.z + radius)) && maze->CanMoveTo(Point3f(pos.x - radius, pos.y, pos.z + radius)) && maze->CanMoveTo(Point3f(pos.x + radius, pos.y, pos.z - radius)) && maze->CanMoveTo(Point3f(pos.x - radius, pos.y, pos.z - radius));
+}
 } // namespace
 
-CameraController::CameraController(std::shared_ptr<CameraModel> model, const IWindow& window)
+CameraController::CameraController(
+	std::shared_ptr<CameraModel> model,
+	std::shared_ptr<MazeModel> mazeModel,
+	const IWindow& window,
+	IAudioManager& audioManager)
 	: m_model(std::move(model))
+	, m_mazeModel(std::move(mazeModel))
 	, m_window(window)
+	, m_audioManager(audioManager)
 {
 }
 
@@ -32,9 +45,52 @@ void CameraController::Update(float dt)
 	if (m_isUp) upAmount += velocity;
 	if (m_isDown) upAmount -= velocity;
 
-	if (forwardAmount != 0.0f || rightAmount != 0.0f || upAmount != 0.0f)
+	if (forwardAmount == 0.0f && rightAmount == 0.0f && upAmount == 0.0f)
 	{
-		m_model->MoveLocal(forwardAmount, rightAmount, upAmount);
+		return;
+	}
+
+	Point3f forward = m_model->GetForward();
+	Point3f right = m_model->GetRight();
+	Point3f up = m_model->GetWorldUp();
+
+	if (m_isSpectator)
+	{
+		Point3f offset = forward * forwardAmount + right * rightAmount + up * upAmount;
+		m_model->MoveBy(offset);
+		return;
+	}
+
+	Point3f flatForward = Math::Normalize(Point3f(forward.x, 0.0f, forward.z));
+	Point3f flatRight = Math::Normalize(Point3f(right.x, 0.0f, right.z));
+
+	Point3f moveVector = flatForward * forwardAmount + flatRight * rightAmount;
+
+	if (moveVector.x != 0.0f || moveVector.z != 0.0f)
+	{
+		Point3f currentPos = m_model->GetData().position;
+		Point3f nextPos = currentPos + moveVector;
+
+		if (IsPositionValid(m_mazeModel, nextPos, COLLISION_RADIUS))
+		{
+			m_model->MoveBy(moveVector);
+		}
+		else
+		{
+			Point3f nextPosX = currentPos + Point3f(moveVector.x, 0.0f, 0.0f);
+			if (moveVector.x != 0.0f && IsPositionValid(m_mazeModel, nextPosX, COLLISION_RADIUS))
+			{
+				m_model->MoveBy(Point3f(moveVector.x, 0.0f, 0.0f));
+			}
+			else
+			{
+				Point3f nextPosZ = currentPos + Point3f(0.0f, 0.0f, moveVector.z);
+				if (moveVector.z != 0.0f && IsPositionValid(m_mazeModel, nextPosZ, COLLISION_RADIUS))
+				{
+					m_model->MoveBy(Point3f(0.0f, 0.0f, moveVector.z));
+				}
+			}
+		}
 	}
 }
 
@@ -48,6 +104,11 @@ void CameraController::HandleEvent(const Event& event)
 					   if (e.code == KeyCode::D) m_isRight = true;
 					   if (e.code == KeyCode::Space) m_isUp = true;
 					   if (e.code == KeyCode::LShift) m_isDown = true;
+					   if (e.code == KeyCode::C)
+					   {
+						   m_isSpectator = !m_isSpectator;
+						   m_audioManager.SetMusicPaused(m_isSpectator);
+					   }
 				   },
 				   [this](const KeyReleasedEvent& e) {
 					   if (e.code == KeyCode::W) m_isForward = false;

@@ -110,3 +110,46 @@ void AudioManager::PlaySoundFile(const std::filesystem::path& filePath)
 	m_voices[m_voiceIndex] = std::move(newVoice);
 	m_voiceIndex = (m_voiceIndex + 1) % MAX_VOICES;
 }
+
+void AudioManager::PlayMusic(const std::filesystem::path& filePath)
+{
+	std::string pathKey = filePath.string();
+	AssertIsFileExists(filePath);
+
+	if (m_music)
+	{
+		ma_sound_uninit(m_music.get());
+	}
+	else
+	{
+		m_music.reset(new ma_sound);
+	}
+
+	AssertIsSoundLoaded(ma_sound_init_from_file(
+		m_engine.get(),
+		pathKey.c_str(),
+		MA_SOUND_FLAG_STREAM,
+		nullptr,
+		nullptr,
+		m_music.get()));
+
+	ma_sound_set_looping(m_music.get(), MA_TRUE);
+	ma_sound_start(m_music.get());
+}
+
+void AudioManager::SetMusicPaused(bool isPaused)
+{
+	if (!m_music)
+	{
+		return;
+	}
+
+	if (isPaused)
+	{
+		ma_sound_stop(m_music.get());
+	}
+	else
+	{
+		ma_sound_start(m_music.get());
+	}
+}

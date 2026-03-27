@@ -46,11 +46,9 @@ void CameraModel::Init(const Point3f& position, float fov, float aspect, float n
 	UpdateVectors();
 }
 
-void CameraModel::MoveLocal(float forwardAmount, float rightAmount, float upAmount)
+void CameraModel::MoveBy(const Point3f& offset)
 {
-	m_data.position += m_forward * forwardAmount;
-	m_data.position += m_right * rightAmount;
-	m_data.position += m_worldUp * upAmount;
+	m_data.position += offset;
 
 	UpdateMatrices();
 	NotifyObservers();
@@ -70,8 +68,24 @@ void CameraModel::SetAspectRatio(float aspect)
 {
 	AssertIsPositive(aspect);
 	m_aspect = aspect;
+
 	UpdateMatrices();
 	NotifyObservers();
+}
+
+Point3f CameraModel::GetForward() const noexcept
+{
+	return m_forward;
+}
+
+Point3f CameraModel::GetRight() const noexcept
+{
+	return m_right;
+}
+
+Point3f CameraModel::GetWorldUp() const noexcept
+{
+	return m_worldUp;
 }
 
 const CameraData& CameraModel::GetData() const

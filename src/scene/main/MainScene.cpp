@@ -14,7 +14,21 @@
 #include "src/view/theme/ThemeView.h"
 #include "src/view/toast/ToastView.h"
 
-void MainScene::Init(std::shared_ptr<ThemeModel> themeModel, IAudioManager&, IWindow& window)
+#include <numbers>
+
+namespace
+{
+constexpr float TORCH_INTENSITY = 1.5f;
+constexpr float TORCH_RANGE = 15.0f;
+constexpr float SUN_DEFAULT_TIME = 12.0f;
+
+constexpr auto SHADER_VERT_PATH = "static/shaders/phong.vert";
+constexpr auto SHADER_FRAG_PATH = "static/shaders/phong.frag";
+constexpr auto BACKGROUND_MUSIC_PATH = "static/audio/my-mommy.mp3";
+// constexpr auto BACKGROUND_MUSIC_PATH = "static/audio/sad-meow-song.mp3";
+} // namespace
+
+void MainScene::Init(std::shared_ptr<ThemeModel> themeModel, IAudioManager& audioManager, IWindow& window)
 {
 	auto windowController = std::make_shared<WindowController>(window);
 	m_sceneController->AddController(windowController);
@@ -22,7 +36,9 @@ void MainScene::Init(std::shared_ptr<ThemeModel> themeModel, IAudioManager&, IWi
 	m_cameraModel = std::make_shared<CameraModel>();
 	m_sceneView->SetCamera(m_cameraModel);
 
-	auto cameraController = std::make_shared<CameraController>(m_cameraModel, window);
+	m_mazeModel = std::make_shared<MazeModel>();
+
+	auto cameraController = std::make_shared<CameraController>(m_cameraModel, m_mazeModel, window, audioManager);
 	m_sceneController->AddController(cameraController);
 
 	auto cameraView = std::make_shared<CameraView>(m_cameraModel, cameraController);
@@ -32,9 +48,16 @@ void MainScene::Init(std::shared_ptr<ThemeModel> themeModel, IAudioManager&, IWi
 	auto sunModel = std::make_shared<SunModel>();
 	m_sceneModel->AddLight(sunModel);
 
+	m_torchModel = std::make_shared<LightModel>();
+	m_torchModel->SetType(LightType::Point);
+	m_torchModel->SetColor(Color::FromFloat(1.0f, 0.8f, 0.5f, 1.0f));
+	m_torchModel->SetIntensity(TORCH_INTENSITY);
+	m_torchModel->SetRange(TORCH_RANGE);
+	m_sceneModel->AddLight(m_torchModel);
+
 	auto sunController = std::make_shared<SunController>(sunModel);
 	sunController->SetTimeScale(0.0f);
-	sunController->SetTimeOfDay(12.0f);
+	sunController->SetTimeOfDay(SUN_DEFAULT_TIME);
 	m_sceneController->AddController(sunController);
 
 	auto themeController = std::make_shared<ThemeController>(themeModel);
@@ -58,33 +81,9 @@ void MainScene::Init(std::shared_ptr<ThemeModel> themeModel, IAudioManager&, IWi
 	m_fpsModel->RegisterObserver(fpsView);
 	m_sceneView->AddUiView(fpsView);
 
-	OpenglGeometryFactory geometryFactory;
+	GenerateLevel();
 
-	std::string vertSource = FileReader::ReadFileToString("static/shaders/phong.vert");
-	std::string fragSource = FileReader::ReadFileToString("static/shaders/phong.frag");
-	auto sharedShader = std::make_shared<OpenglShader>(vertSource, fragSource);
-
-	auto planeMesh = geometryFactory.CreatePlane(100.0f, 100.0f);
-	auto hexecontahedronMesh = geometryFactory.CreateFromObj("static/models/pentagonal-hexecontahedron.obj");
-
-	auto planeMaterial = std::make_shared<OpenglMaterial>();
-	planeMaterial->SetShader(sharedShader);
-
-	auto planeModel = std::make_shared<EntityModel>();
-	planeModel->SetPosition({0.0f, -1.0f, 0.0f});
-	planeModel->SetColor(Color::FromRGBA(166, 181, 128));
-	m_sceneModel->AddEntity(planeModel);
-	m_sceneView->RegisterEntityVisuals(planeModel, planeMesh, planeMaterial);
-
-	auto hexecontahedronMaterial = std::make_shared<OpenglMaterial>();
-	hexecontahedronMaterial->SetShader(sharedShader);
-
-	auto hexecontahedron = std::make_shared<EntityModel>();
-	hexecontahedron->SetPosition({2.0f, 0.0f, 0.0f});
-	hexecontahedron->SetScale({0.05f, 0.05f, 0.05f});
-	hexecontahedron->SetColor(Color::FromRGBA(102, 102, 255));
-	m_sceneModel->AddEntity(hexecontahedron);
-	m_sceneView->RegisterEntityVisuals(hexecontahedron, hexecontahedronMesh, hexecontahedronMaterial);
+	audioManager.PlayMusic(BACKGROUND_MUSIC_PATH);
 }
 
 void MainScene::Update(float dt)
@@ -95,6 +94,11 @@ void MainScene::Update(float dt)
 	{
 		m_fpsModel->Update(dt);
 	}
+
+	if (m_torchModel && m_cameraModel)
+	{
+		m_torchModel->SetPosition(m_cameraModel->GetData().position);
+	}
 }
 
 void MainScene::OnException(const std::exception& e)
@@ -102,5 +106,65 @@ void MainScene::OnException(const std::exception& e)
 	if (m_toastController)
 	{
 		m_toastController->ShowError(e.what());
+	}
+}
+
+void MainScene::GenerateLevel()
+{
+	OpenglGeometryFactory geometryFactory;
+
+	std::string vertSource = FileReader::ReadFileToString(SHADER_VERT_PATH);
+	std::string fragSource = FileReader::ReadFileToString(SHADER_FRAG_PATH);
+	auto sharedShader = std::make_shared<OpenglShader>(vertSource, fragSource);
+
+	const auto& layout = m_mazeModel->GetLayout();
+	float blockSize = m_mazeModel->GetBlockSize();
+	float mazeWidth = static_cast<float>(layout[0].size()) * blockSize;
+	float mazeDepth = static_cast<float>(layout.size()) * blockSize;
+	float centerX = mazeWidth / 2.0f - blockSize / 2.0f;
+	float centerZ = mazeDepth / 2.0f - blockSize / 2.0f;
+
+	auto planeMesh = geometryFactory.CreatePlane(mazeWidth, mazeDepth);
+	auto cubeMesh = geometryFactory.CreateCube(blockSize);
+
+	auto floorMaterial = std::make_shared<OpenglMaterial>();
+	floorMaterial->SetShader(sharedShader);
+	floorMaterial->SetSpecularColor(Color::FromFloat(0.0f, 0.0f, 0.0f, 0.0f));
+
+	auto floorModel = std::make_shared<EntityModel>();
+	floorModel->SetPosition({centerX, -blockSize / 2.0f, centerZ});
+	floorModel->SetColor(Color::FromRGBA(127, 0, 255));
+	m_sceneModel->AddEntity(floorModel);
+	m_sceneView->RegisterEntityVisuals(floorModel, planeMesh, floorMaterial);
+
+	auto ceilingMaterial = std::make_shared<OpenglMaterial>();
+	ceilingMaterial->SetShader(sharedShader);
+	ceilingMaterial->SetSpecularColor(Color::FromFloat(0.0f, 0.0f, 0.0f, 0.0f));
+
+	auto ceilingModel = std::make_shared<EntityModel>();
+	ceilingModel->SetPosition({centerX, blockSize / 2.0f, centerZ});
+	ceilingModel->Rotate(std::numbers::pi_v<float>, {1.0f, 0.0f, 0.0f});
+	ceilingModel->SetColor(Color::FromRGBA(160, 120, 120));
+	m_sceneModel->AddEntity(ceilingModel);
+	m_sceneView->RegisterEntityVisuals(ceilingModel, planeMesh, ceilingMaterial);
+
+	auto wallMaterial = std::make_shared<OpenglMaterial>();
+	wallMaterial->SetShader(sharedShader);
+
+	for (size_t row = 0; row < layout.size(); ++row)
+	{
+		for (size_t col = 0; col < layout[row].size(); ++col)
+		{
+			if (layout[row][col] == '#')
+			{
+				auto wallModel = std::make_shared<EntityModel>();
+				wallModel->SetPosition({static_cast<float>(col) * blockSize,
+					0.0f,
+					static_cast<float>(row) * blockSize});
+				wallModel->SetColor(Color::FromRGBA(166, 181, 128));
+				m_sceneModel->AddEntity(wallModel);
+				m_sceneView->RegisterEntityVisuals(wallModel, cubeMesh, wallMaterial);
+			}
+		}
 	}
 }

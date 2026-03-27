@@ -15,8 +15,10 @@ public:
 	AudioManager();
 	~AudioManager() override;
 
-	void PreloadSound(const std::filesystem::path& filePath);
+	void PreloadSound(const std::filesystem::path& filePath) override;
 	void PlaySoundFile(const std::filesystem::path& filePath) override;
+	void PlayMusic(const std::filesystem::path& filePath) override;
+	void SetMusicPaused(bool isPaused) override;
 
 private:
 	static constexpr size_t MAX_VOICES = 4;
@@ -33,6 +35,7 @@ private:
 
 	std::unique_ptr<ma_engine, EngineDeleter> m_engine;
 	std::unordered_map<std::string, std::unique_ptr<ma_sound, SoundDeleter>> m_soundCache;
+	std::unique_ptr<ma_sound, SoundDeleter> m_music;
 	std::array<std::unique_ptr<ma_sound, SoundDeleter>, MAX_VOICES> m_voices;
 	size_t m_voiceIndex;
 };

@@ -10,9 +10,13 @@ public:
 
 	void Init(const Point3f& position, float fov, float aspect, float nearPlane, float farPlane);
 
-	void MoveLocal(float forwardAmount, float rightAmount, float upAmount);
+	void MoveBy(const Point3f& offset);
 	void Rotate(float yawOffset, float pitchOffset);
 	void SetAspectRatio(float aspect);
+
+	Point3f GetForward() const noexcept;
+	Point3f GetRight() const noexcept;
+	Point3f GetWorldUp() const noexcept;
 
 	const CameraData& GetData() const;
 
