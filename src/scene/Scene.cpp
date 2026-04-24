@@ -7,7 +7,7 @@ Scene::Scene()
 	m_sceneView = std::make_shared<SceneView>(m_sceneModel);
 }
 
-void Scene::Init(std::shared_ptr<ThemeModel>, IAudioManager&, IWindow&)
+void Scene::Init(IAudioManager&, IWindow&)
 {
 }
 

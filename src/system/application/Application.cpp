@@ -3,7 +3,6 @@
 #include "src/scene/main/MainScene.h"
 #include "src/system/AppConfig.h"
 #include <chrono>
-#include <filesystem>
 #include <stdexcept>
 
 namespace
@@ -21,12 +20,11 @@ void AssertIsWindowValid(const IWindow* window)
 	}
 }
 
-void SetupWindowProperties(IWindow& window)
+void SetupWindow(IWindow& window)
 {
 	window.SetTitleBarTheme(true);
 	window.SetVSync(false);
 	window.SetIconColor(AppConfig::ICON_COLOR_LIGHT);
-	// window.SetIconFromFile("static/icon.png");
 }
 } // namespace
 
@@ -37,16 +35,14 @@ Application::Application(
 	: m_window(std::move(window))
 	, m_renderer(std::move(renderer))
 	, m_audioManager(std::move(audioManager))
-	, m_themeModel(std::make_shared<ThemeModel>())
 {
 	AssertIsWindowValid(m_window.get());
-	SetupWindowProperties(*m_window);
+	SetupWindow(*m_window);
 }
 
 void Application::Init()
 {
-	m_themeModel->RegisterObserver(shared_from_this());
-	Update(m_themeModel->GetData(), nullptr);
+	m_renderer->SetClearColor(AppConfig::DarkTheme::WINDOW_BG);
 	m_renderer->LoadFont(AppConfig::FONT_PATH, AppConfig::FONT_SIZE);
 	LoadScene(std::make_unique<MainScene>());
 }
@@ -64,25 +60,6 @@ void Application::Run()
 		ProcessEvents();
 		UpdateLogic(dt.count());
 		Render();
-	}
-
-	m_themeModel->RemoveObserver(shared_from_this());
-}
-
-
-void Application::Update(const ThemeData& data, IObservable<ThemeData>*)
-{
-	if (m_window)
-	{
-		m_window->SetTitleBarTheme(data.isDark);
-		Color iconColor = data.isDark ? AppConfig::ICON_COLOR_LIGHT : AppConfig::ICON_COLOR_DARK;
-		m_window->SetIconColor(iconColor);
-	}
-
-	if (m_renderer)
-	{
-		Color bgColor = data.isDark ? AppConfig::DarkTheme::WINDOW_BG : AppConfig::LightTheme::WINDOW_BG;
-		m_renderer->SetClearColor(bgColor);
 	}
 }
 
@@ -147,6 +124,6 @@ void Application::LoadScene(std::unique_ptr<Scene> scene)
 
 	if (m_scene)
 	{
-		m_scene->Init(m_themeModel, *m_audioManager, *m_window);
+		m_scene->Init(*m_audioManager, *m_window);
 	}
 }

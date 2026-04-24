@@ -5,16 +5,14 @@
 #include "src/scene/Scene.h"
 #include <memory>
 
-class Application final
-	: public IObserver<ThemeData>
-	, public std::enable_shared_from_this<Application>
+class Application final : public std::enable_shared_from_this<Application>
 {
 public:
 	Application(
 		std::unique_ptr<IWindow> window,
 		std::unique_ptr<IRenderer> renderer,
 		std::unique_ptr<IAudioManager> audioManager);
-	~Application() override = default;
+	~Application() = default;
 
 	Application(const Application&) = delete;
 	Application& operator=(const Application&) = delete;
@@ -23,7 +21,6 @@ public:
 
 	void Init();
 	void Run();
-	void Update(const ThemeData& data, IObservable<ThemeData>* subject) override;
 
 private:
 	void ProcessEvents();
@@ -35,5 +32,4 @@ private:
 	std::unique_ptr<IRenderer> m_renderer;
 	std::unique_ptr<IAudioManager> m_audioManager;
 	std::unique_ptr<Scene> m_scene;
-	std::shared_ptr<ThemeModel> m_themeModel;
 };

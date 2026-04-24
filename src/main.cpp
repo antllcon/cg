@@ -17,7 +17,11 @@ int main()
 		auto renderer = std::make_unique<OpenglRenderer>();
 		auto audio = std::make_unique<AudioManager>();
 
-		auto app = std::make_shared<Application>(std::move(window), std::move(renderer), std::move(audio));
+		auto app = std::make_shared<Application>(
+			std::move(window),
+			std::move(renderer),
+			std::move(audio)
+		);
 
 		app->Init();
 		app->Run();

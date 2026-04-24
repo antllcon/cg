@@ -8,7 +8,7 @@
 class MainScene final : public Scene
 {
 public:
-	void Init(std::shared_ptr<ThemeModel> themeModel, IAudioManager& audioManager, IWindow& window) override;
+	void Init(IAudioManager& audioManager, IWindow& window) override;
 	void Update(float dt) override;
 	void OnException(const std::exception& e) override;
 
