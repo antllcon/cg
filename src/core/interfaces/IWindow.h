@@ -16,6 +16,7 @@ public:
 
 	virtual Point2i GetSize() const = 0;
 	virtual void SetTitleBarTheme(bool isDark) = 0;
+
 	virtual void SetIconColor(const Color& color) = 0;
 	virtual void SetIconFromFile(const std::filesystem::path& path) = 0;
 

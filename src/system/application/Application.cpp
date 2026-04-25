@@ -26,6 +26,14 @@ void SetupWindow(IWindow& window)
 	window.SetVSync(false);
 	window.SetIconColor(AppConfig::ICON_COLOR_LIGHT);
 }
+
+float CalculateDeltaTime(std::chrono::steady_clock::time_point& lastTime)
+{
+	auto currentTime = std::chrono::steady_clock::now();
+	std::chrono::duration<float> dt = currentTime - lastTime;
+	lastTime = currentTime;
+	return dt.count();
+}
 } // namespace
 
 Application::Application(
@@ -53,12 +61,10 @@ void Application::Run()
 
 	while (m_window->IsOpen())
 	{
-		auto currentTime = std::chrono::steady_clock::now();
-		std::chrono::duration<float> dt = currentTime - lastTime;
-		lastTime = currentTime;
+		const auto dt = CalculateDeltaTime(lastTime);
 
 		ProcessEvents();
-		UpdateLogic(dt.count());
+		UpdateLogic(dt);
 		Render();
 	}
 }

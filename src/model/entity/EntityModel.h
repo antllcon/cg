@@ -6,7 +6,7 @@
 struct EntityData
 {
 	Transform transform;
-	Color color; // TODO: зачем в модели, можно ли без неё? А во view?
+	Color color;
 };
 
 class EntityModel final : public CObservable<EntityData>

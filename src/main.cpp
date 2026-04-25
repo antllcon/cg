@@ -20,8 +20,7 @@ int main()
 		auto app = std::make_shared<Application>(
 			std::move(window),
 			std::move(renderer),
-			std::move(audio)
-		);
+			std::move(audio));
 
 		app->Init();
 		app->Run();
