@@ -25,6 +25,16 @@ std::string GetExtensionToLower(const std::filesystem::path& path)
 	return ext;
 }
 
+std::string GetExtensionToLower(const std::filesystem::path& path)
+{
+	std::string ext = path.extension().string();
+	for (auto& ch : ext)
+	{
+		ch = static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
+	}
+	return ext;
+}
+
 void AssertIsFileExists(const std::filesystem::path& path)
 {
 	if (!std::filesystem::exists(path))
