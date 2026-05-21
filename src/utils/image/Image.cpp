@@ -1,12 +1,38 @@
 #include "Image.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "libs/stb/stb_image.h"
-
 #include <algorithm>
+#include <filesystem>
+#include <set>
 #include <stdexcept>
 
 namespace
 {
+const std::set<std::string> IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".bmp", ".tiff", ".webp"};
+
+void AssertIsFileExists(const std::filesystem::path& path)
+{
+	if (!std::filesystem::exists(path))
+	{
+		throw std::invalid_argument("Файл не найден: " + path.string());
+	}
+}
+
+void AssertIsImageFile(const std::filesystem::path& path)
+{
+	std::string ext = path.extension().string();
+
+	for (auto& ch : ext)
+	{
+		ch = static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
+	}
+
+	if (!IMAGE_EXTENSIONS.contains(ext))
+	{
+		throw std::invalid_argument("Файл не является изображением: " + path.string());
+	}
+}
+
 void AssertIsLoaded(const unsigned char* data)
 {
 	if (!data)
@@ -21,35 +47,6 @@ void AssertIsDimensionsValid(const int width, const int height, const int channe
 	{
 		throw std::runtime_error("Некорректные размеры изображения");
 	}
-}
-
-void AssertIsHexColorValid(const std::string& hexColor)
-{
-	if (hexColor.length() != 6)
-	{
-		throw std::invalid_argument("Цвет должен быть строкой из 6 символов RRGGBB");
-	}
-	for (const char c : hexColor)
-	{
-		if (!std::isxdigit(static_cast<unsigned char>(c)))
-		{
-			throw std::invalid_argument("Цвет должен содержать только шестнадцатеричные символы");
-		}
-	}
-}
-
-void AssertIsMemoryAllocated(const unsigned char* data)
-{
-	if (!data)
-	{
-		throw std::runtime_error("Не удалось выделить память под изображение");
-	}
-}
-
-unsigned char ParseHexChannel(const std::string& hexColor, const size_t offset)
-{
-	const std::string channelStr = hexColor.substr(offset, 2);
-	return static_cast<unsigned char>(std::stoul(channelStr, nullptr, 16));
 }
 } // namespace
 
@@ -126,6 +123,9 @@ unsigned char* Image::GetData()
 
 void Image::Load(const std::string& path)
 {
+	AssertIsFileExists(path);
+	AssertIsImageFile(path);
+
 	int width = 0;
 	int height = 0;
 	int channels = 0;
