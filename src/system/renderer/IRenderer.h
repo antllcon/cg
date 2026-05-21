@@ -1,6 +1,6 @@
 #pragma once
 
-#include "src/core/types/color/Color.h"
+#include "src/utils/color/Color.h"
 
 class IRenderer
 {
