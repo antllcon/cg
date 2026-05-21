@@ -1,5 +1,5 @@
 #pragma once
-#include "../math/Point.h"
+
 #include <variant>
 
 enum class MouseButton
@@ -129,24 +129,24 @@ struct WindowResizedEvent
 
 struct MouseButtonPressedEvent
 {
-	Point2i position;
+	std::pair<double, double> position;
 	MouseButton button;
 };
 
 struct MouseButtonReleasedEvent
 {
-	Point2i position;
+	std::pair<double, double> position;
 	MouseButton button;
 };
 
 struct MouseMovedEvent
 {
-	Point2i position;
+	std::pair<double, double> position;
 };
 
 struct MouseScrolledEvent
 {
-	Point2i position;
+	std::pair<double, double> position;
 	float delta;
 };
 
