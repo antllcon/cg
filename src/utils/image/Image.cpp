@@ -25,16 +25,6 @@ std::string GetExtensionToLower(const std::filesystem::path& path)
 	return ext;
 }
 
-std::string GetExtensionToLower(const std::filesystem::path& path)
-{
-	std::string ext = path.extension().string();
-	for (auto& ch : ext)
-	{
-		ch = static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
-	}
-	return ext;
-}
-
 void AssertIsFileExists(const std::filesystem::path& path)
 {
 	if (!std::filesystem::exists(path))
@@ -45,7 +35,7 @@ void AssertIsFileExists(const std::filesystem::path& path)
 
 void AssertIsImageFile(const std::filesystem::path& path)
 {
-	const std::string ext = GetExtensionToLower(path);
+	const auto ext = GetExtensionToLower(path);
 
 	if (!IMAGE_EXTENSIONS.contains(ext))
 	{
@@ -61,7 +51,7 @@ void AssertIsLoaded(const unsigned char* data)
 	}
 }
 
-void AssertIsDimensionsValid(const int width, const int height, const int channels)
+void AssertIsDimensionsValid(const uint32_t width, const uint32_t height, const uint8_t channels)
 {
 	if (width <= 0 || height <= 0 || channels <= 0)
 	{
@@ -115,12 +105,12 @@ Image::Image(const std::string& path)
 	Load(path);
 }
 
-Image::Image(unsigned int width, unsigned int height, unsigned int channels, const unsigned char* data)
+Image::Image(uint32_t width, uint32_t height, uint8_t channels, const unsigned char* data)
 	: m_width(width)
 	, m_height(height)
 	, m_channels(channels)
 {
-	AssertIsDimensionsValid(static_cast<int>(width), static_cast<int>(height), static_cast<int>(channels));
+	AssertIsDimensionsValid(width, height, channels);
 	AssertIsRawDataProvided(data);
 
 	const size_t bytesCount = GetPixelCount() * m_channels;
@@ -190,22 +180,22 @@ bool Image::IsRGB() const
 	return m_channels == 3u;
 }
 
-unsigned int Image::GetWidth() const
+uint32_t Image::GetWidth() const
 {
 	return m_width;
 }
 
-unsigned int Image::GetHeight() const
+uint32_t Image::GetHeight() const
 {
 	return m_height;
 }
 
-unsigned int Image::GetChannels() const
+uint8_t Image::GetChannels() const
 {
 	return m_channels;
 }
 
-size_t Image::GetPixelCount() const
+uint64_t Image::GetPixelCount() const
 {
 	return m_width * m_height;
 }
@@ -234,9 +224,9 @@ void Image::Load(const std::string& path)
 	AssertIsLoaded(data);
 	AssertIsDimensionsValid(width, height, channels);
 
-	m_width = static_cast<unsigned int>(width);
-	m_height = static_cast<unsigned int>(height);
-	m_channels = static_cast<unsigned int>(channels);
+	m_width = static_cast<uint32_t>(width);
+	m_height = static_cast<uint32_t>(height);
+	m_channels = static_cast<uint8_t>(channels);
 	m_data = data;
 }
 
