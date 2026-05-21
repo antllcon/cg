@@ -7,12 +7,15 @@ class Image
 {
 public:
 	explicit Image(const std::string& path);
+	Image(unsigned int width, unsigned int height, unsigned int channels, const unsigned char* data);
 	~Image();
 
 	Image(const Image&) = delete;
 	Image& operator=(const Image&) = delete;
 	Image(Image&& other) noexcept;
 	Image& operator=(Image&& other) noexcept;
+
+	void Save(const std::string& path) const;
 
 	bool IsRGB() const;
 
