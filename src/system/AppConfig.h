@@ -1,35 +1,25 @@
 #pragma once
-#include "src/core/types/color/Color.h"
+
+#include "src/utils/color/Color.h"
 #include <cstdint>
 
 namespace AppConfig
 {
-inline constexpr float WINDOW_WIDTH = 1280.0f;
-inline constexpr float WINDOW_HEIGHT = 720.0f;
-inline constexpr auto WINDOW_NAME = "Window";
+inline constexpr auto WINDOW_NAME = "Image median redactor";
+inline constexpr float WINDOW_WIDTH = 960.0f;
+inline constexpr float WINDOW_HEIGHT = 960.0f;
 
 inline constexpr auto FONT_PATH = "static/font.ttf";
 inline constexpr uint32_t FONT_SIZE = 12;
 
-inline constexpr auto PRESS_SOUND = "static/sound.mp3";
+inline const Color ICON_COLOR = Color::FromRGBA(240, 240, 240, 255);
+inline constexpr uint8_t ICON_SIZE = 32u;
 
-inline const Color ICON_COLOR_DARK = Color::FromFloat(0.125f, 0.125f, 0.125f, 1.0f);
-inline const Color ICON_COLOR_LIGHT = Color::FromFloat(0.94f, 0.94f, 0.94f, 1.0f);
-inline constexpr uint32_t ICON_SIZE = 32;
-
-namespace DarkTheme
-{
 inline const Color WINDOW_BG = Color::FromRGBA(217, 230, 239);
-inline const Color SURFACE_BG = Color::FromFloat(0.196f, 0.196f, 0.196f, 0.902f);
-inline const Color SURFACE_OUTLINE = Color::FromFloat(0.314f, 0.314f, 0.314f, 1.0f);
-inline const Color PRIMARY_TEXT = Color::FromFloat(1.0f, 1.0f, 1.0f, 1.0f);
-} // namespace DarkTheme
+inline const Color SURFACE_BG = Color::FromRGBA(50, 50, 50, 230);
+inline const Color SURFACE_OUTLINE = Color::FromRGBA(80, 80, 80, 255);
+inline const Color PRIMARY_TEXT = Color::FromRGBA(255, 255, 255, 255);
 
-namespace LightTheme
-{
-inline const Color WINDOW_BG = Color::FromRGBA(217, 230, 239);
-inline const Color SURFACE_BG = Color::FromFloat(0.94f, 0.94f, 0.94f, 0.784f);
-inline const Color SURFACE_OUTLINE = Color::FromFloat(0.784f, 0.784f, 0.784f, 1.0f);
-inline const Color PRIMARY_TEXT = Color::FromFloat(0.0f, 0.0f, 0.0f, 1.0f);
-} // namespace LightTheme
+inline constexpr bool DARK_ENABLED = true;
+inline constexpr bool VSYNC_ENABLED = true;
 } // namespace AppConfig
