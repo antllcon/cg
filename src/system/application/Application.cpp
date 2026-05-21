@@ -1,13 +1,14 @@
 #include "Application.h"
-#include "src/core/types/event/EventHandling.h"
-#include "src/scene/main/MainScene.h"
 #include "src/system/AppConfig.h"
+#include "src/system/window/GlfwWindow.h"
 #include <chrono>
-#include <filesystem>
 #include <stdexcept>
+#include <variant>
 
 namespace
 {
+using Clock = std::chrono::high_resolution_clock;
+
 void AssertIsWindowValid(const IWindow* window)
 {
 	if (!window)
@@ -21,111 +22,83 @@ void AssertIsWindowValid(const IWindow* window)
 	}
 }
 
+void AssertIsRendererValid(const IRenderer* renderer)
+{
+	if (!renderer)
+	{
+		throw std::runtime_error("Рендерер не инициализирован");
+	}
+}
+
 void SetupWindowProperties(IWindow& window)
 {
-	window.SetTitleBarTheme(true);
-	window.SetVSync(false);
-	window.SetIconColor(AppConfig::ICON_COLOR_LIGHT);
-	// window.SetIconFromFile("static/icon.png");
+	window.SetTitleBarColor(AppConfig::DARK_ENABLED);
+	window.SetIcon(AppConfig::ICON_SIZE, AppConfig::ICON_COLOR);
+	window.SetVSync(AppConfig::VSYNC_ENABLED);
+}
+
+void SetupRendererProperties(IRenderer& m_renderer)
+{
+	m_renderer.SetClearColor(AppConfig::WINDOW_BG);
+}
+
+float ConsumeDeltaTime(Clock::time_point& lastTime)
+{
+	const auto currentTime = Clock::now();
+	const auto duration = currentTime - lastTime;
+	lastTime = currentTime;
+	return duration.count();
 }
 } // namespace
 
-Application::Application(
-	std::unique_ptr<IWindow> window,
-	std::unique_ptr<IRenderer> renderer,
-	std::unique_ptr<IAudioManager> audioManager)
-	: m_window(std::move(window))
-	, m_renderer(std::move(renderer))
-	, m_audioManager(std::move(audioManager))
-	, m_themeModel(std::make_shared<ThemeModel>())
+Application::Application()
+	: m_window(std::make_unique<GlfwWindow>())
+	, m_renderer(std::make_unique<OpenGLRenderer>())
 {
 	AssertIsWindowValid(m_window.get());
-	SetupWindowProperties(*m_window);
-}
+	AssertIsRendererValid(m_renderer.get());
 
-void Application::Init()
-{
-	m_themeModel->RegisterObserver(shared_from_this());
-	Update(m_themeModel->GetData(), nullptr);
-	m_renderer->LoadFont(AppConfig::FONT_PATH, AppConfig::FONT_SIZE);
-	LoadScene(std::make_unique<MainScene>());
+	SetupWindowProperties(*m_window);
+	SetupRendererProperties(*m_renderer);
 }
 
 void Application::Run()
 {
-	auto lastTime = std::chrono::steady_clock::now();
+	auto lastTime = Clock::now();
 
 	while (m_window->IsOpen())
 	{
-		auto currentTime = std::chrono::steady_clock::now();
-		std::chrono::duration<float> dt = currentTime - lastTime;
-		lastTime = currentTime;
+		const auto dt = ConsumeDeltaTime(lastTime);
 
 		ProcessEvents();
-		UpdateLogic(dt.count());
+		UpdateLogic(dt);
 		Render();
-	}
-
-	m_themeModel->RemoveObserver(shared_from_this());
-}
-
-
-void Application::Update(const ThemeData& data, IObservable<ThemeData>*)
-{
-	if (m_window)
-	{
-		m_window->SetTitleBarTheme(data.isDark);
-		Color iconColor = data.isDark ? AppConfig::ICON_COLOR_LIGHT : AppConfig::ICON_COLOR_DARK;
-		m_window->SetIconColor(iconColor);
-	}
-
-	if (m_renderer)
-	{
-		Color bgColor = data.isDark ? AppConfig::DarkTheme::WINDOW_BG : AppConfig::LightTheme::WINDOW_BG;
-		m_renderer->SetClearColor(bgColor);
 	}
 }
 
 void Application::ProcessEvents()
 {
-	while (std::optional<Event> eventOpt = m_window->PollEvent())
+	while (auto eventOpt = m_window->PollEvent())
 	{
-		const Event& event = eventOpt.value();
+		const auto& event = eventOpt.value();
 
-		std::visit(Overload{
-					   [this](const WindowClosedEvent&) {
-						   m_window->Close();
-					   },
-					   [](const auto&) {
-					   }},
-			event);
-
-		if (m_scene)
+		if (std::holds_alternative<WindowClosedEvent>(event))
 		{
-			try
-			{
-				m_scene->ProcessEvents(event);
-			}
-			catch (const std::exception& e)
-			{
-				m_scene->OnException(e);
-			}
+			m_window->Close();
+		}
+
+		if (m_sceneManager)
+		{
+			m_sceneManager->ProcessEvents(event);
 		}
 	}
 }
 
 void Application::UpdateLogic(float dt)
 {
-	if (m_scene)
+	if (m_sceneManager)
 	{
-		try
-		{
-			m_scene->Update(dt);
-		}
-		catch (const std::exception& e)
-		{
-			m_scene->OnException(e);
-		}
+		m_sceneManager->Update(dt);
 	}
 }
 
@@ -133,20 +106,15 @@ void Application::Render()
 {
 	m_renderer->Clear();
 
-	if (m_scene)
+	if (m_sceneManager)
 	{
-		m_scene->Render(*m_renderer);
+		m_sceneManager->Render(*m_renderer);
 	}
 
 	m_renderer->Display();
 }
 
-void Application::LoadScene(std::unique_ptr<Scene> scene)
+void Application::LoadScene(std::unique_ptr<SceneManager> scene)
 {
-	m_scene = std::move(scene);
-
-	if (m_scene)
-	{
-		m_scene->Init(m_themeModel, *m_audioManager, *m_window);
-	}
+	m_sceneManager = std::move(scene);
 }
