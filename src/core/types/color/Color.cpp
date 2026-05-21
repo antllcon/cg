@@ -1,6 +1,6 @@
 #include "Color.h"
-
 #include <cmath>
+#include <limits>
 #include <stdexcept>
 
 namespace
@@ -22,13 +22,14 @@ uint8_t ConvertFloatToByte(float value)
 {
 	return static_cast<uint8_t>(std::round(value * 255.0f));
 }
+
+bool AreFloatsEqual(float a, float b)
+{
+	return std::abs(a - b) < std::numeric_limits<float>::epsilon();
+}
 } // namespace
 
 Color::Color()
-	: m_r(0.0f)
-	, m_g(0.0f)
-	, m_b(0.0f)
-	, m_a(1.0f)
 {
 }
 
@@ -42,7 +43,11 @@ Color::Color(float r, float g, float b, float a)
 
 Color Color::FromRGBA(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
 {
-	return Color(ConvertByteToFloat(r), ConvertByteToFloat(g), ConvertByteToFloat(b), ConvertByteToFloat(a));
+	return Color(
+		ConvertByteToFloat(r),
+		ConvertByteToFloat(g),
+		ConvertByteToFloat(b),
+		ConvertByteToFloat(a));
 }
 
 Color Color::FromFloat(float r, float g, float b, float a)
@@ -55,52 +60,36 @@ Color Color::FromFloat(float r, float g, float b, float a)
 	return Color(r, g, b, a);
 }
 
-float Color::GetR() const noexcept
+std::tuple<float, float, float, float> Color::GetAsFloats() const noexcept
 {
-	return m_r;
+	return {m_r, m_g, m_b, m_a};
 }
 
-float Color::GetG() const noexcept
+std::tuple<uint8_t, uint8_t, uint8_t, uint8_t> Color::GetAsBytes() const noexcept
 {
-	return m_g;
-}
-
-float Color::GetB() const noexcept
-{
-	return m_b;
-}
-
-float Color::GetA() const noexcept
-{
-	return m_a;
-}
-
-uint8_t Color::GetRAsByte() const noexcept
-{
-	return ConvertFloatToByte(m_r);
-}
-
-uint8_t Color::GetGAsByte() const noexcept
-{
-	return ConvertFloatToByte(m_g);
-}
-
-uint8_t Color::GetBAsByte() const noexcept
-{
-	return ConvertFloatToByte(m_b);
-}
-
-uint8_t Color::GetAAsByte() const noexcept
-{
-	return ConvertFloatToByte(m_a);
+	return {
+		ConvertFloatToByte(m_r),
+		ConvertFloatToByte(m_g),
+		ConvertFloatToByte(m_b),
+		ConvertFloatToByte(m_a)};
 }
 
 uint32_t Color::ToHex() const noexcept
 {
-	uint32_t r = GetRAsByte();
-	uint32_t g = GetGAsByte();
-	uint32_t b = GetBAsByte();
-	uint32_t a = GetAAsByte();
+	auto [r, g, b, a] = GetAsBytes();
 
-	return (r << 24) | (g << 16) | (b << 8) | a;
+	uint32_t r32 = r;
+	uint32_t g32 = g;
+	uint32_t b32 = b;
+	uint32_t a32 = a;
+
+	return r32 << 24 | g32 << 16 | b32 << 8 | a32;
+}
+
+bool Color::operator==(const Color& other) const noexcept
+{
+	return AreFloatsEqual(m_r, other.m_r)
+		&& AreFloatsEqual(m_g, other.m_g)
+		&& AreFloatsEqual(m_b, other.m_b)
+		&& AreFloatsEqual(m_a, other.m_a);
 }
