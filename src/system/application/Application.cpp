@@ -1,5 +1,6 @@
 #include "Application.h"
 #include "src/system/AppConfig.h"
+#include "src/system/renderer/OpenGLRenderer.h"
 #include "src/system/window/GlfwWindow.h"
 #include <chrono>
 #include <stdexcept>
