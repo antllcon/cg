@@ -39,20 +39,17 @@ void Controller::OnSaveImageRequested()
 	}
 }
 
+void Controller::ToggleFilter()
+{
+	m_model->ToggleFilter();
+}
+
 void Controller::IncreaseFilterRadius()
 {
-	uint8_t currentRadius = m_model->GetMedianRadius();
-	if (currentRadius < FilterConfig::MAX_RADIUS)
-	{
-		m_model->SetMedianRadius(currentRadius + 1);
-	}
+	m_model->IncreaseFilterRadius();
 }
 
 void Controller::DecreaseFilterRadius()
 {
-	uint8_t currentRadius = m_model->GetMedianRadius();
-	if (currentRadius > FilterConfig::MIN_RADIUS)
-	{
-		m_model->SetMedianRadius(currentRadius - 1);
-	}
+	m_model->DecreaseFilterRadius();
 }

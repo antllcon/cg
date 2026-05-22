@@ -18,13 +18,16 @@ void ProcessKeyPress(const KeyPressedEvent& keyEvent, Controller& controller)
 	case KeyCode::Delete:
 		controller.OnCloseImageRequested();
 		break;
-	case KeyCode::Up:
-	case KeyCode::Left:
-		controller.DecreaseFilterRadius();
+	case KeyCode::Tab:
+		controller.ToggleFilter();
 		break;
-	case KeyCode::Down:
+	case KeyCode::Up:
 	case KeyCode::Right:
 		controller.IncreaseFilterRadius();
+		break;
+	case KeyCode::Down:
+	case KeyCode::Left:
+		controller.DecreaseFilterRadius();
 		break;
 	default:
 		break;
@@ -48,11 +51,11 @@ void View::HandleEvent(const Event& event)
 
 void View::Render(IRenderer& renderer) const
 {
-	const auto [state, image, medianRadius] = m_model->GetState();
+	const auto [state, image, filter] = m_model->GetState();
 
 	if (state == AppState::ImageLoaded && image)
 	{
-		renderer.DrawImageFiltered(image, medianRadius);
+		renderer.DrawImage(image, filter);
 	}
 	else
 	{

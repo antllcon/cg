@@ -17,6 +17,7 @@ public:
 	void OnCloseImageRequested();
 	void OnSaveImageRequested();
 
+	void ToggleFilter();
 	void IncreaseFilterRadius();
 	void DecreaseFilterRadius();
 

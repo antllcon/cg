@@ -4,14 +4,6 @@
 
 namespace
 {
-void AssertIsRadiusValid(uint8_t radius)
-{
-	if (radius > FilterConfig::MAX_RADIUS)
-	{
-		throw std::runtime_error("Радиус медианного фильтра должен быть от 0 до 7");
-	}
-}
-
 void AssertIsFileExists(const std::string& path)
 {
 	if (!std::filesystem::exists(path))
@@ -27,7 +19,7 @@ void Model::LoadImage(const std::string& path)
 
 	m_data.image = std::make_shared<Image>(path);
 	m_data.state = AppState::ImageLoaded;
-	m_data.medianRadius = FilterConfig::MIN_RADIUS;
+	m_data.filter = NoFilterSettings{};
 
 	NotifyObservers();
 }
@@ -44,22 +36,47 @@ void Model::CloseImage()
 {
 	m_data.image = nullptr;
 	m_data.state = AppState::NoImage;
+	m_data.filter = NoFilterSettings{};
 
 	NotifyObservers();
 }
 
-void Model::SetMedianRadius(uint8_t radius)
+void Model::ToggleFilter()
 {
-	AssertIsRadiusValid(radius);
-
-	m_data.medianRadius = radius;
+	if (std::holds_alternative<NoFilterSettings>(m_data.filter))
+	{
+		m_data.filter = MedianFilterSettings{};
+	}
+	else
+	{
+		m_data.filter = NoFilterSettings{};
+	}
 
 	NotifyObservers();
 }
 
-uint8_t Model::GetMedianRadius() const
+void Model::IncreaseFilterRadius()
 {
-	return m_data.medianRadius;
+	if (auto* medianSettings = std::get_if<MedianFilterSettings>(&m_data.filter))
+	{
+		if (medianSettings->radius < MedianFilterSettings::MAX_RADIUS)
+		{
+			medianSettings->radius++;
+			NotifyObservers();
+		}
+	}
+}
+
+void Model::DecreaseFilterRadius()
+{
+	if (auto* medianSettings = std::get_if<MedianFilterSettings>(&m_data.filter))
+	{
+		if (medianSettings->radius > MedianFilterSettings::MIN_RADIUS)
+		{
+			medianSettings->radius--;
+			NotifyObservers();
+		}
+	}
 }
 
 ModelData Model::GetState() const

@@ -1,7 +1,9 @@
 #pragma once
 
 #include "src/utils/image/Image.h"
+#include <cstdint>
 #include <memory>
+#include <variant>
 
 enum class AppState
 {
@@ -9,15 +11,23 @@ enum class AppState
 	ImageLoaded
 };
 
-namespace FilterConfig
+struct NoFilterSettings
 {
-inline constexpr uint8_t MIN_RADIUS = 0;
-inline constexpr uint8_t MAX_RADIUS = 7;
-} // namespace FilterConfig
+};
+
+struct MedianFilterSettings
+{
+	static constexpr uint8_t MIN_RADIUS = 0;
+	static constexpr uint8_t MAX_RADIUS = 7;
+
+	uint8_t radius = MIN_RADIUS;
+};
+
+using FilterSettings = std::variant<NoFilterSettings, MedianFilterSettings>;
 
 struct ModelData
 {
 	AppState state = AppState::NoImage;
 	std::shared_ptr<Image> image = nullptr;
-	uint8_t medianRadius = FilterConfig::MIN_RADIUS;
+	FilterSettings filter = NoFilterSettings{};
 };

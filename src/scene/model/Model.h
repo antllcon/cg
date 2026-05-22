@@ -14,8 +14,9 @@ public:
 	void SaveImage(const std::string& path) const;
 	void CloseImage();
 
-	void SetMedianRadius(uint8_t radius);
-	uint8_t GetMedianRadius() const;
+	void ToggleFilter();
+	void IncreaseFilterRadius();
+	void DecreaseFilterRadius();
 
 	ModelData GetState() const;
 
