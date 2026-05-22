@@ -283,9 +283,9 @@ std::optional<Event> GlfwWindow::PollEvent()
 	return event;
 }
 
-void GlfwWindow::PushEvent(const Event& event)
+void GlfwWindow::PushEvent(Event event)
 {
-	m_events.push(event);
+	m_events.push(std::move(event));
 }
 
 std::pair<uint16_t, uint16_t> GlfwWindow::GetSize() const

@@ -15,7 +15,7 @@ public:
 	void Close() override;
 
 	std::optional<Event> PollEvent() override;
-	void PushEvent(const Event& event);
+	void PushEvent(Event event);
 
 	std::pair<uint16_t, uint16_t> GetSize() const override;
 

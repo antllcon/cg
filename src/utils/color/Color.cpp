@@ -60,12 +60,12 @@ Color Color::FromFloat(float r, float g, float b, float a)
 	return Color(r, g, b, a);
 }
 
-std::tuple<float, float, float, float> Color::GetAsFloats() const noexcept
+std::tuple<float, float, float, float> Color::GetAsFloats() const
 {
 	return {m_r, m_g, m_b, m_a};
 }
 
-std::tuple<uint8_t, uint8_t, uint8_t, uint8_t> Color::GetAsBytes() const noexcept
+std::tuple<uint8_t, uint8_t, uint8_t, uint8_t> Color::GetAsBytes() const
 {
 	return {
 		ConvertFloatToByte(m_r),
@@ -74,7 +74,27 @@ std::tuple<uint8_t, uint8_t, uint8_t, uint8_t> Color::GetAsBytes() const noexcep
 		ConvertFloatToByte(m_a)};
 }
 
-uint32_t Color::ToHex() const noexcept
+uint8_t Color::GetRAsByte() const
+{
+	return ConvertFloatToByte(m_r);
+}
+
+uint8_t Color::GetGAsByte() const
+{
+	return ConvertFloatToByte(m_g);
+}
+
+uint8_t Color::GetBAsByte() const
+{
+	return ConvertFloatToByte(m_b);
+}
+
+uint8_t Color::GetAAsByte() const
+{
+	return ConvertFloatToByte(m_a);
+}
+
+uint32_t Color::ToHex() const
 {
 	auto [r, g, b, a] = GetAsBytes();
 

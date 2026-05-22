@@ -15,10 +15,15 @@ public:
 	static Color FromRGBA(uint8_t r, uint8_t g, uint8_t b, uint8_t a = RGB_MAX);
 	static Color FromFloat(float r, float g, float b, float a = FLOAT_MAX);
 
-	std::tuple<float, float, float, float> GetAsFloats() const noexcept;
-	std::tuple<uint8_t, uint8_t, uint8_t, uint8_t> GetAsBytes() const noexcept;
+	std::tuple<float, float, float, float> GetAsFloats() const;
+	std::tuple<uint8_t, uint8_t, uint8_t, uint8_t> GetAsBytes() const;
 
-	uint32_t ToHex() const noexcept;
+	uint8_t GetRAsByte() const;
+	uint8_t GetGAsByte() const;
+	uint8_t GetBAsByte() const;
+	uint8_t GetAAsByte() const;
+
+	uint32_t ToHex() const;
 
 	bool operator==(const Color& other) const noexcept;
 
