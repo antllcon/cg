@@ -8,13 +8,10 @@
 #include <algorithm>
 #include <cctype>
 #include <filesystem>
-#include <set>
 #include <stdexcept>
 
 namespace
 {
-const std::set<std::string> IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg"};
-
 std::string GetExtensionToLower(const std::filesystem::path& path)
 {
 	std::string ext = path.extension().string();
@@ -37,7 +34,7 @@ void AssertIsImageFile(const std::filesystem::path& path)
 {
 	const auto ext = GetExtensionToLower(path);
 
-	if (!IMAGE_EXTENSIONS.contains(ext))
+	if (!Image::EXTENSIONS.contains(ext))
 	{
 		throw std::invalid_argument("Файл не является изображением: " + path.string());
 	}

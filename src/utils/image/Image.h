@@ -1,11 +1,16 @@
 #pragma once
 
 #include <ostream>
+#include <set>
 #include <string>
+#include <vector>
 
 class Image
 {
 public:
+	inline static const std::set<std::string> EXTENSIONS = {".png", ".jpg", ".jpeg"};
+	inline static const std::vector<std::string> DIALOG_FILTER = {"*.png *.jpg *.jpeg"};
+
 	explicit Image(const std::string& path);
 	Image(uint32_t width, uint32_t height, uint8_t channels, const unsigned char* data);
 	~Image();
