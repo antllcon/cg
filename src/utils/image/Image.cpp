@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include "Image.h"
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -219,7 +220,10 @@ void Image::Load(const std::string& path)
 	auto data = stbi_load(path.c_str(), &width, &height, &channels, 0);
 
 	AssertIsLoaded(data);
-	AssertIsDimensionsValid(width, height, channels);
+	AssertIsDimensionsValid(
+		static_cast<uint32_t>(width),
+		static_cast<uint32_t>(height),
+		static_cast<uint8_t>(channels));
 
 	m_width = static_cast<uint32_t>(width);
 	m_height = static_cast<uint32_t>(height);

@@ -5,7 +5,7 @@
 class OpenGLRenderer : public IRenderer
 {
 public:
-	~OpenGLRenderer() override;
+	~OpenGLRenderer() override = default;
 
 	void SetClearColor(const Color& color) override;
 	void Clear() override;

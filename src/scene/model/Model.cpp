@@ -32,6 +32,14 @@ void Model::LoadImage(const std::string& path)
 	NotifyObservers();
 }
 
+void Model::SaveImage(const std::string& path) const
+{
+	if (m_data.image)
+	{
+		m_data.image->Save(path);
+	}
+}
+
 void Model::CloseImage()
 {
 	m_data.image = nullptr;

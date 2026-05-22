@@ -10,6 +10,10 @@ void Controller::Update(float)
 {
 }
 
+void Controller::HandleEvent(const Event&)
+{
+}
+
 void Controller::OnOpenImageRequested()
 {
 	auto pathOpt = SystemDialogs::OpenFile("Выберите изображение", Image::DIALOG_FILTER);

@@ -48,7 +48,7 @@ float ConsumeDeltaTime(Clock::time_point& lastTime)
 	const auto currentTime = Clock::now();
 	const auto duration = currentTime - lastTime;
 	lastTime = currentTime;
-	return duration.count();
+	return std::chrono::duration<float>(duration).count();
 }
 } // namespace
 
