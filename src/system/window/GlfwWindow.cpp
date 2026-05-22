@@ -5,11 +5,6 @@
 #include <filesystem>
 #include <stdexcept>
 
-#define STB_IMAGE_IMPLEMENTATION
-#pragma warning(push, 0)
-#include <stb_image.h>
-#pragma warning(pop)
-
 #ifdef _WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
@@ -37,28 +32,12 @@ void AssertIsWindowCreated(const GLFWwindow* window)
 	}
 }
 
-void AssertIsFileExists(const std::filesystem::path& path)
-{
-	if (!std::filesystem::exists(path))
-	{
-		throw std::runtime_error("Файл иконки не найден");
-	}
-}
-
-void AssertIsImageLoaded(const unsigned char* data)
-{
-	if (data == nullptr)
-	{
-		throw std::runtime_error("Не удалось декодировать изображение иконки");
-	}
-}
-
 GlfwWindow* GetSelf(GLFWwindow* window)
 {
 	return static_cast<GlfwWindow*>(glfwGetWindowUserPointer(window));
 }
 
-Point2i GetCursorPosition(GLFWwindow* window)
+std::pair<double, double> GetCursorPosition(GLFWwindow* window)
 {
 	double xpos;
 	double ypos;
@@ -207,7 +186,7 @@ void KeyCallback(GLFWwindow* window, int key, int, int action, int mods)
 void MouseButtonCallback(GLFWwindow* window, int button, int action, int)
 {
 	MouseButton mappedButton = MapGlfwButton(button);
-	Point2i position = GetCursorPosition(window);
+	std::pair<double, double> position = GetCursorPosition(window);
 
 	if (action == GLFW_PRESS)
 	{
@@ -221,13 +200,13 @@ void MouseButtonCallback(GLFWwindow* window, int button, int action, int)
 
 void CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
 {
-	Point2i position{static_cast<int>(xpos), static_cast<int>(ypos)};
+	std::pair<double, double> position{static_cast<int>(xpos), static_cast<int>(ypos)};
 	GetSelf(window)->PushEvent(MouseMovedEvent{position});
 }
 
 void ScrollCallback(GLFWwindow* window, double, double yoffset)
 {
-	Point2i position = GetCursorPosition(window);
+	std::pair<double, double> position = GetCursorPosition(window);
 	GetSelf(window)->PushEvent(MouseScrolledEvent{position, static_cast<float>(yoffset)});
 }
 
@@ -309,16 +288,17 @@ void GlfwWindow::PushEvent(const Event& event)
 	m_events.push(event);
 }
 
-Point2i GlfwWindow::GetSize() const
+std::pair<uint16_t, uint16_t> GlfwWindow::GetSize() const
 {
-	int width;
-	int height;
+	int width, height;
 	glfwGetFramebufferSize(m_window, &width, &height);
 
-	return {width, height};
+	return {
+		static_cast<uint16_t>(width),
+		static_cast<uint16_t>(height)};
 }
 
-void GlfwWindow::SetTitleBarTheme(bool isDark)
+void GlfwWindow::SetTitleBarColor(bool isDark)
 {
 #ifdef _WIN32
 	HWND hwnd = glfwGetWin32Window(m_window);
@@ -329,9 +309,8 @@ void GlfwWindow::SetTitleBarTheme(bool isDark)
 #endif
 }
 
-void GlfwWindow::SetIconColor(const Color& color)
+void GlfwWindow::SetIcon(uint8_t size, const Color& color)
 {
-	uint32_t size = AppConfig::ICON_SIZE;
 	std::vector<uint8_t> pixels(size * size * 4);
 
 	float center = static_cast<float>(size) / 2.0f;
@@ -371,28 +350,6 @@ void GlfwWindow::SetIconColor(const Color& color)
 	image.pixels = pixels.data();
 
 	glfwSetWindowIcon(m_window, 1, &image);
-}
-
-void GlfwWindow::SetIconFromFile(const std::filesystem::path& path)
-{
-	AssertIsFileExists(path);
-
-	int width;
-	int height;
-	int channels;
-
-	unsigned char* pixels = stbi_load(path.string().c_str(), &width, &height, &channels, 4);
-
-	AssertIsImageLoaded(pixels);
-
-	GLFWimage image;
-	image.width = width;
-	image.height = height;
-	image.pixels = pixels;
-
-	glfwSetWindowIcon(m_window, 1, &image);
-
-	stbi_image_free(pixels);
 }
 
 void GlfwWindow::SetVSync(bool enabled)

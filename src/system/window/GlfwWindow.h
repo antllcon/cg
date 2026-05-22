@@ -1,5 +1,6 @@
 #pragma once
-#include "src/core/interfaces/IWindow.h"
+
+#include "IWindow.h"
 #include <queue>
 
 struct GLFWwindow;
@@ -16,11 +17,10 @@ public:
 	std::optional<Event> PollEvent() override;
 	void PushEvent(const Event& event);
 
-	Point2i GetSize() const override;
-	void SetTitleBarTheme(bool isDark) override;
+	std::pair<uint16_t, uint16_t> GetSize() const override;
 
-	void SetIconColor(const Color& color) override;
-	void SetIconFromFile(const std::filesystem::path& path) override;
+	void SetTitleBarColor(bool isDark) override;
+	void SetIcon(uint8_t size, const Color& color) override;
 
 	void SetVSync(bool enabled) override;
 	void SetFullscreen(bool isFullscreen) override;
