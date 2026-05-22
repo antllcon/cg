@@ -3,6 +3,11 @@
 #include "utils/console/ConsoleEncoding.h"
 #include <iostream>
 
+extern "C" {
+__declspec(dllexport) uint32_t NvOptimusEnablement = 1;
+__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+}
+
 int main()
 {
 	ConsoleEncoding encoding;
