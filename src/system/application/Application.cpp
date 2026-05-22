@@ -54,6 +54,7 @@ float ConsumeDeltaTime(Clock::time_point& lastTime)
 Application::Application()
 	: m_window(std::make_unique<GlfwWindow>())
 	, m_renderer(std::make_unique<OpenGLRenderer>())
+	, m_mainScene(std::make_unique<MainScene>())
 {
 	AssertIsWindowValid(m_window.get());
 	AssertIsRendererValid(m_renderer.get());
@@ -87,34 +88,18 @@ void Application::ProcessEvents()
 			m_window->Close();
 		}
 
-		if (m_sceneManager)
-		{
-			m_sceneManager->ProcessEvents(event);
-		}
+		m_mainScene->ProcessEvents(event);
 	}
 }
 
 void Application::UpdateLogic(float dt)
 {
-	if (m_sceneManager)
-	{
-		m_sceneManager->Update(dt);
-	}
+	m_mainScene->Update(dt);
 }
 
 void Application::Render()
 {
 	m_renderer->Clear();
-
-	if (m_sceneManager)
-	{
-		m_sceneManager->Render(*m_renderer);
-	}
-
+	m_mainScene->Render(*m_renderer);
 	m_renderer->Display();
-}
-
-void Application::LoadScene(std::unique_ptr<SceneManager> scene)
-{
-	m_sceneManager = std::move(scene);
 }

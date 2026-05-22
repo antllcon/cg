@@ -1,6 +1,6 @@
 #pragma once
 
-#include "src/scene/SceneManager.h"
+#include "src/scene/MainScene.h"
 #include "src/system/renderer/IRenderer.h"
 #include "src/system/window/IWindow.h"
 #include <memory>
@@ -17,7 +17,6 @@ public:
 	Application& operator=(Application&&) = delete;
 
 	void Run();
-	void LoadScene(std::unique_ptr<SceneManager> scene);
 
 private:
 	void ProcessEvents();
@@ -26,5 +25,5 @@ private:
 
 	std::unique_ptr<IWindow> m_window;
 	std::unique_ptr<IRenderer> m_renderer;
-	std::unique_ptr<SceneManager> m_sceneManager;
+	std::unique_ptr<MainScene> m_mainScene;
 };
