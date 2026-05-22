@@ -17,6 +17,8 @@ public:
 	std::optional<Event> PollEvent() override;
 	void PushEvent(Event event);
 
+	void SwapBuffers() override;
+
 	std::pair<uint16_t, uint16_t> GetSize() const override;
 
 	void SetTitleBarColor(bool isDark) override;

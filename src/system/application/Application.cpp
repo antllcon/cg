@@ -103,4 +103,5 @@ void Application::Render()
 	m_renderer->Clear();
 	m_mainScene->Render(*m_renderer);
 	m_renderer->Display();
+	m_window->SwapBuffers();
 }

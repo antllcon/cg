@@ -14,6 +14,8 @@ public:
 	virtual void Close() = 0;
 	virtual std::optional<Event> PollEvent() = 0;
 
+	virtual void SwapBuffers() = 0;
+
 	virtual std::pair<uint16_t, uint16_t> GetSize() const = 0;
 	virtual void SetTitleBarColor(bool isDark) = 0;
 	virtual void SetIcon(uint8_t size, const Color& color) = 0;

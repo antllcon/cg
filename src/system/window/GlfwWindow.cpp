@@ -1,11 +1,13 @@
 #include "GlfwWindow.h"
 #include "src/system/AppConfig.h"
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <cmath>
 #include <filesystem>
 #include <stdexcept>
 
 #ifdef _WIN32
+#undef APIENTRY
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 #include <dwmapi.h>
@@ -29,6 +31,14 @@ void AssertIsWindowCreated(const GLFWwindow* window)
 	if (window == nullptr)
 	{
 		throw std::runtime_error("Не удалось создать окно GLFW");
+	}
+}
+
+void AssertIsGladInitialized(int result)
+{
+	if (result == 0)
+	{
+		throw std::runtime_error("Не удалось инициализировать GLAD");
 	}
 }
 
@@ -234,8 +244,9 @@ GlfwWindow::GlfwWindow()
 		nullptr);
 
 	AssertIsWindowCreated(m_window);
-
 	glfwMakeContextCurrent(m_window);
+
+	AssertIsGladInitialized(gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)));
 	glfwSetWindowUserPointer(m_window, this);
 
 	glfwSetWindowCloseCallback(m_window, WindowCloseCallback);
@@ -286,6 +297,11 @@ std::optional<Event> GlfwWindow::PollEvent()
 void GlfwWindow::PushEvent(Event event)
 {
 	m_events.push(std::move(event));
+}
+
+void GlfwWindow::SwapBuffers()
+{
+	glfwSwapBuffers(m_window);
 }
 
 std::pair<uint16_t, uint16_t> GlfwWindow::GetSize() const
