@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../scene/model/FilterTypes.h"
+#include "src/scene/model/ModelData.h"
 #include "src/utils/color/Color.h"
 #include "src/utils/image/Image.h"
 #include <memory>
