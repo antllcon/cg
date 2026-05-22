@@ -45,10 +45,17 @@ void Model::ToggleFilter()
 {
 	if (std::holds_alternative<NoFilterSettings>(m_data.filter))
 	{
-		m_data.filter = MedianFilterSettings{};
+		MedianFilterSettings settings;
+		settings.radius = m_cachedMedianRadius;
+		m_data.filter = settings;
 	}
 	else
 	{
+		if (const auto* medianSettings = std::get_if<MedianFilterSettings>(&m_data.filter))
+		{
+			m_cachedMedianRadius = medianSettings->radius;
+		}
+
 		m_data.filter = NoFilterSettings{};
 	}
 

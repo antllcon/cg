@@ -25,4 +25,5 @@ protected:
 
 private:
 	ModelData m_data;
+	uint8_t m_cachedMedianRadius = MedianFilterSettings::MIN_RADIUS;
 };
