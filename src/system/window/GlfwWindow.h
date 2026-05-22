@@ -15,6 +15,7 @@ public:
 	void Close() override;
 
 	std::optional<Event> PollEvent() override;
+	void WaitEvents() override;
 	void PushEvent(Event event);
 
 	void SwapBuffers() override;

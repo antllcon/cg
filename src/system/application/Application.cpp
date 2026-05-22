@@ -71,6 +71,7 @@ void Application::Run()
 
 	while (m_window->IsOpen())
 	{
+		m_window->WaitEvents();
 		const auto dt = ConsumeDeltaTime(lastTime);
 
 		ProcessEvents();

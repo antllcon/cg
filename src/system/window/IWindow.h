@@ -12,7 +12,9 @@ public:
 
 	virtual bool IsOpen() const = 0;
 	virtual void Close() = 0;
+
 	virtual std::optional<Event> PollEvent() = 0;
+	virtual void WaitEvents() = 0;
 
 	virtual void SwapBuffers() = 0;
 

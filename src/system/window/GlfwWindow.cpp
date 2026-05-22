@@ -296,6 +296,11 @@ std::optional<Event> GlfwWindow::PollEvent()
 	return event;
 }
 
+void GlfwWindow::WaitEvents()
+{
+	glfwWaitEvents();
+}
+
 void GlfwWindow::PushEvent(Event event)
 {
 	m_events.push(std::move(event));
