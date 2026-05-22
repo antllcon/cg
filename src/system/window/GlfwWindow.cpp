@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 #include <cmath>
 #include <filesystem>
+#include <iostream>
 #include <stdexcept>
 
 #ifdef _WIN32
@@ -237,8 +238,8 @@ GlfwWindow::GlfwWindow()
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
 	m_window = glfwCreateWindow(
-		static_cast<int>(AppConfig::WINDOW_WIDTH),
-		static_cast<int>(AppConfig::WINDOW_HEIGHT),
+		AppConfig::WINDOW_WIDTH,
+		AppConfig::WINDOW_HEIGHT,
 		AppConfig::WINDOW_NAME,
 		nullptr,
 		nullptr);
@@ -247,6 +248,7 @@ GlfwWindow::GlfwWindow()
 	glfwMakeContextCurrent(m_window);
 
 	AssertIsGladInitialized(gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)));
+	PrintOpenGLVersion();
 	glfwSetWindowUserPointer(m_window, this);
 
 	glfwSetWindowCloseCallback(m_window, WindowCloseCallback);
@@ -387,4 +389,15 @@ void GlfwWindow::SetCursorCaptured(bool captured)
 bool GlfwWindow::IsCursorCaptured() const
 {
 	return m_isCursorCaptured;
+}
+
+void GlfwWindow::PrintOpenGLVersion()
+{
+	auto version = reinterpret_cast<const char*>(glGetString(GL_VERSION));
+	auto vendor = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
+	auto renderer = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
+
+	std::cout << "OpenGL version:\t" << version << std::endl;
+	std::cout << "GPU Vendor:\t" << vendor << std::endl;
+	std::cout << "GPU Renderer:\t" << renderer << std::endl;
 }

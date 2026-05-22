@@ -41,6 +41,7 @@ void SetupWindowProperties(IWindow& window)
 void SetupRendererProperties(IRenderer& m_renderer)
 {
 	m_renderer.SetClearColor(AppConfig::WINDOW_BG);
+	m_renderer.SetViewport(AppConfig::WINDOW_WIDTH, AppConfig::WINDOW_HEIGHT);
 }
 
 float ConsumeDeltaTime(Clock::time_point& lastTime)

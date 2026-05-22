@@ -6,8 +6,8 @@
 namespace AppConfig
 {
 inline constexpr auto WINDOW_NAME = "Image median redactor";
-inline constexpr float WINDOW_WIDTH = 800.0f;
-inline constexpr float WINDOW_HEIGHT = 800.0f;
+inline constexpr uint32_t WINDOW_WIDTH = 800u;
+inline constexpr uint32_t WINDOW_HEIGHT = 800u;
 
 inline constexpr auto FONT_PATH = "static/font.ttf";
 inline constexpr uint32_t FONT_SIZE = 12;

@@ -30,6 +30,8 @@ public:
 	void SetCursorCaptured(bool captured) override;
 	bool IsCursorCaptured() const override;
 
+	static void PrintOpenGLVersion();
+
 private:
 	GLFWwindow* m_window;
 	std::queue<Event> m_events;
