@@ -1,12 +1,12 @@
 #pragma once
 
 #include "controller/IController.h"
+#include "model/Model.h"
 #include "src/utils/types/event/Event.h"
 #include "view/IView.h"
 #include <memory>
 
 class IRenderer;
-class IModel;
 
 class MainScene final
 {
@@ -19,7 +19,7 @@ public:
 	void Render(IRenderer& renderer) const;
 
 private:
-	std::shared_ptr<IModel> m_model;
+	std::shared_ptr<Model> m_model;
 	std::shared_ptr<IController> m_controller;
 	std::shared_ptr<IView> m_view;
 };
