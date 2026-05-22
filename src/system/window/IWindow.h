@@ -1,6 +1,7 @@
 #pragma once
-#include "src/core/types/color/Color.h"
-#include "src/core/types/event/Event.h"
+
+#include "src/utils/color/Color.h"
+#include "src/utils/types/event/Event.h"
 #include <filesystem>
 #include <optional>
 
@@ -13,9 +14,9 @@ public:
 	virtual void Close() = 0;
 	virtual std::optional<Event> PollEvent() = 0;
 
-	virtual std::pair<unsigned int, unsigned int> GetSize() const = 0;
+	virtual std::pair<uint16_t, uint16_t> GetSize() const = 0;
 	virtual void SetTitleBarColor(bool isDark) = 0;
-	virtual void SetIconColor(const Color& color) = 0;
+	virtual void SetIcon(uint8_t size, const Color& color) = 0;
 
 	virtual void SetVSync(bool enabled) = 0;
 	virtual void SetFullscreen(bool isFullscreen) = 0;

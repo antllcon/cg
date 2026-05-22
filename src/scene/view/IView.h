@@ -1,5 +1,8 @@
 #pragma once
-#include "src/core/types/event/Event.h"
+
+#include "src/utils/types/event/Event.h"
+
+class IRenderer;
 
 class IView
 {
