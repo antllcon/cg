@@ -18,13 +18,13 @@ public:
 	void DrawImage(const std::shared_ptr<Image>& image, const FilterSettings& settings) override;
 
 private:
-	void InitializeGeometry();
+	void InitGeometryCanvas();
 	void UpdateTextureIfNeeded(const std::shared_ptr<Image>& image);
 	void BindResourcesAndDraw(const FilterSettings& settings) const;
 
 private:
-	uint32_t m_vao = 0;
-	uint32_t m_vbo = 0;
+	uint32_t m_VertexArrayObject = 0;
+	uint32_t m_vertexBufferObject = 0;
 	uint32_t m_texture = 0;
 	uint32_t m_viewportWidth = 1;
 	uint32_t m_viewportHeight = 1;

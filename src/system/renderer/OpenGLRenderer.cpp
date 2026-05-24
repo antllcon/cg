@@ -1,12 +1,27 @@
 #include "OpenGLRenderer.h"
+#include <array>
 #include <glad/glad.h>
 #include <stdexcept>
-#include <vector>
 
 namespace
 {
 constexpr auto VERTEX_SHADER_SOURCE = "static/shaders/image.vert";
 constexpr auto FRAGMENT_SHADER_SOURCE = "static/shaders/image.frag";
+
+constexpr float S_LEFT = -1.0f;
+constexpr float S_RIGHT = 1.0f;
+constexpr float S_BOTTOM = -1.0f;
+constexpr float S_TOP = 1.0f;
+
+constexpr float T_LEFT = 0.0f;
+constexpr float T_RIGHT = 1.0f;
+constexpr float T_BOTTOM = 0.0f;
+constexpr float T_TOP = 1.0f;
+
+constexpr uint8_t CANVAS_VERTICES_SIZE = 24u;
+
+constexpr std::array<float, CANVAS_VERTICES_SIZE> CANVAS_VERTICES = {
+	S_LEFT, S_BOTTOM, T_LEFT, T_BOTTOM, S_RIGHT, S_BOTTOM, T_RIGHT, T_BOTTOM, S_LEFT, S_TOP, T_LEFT, T_TOP, S_RIGHT, S_TOP, T_RIGHT, T_TOP, S_LEFT, S_TOP, T_LEFT, T_TOP, S_RIGHT, S_BOTTOM, T_RIGHT, T_BOTTOM};
 
 void AssertIsImageValid(const Image* image)
 {
@@ -37,15 +52,15 @@ std::pair<float, float> CalculateScale(float windowWidth, float windowHeight, fl
 
 OpenGLRenderer::OpenGLRenderer()
 {
-	InitializeGeometry();
+	InitGeometryCanvas();
 	m_shader = std::make_unique<Shader>(VERTEX_SHADER_SOURCE, FRAGMENT_SHADER_SOURCE);
 	glGenTextures(1, &m_texture);
 }
 
 OpenGLRenderer::~OpenGLRenderer()
 {
-	glDeleteVertexArrays(1, &m_vao);
-	glDeleteBuffers(1, &m_vbo);
+	glDeleteVertexArrays(1, &m_VertexArrayObject);
+	glDeleteBuffers(1, &m_vertexBufferObject);
 	glDeleteTextures(1, &m_texture);
 }
 
@@ -80,18 +95,15 @@ void OpenGLRenderer::DrawImage(const std::shared_ptr<Image>& image, const Filter
 	BindResourcesAndDraw(settings);
 }
 
-void OpenGLRenderer::InitializeGeometry()
+void OpenGLRenderer::InitGeometryCanvas()
 {
-	const std::vector<float> vertices = {
-		-1.0f, -1.0f, 0.0f, 0.0f, 1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, -1.0f, 1.0f, 0.0f};
+	glGenVertexArrays(1, &m_VertexArrayObject);
+	glGenBuffers(1, &m_vertexBufferObject);
 
-	glGenVertexArrays(1, &m_vao);
-	glGenBuffers(1, &m_vbo);
+	glBindVertexArray(m_VertexArrayObject);
 
-	glBindVertexArray(m_vao);
-
-	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferObject);
+	glBufferData(GL_ARRAY_BUFFER, CANVAS_VERTICES_SIZE * sizeof(float), CANVAS_VERTICES.data(), GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), reinterpret_cast<void*>(0));
 	glEnableVertexAttribArray(0);
@@ -153,7 +165,7 @@ void OpenGLRenderer::BindResourcesAndDraw(const FilterSettings& settings) const
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_texture);
 
-	glBindVertexArray(m_vao);
+	glBindVertexArray(m_VertexArrayObject);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	glBindVertexArray(0);
 }
