@@ -5,7 +5,7 @@
 
 namespace AppConfig
 {
-inline constexpr auto WINDOW_NAME = "Image median redactor";
+inline constexpr auto WINDOW_NAME = "Fractals";
 inline constexpr uint32_t WINDOW_WIDTH = 800u;
 inline constexpr uint32_t WINDOW_HEIGHT = 800u;
 
