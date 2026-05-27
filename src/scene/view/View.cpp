@@ -63,7 +63,7 @@ void View::HandleEvent(const Event& event)
 
 void View::Render(IRenderer& renderer) const
 {
-	// renderer.DrawProcedural(m_model->GetState());
+	renderer.DrawProcedural(m_model->GetState());
 }
 
 void View::Update(const ModelData&, IObservable<ModelData>*)
