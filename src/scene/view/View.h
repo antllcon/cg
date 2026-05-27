@@ -21,4 +21,7 @@ public:
 private:
 	std::shared_ptr<Model> m_model;
 	std::shared_ptr<Controller> m_controller;
+
+	bool m_isDragging = false;
+	std::pair<double, double> m_lastMousePos = {0.0, 0.0};
 };

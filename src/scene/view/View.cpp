@@ -1,38 +1,10 @@
 #include "View.h"
 #include "src/system/renderer/IRenderer.h"
+#include "src/utils/types/event/EventHandling.h"
 
 namespace
 {
-void ProcessKeyPress(const KeyPressedEvent& keyEvent, Controller& controller)
-{
-	switch (keyEvent.code)
-	{
-	case KeyCode::O:
-	case KeyCode::Space:
-		controller.OnOpenImageRequested();
-		break;
-	case KeyCode::S:
-		controller.OnSaveImageRequested();
-		break;
-	case KeyCode::Escape:
-	case KeyCode::Delete:
-		controller.OnCloseImageRequested();
-		break;
-	case KeyCode::Tab:
-		controller.ToggleFilter();
-		break;
-	case KeyCode::Up:
-	case KeyCode::Right:
-		controller.IncreaseFilterRadius();
-		break;
-	case KeyCode::Down:
-	case KeyCode::Left:
-		controller.DecreaseFilterRadius();
-		break;
-	default:
-		break;
-	}
-}
+constexpr float PAN_SENSITIVITY = 0.005f;
 } // namespace
 
 View::View(std::shared_ptr<Model> model, std::shared_ptr<Controller> controller)
@@ -43,24 +15,55 @@ View::View(std::shared_ptr<Model> model, std::shared_ptr<Controller> controller)
 
 void View::HandleEvent(const Event& event)
 {
-	if (const auto* keyEvent = std::get_if<KeyPressedEvent>(&event))
-	{
-		ProcessKeyPress(*keyEvent, *m_controller);
-	}
+	std::visit(Overload{
+				   [this](const KeyPressedEvent& e) {
+					   if (e.code == KeyCode::Space)
+					   {
+						   m_controller->NextFractal();
+					   }
+					   else if (e.code == KeyCode::Escape || e.code == KeyCode::Delete)
+					   {
+						   m_controller->ResetView();
+					   }
+				   },
+				   [this](const MouseButtonPressedEvent& e) {
+					   if (e.button == MouseButton::Right)
+					   {
+						   m_controller->NextFractal();
+					   }
+					   else if (e.button == MouseButton::Left)
+					   {
+						   m_isDragging = true;
+						   m_lastMousePos = e.position;
+					   }
+				   },
+				   [this](const MouseButtonReleasedEvent& e) {
+					   if (e.button == MouseButton::Left)
+					   {
+						   m_isDragging = false;
+					   }
+				   },
+				   [this](const MouseMovedEvent& e) {
+					   if (m_isDragging)
+					   {
+						   float dx = static_cast<float>(e.position.first - m_lastMousePos.first);
+						   float dy = static_cast<float>(e.position.second - m_lastMousePos.second);
+
+						   m_controller->MoveCamera(-dx * PAN_SENSITIVITY, dy * PAN_SENSITIVITY);
+						   m_lastMousePos = e.position;
+					   }
+				   },
+				   [this](const MouseScrolledEvent& e) {
+					   m_controller->ZoomCamera(e.delta);
+				   },
+				   [](const auto&) {
+				   }},
+		event);
 }
 
 void View::Render(IRenderer& renderer) const
 {
-	const auto [state, image, filter] = m_model->GetState();
-
-	if (state == AppState::ImageLoaded && image)
-	{
-		renderer.DrawImage(image, filter);
-	}
-	else
-	{
-		// TODO: отображать текст бы (открыть изображение для редактирования)
-	}
+	// renderer.DrawProcedural(m_model->GetState());
 }
 
 void View::Update(const ModelData&, IObservable<ModelData>*)
