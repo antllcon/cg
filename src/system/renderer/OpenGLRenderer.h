@@ -2,7 +2,7 @@
 
 #include "IRenderer.h"
 #include "shader/Shader.h"
-#include "src/utils/image/Image.h"
+#include <map>
 #include <memory>
 
 class OpenGLRenderer final : public IRenderer
@@ -15,19 +15,16 @@ public:
 	void SetClearColor(const Color& color) override;
 	void Clear() override;
 	void Display() override;
-	void DrawImage(const std::shared_ptr<Image>& image, const FilterSettings& settings) override;
+	void DrawProcedural(const ModelData& data) override;
 
 private:
 	void InitGeometryCanvas();
-	void UpdateTextureIfNeeded(const std::shared_ptr<Image>& image);
-	void BindResourcesAndDraw(const FilterSettings& settings) const;
 
 private:
 	uint32_t m_VertexArrayObject = 0;
 	uint32_t m_vertexBufferObject = 0;
-	uint32_t m_texture = 0;
 	uint32_t m_viewportWidth = 1;
 	uint32_t m_viewportHeight = 1;
-	const Image* m_loadedImage = nullptr;
-	std::unique_ptr<Shader> m_shader;
+
+	std::map<FractalType, std::unique_ptr<Shader>> m_shaders;
 };

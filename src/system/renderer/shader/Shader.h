@@ -15,6 +15,7 @@ public:
 	void Use() const;
 
 	void SetInt(const std::string& name, int value) const;
+	void SetFloat(const std::string& name, float value) const;
 	void SetFloat2(const std::string& name, float x, float y) const;
 
 private:

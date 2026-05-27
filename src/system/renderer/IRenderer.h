@@ -2,8 +2,6 @@
 
 #include "src/scene/model/ModelData.h"
 #include "src/utils/color/Color.h"
-#include "src/utils/image/Image.h"
-#include <memory>
 
 class IRenderer
 {
@@ -14,5 +12,6 @@ public:
 	virtual void SetClearColor(const Color& color) = 0;
 	virtual void Clear() = 0;
 	virtual void Display() = 0;
-	virtual void DrawImage(const std::shared_ptr<Image>& image, const FilterSettings& settings) = 0;
+
+	virtual void DrawProcedural(const ModelData& data) = 0;
 };
