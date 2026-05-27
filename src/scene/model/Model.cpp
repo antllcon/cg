@@ -1,89 +1,65 @@
 #include "Model.h"
-#include <filesystem>
+
+#include <cmath>
 #include <stdexcept>
 
 namespace
 {
-void AssertIsFileExists(const std::string& path)
+constexpr float ZOOM_MULTIPLIER = 1.25f;
+
+void AssertDeltaValid(float delta)
 {
-	if (!std::filesystem::exists(path))
+	if (std::isnan(delta) || std::isinf(delta))
 	{
-		throw std::runtime_error("Указанный файл изображения не найден");
+		throw std::invalid_argument("Дельта изменения должна быть конечным числом");
+	}
+}
+
+void AssertZoomValid(float zoom)
+{
+	if (zoom <= 0.0f || std::isnan(zoom) || std::isinf(zoom))
+	{
+		throw std::invalid_argument("Значение зума должно быть строго положительным конечным числом");
 	}
 }
 } // namespace
 
-void Model::LoadImage(const std::string& path)
+void Model::NextFractalType()
 {
-	AssertIsFileExists(path);
+	++m_data.type;
+	ResetView();
+}
 
-	m_data.image = std::make_shared<Image>(path);
-	m_data.state = AppState::ImageLoaded;
-	m_data.filter = NoFilterSettings{};
+void Model::MoveCamera(float dx, float dy)
+{
+	AssertDeltaValid(dx);
+	AssertDeltaValid(dy);
+
+	m_data.offsetX += dx / m_data.zoom;
+	m_data.offsetY += dy / m_data.zoom;
 
 	NotifyObservers();
 }
 
-void Model::SaveImage(const std::string& path) const
+void Model::ZoomCamera(float delta)
 {
-	if (m_data.image)
-	{
-		m_data.image->Save(path);
-	}
-}
+	AssertDeltaValid(delta);
 
-void Model::CloseImage()
-{
-	m_data.image = nullptr;
-	m_data.state = AppState::NoImage;
-	m_data.filter = NoFilterSettings{};
+	float newZoom = m_data.zoom * std::pow(ZOOM_MULTIPLIER, delta);
+
+	AssertZoomValid(newZoom);
+	m_data.zoom = newZoom;
 
 	NotifyObservers();
 }
 
-void Model::ToggleFilter()
+void Model::ResetView()
 {
-	if (std::holds_alternative<NoFilterSettings>(m_data.filter))
-	{
-		MedianFilterSettings settings;
-		settings.radius = m_cachedMedianRadius;
-		m_data.filter = settings;
-	}
-	else
-	{
-		if (const auto* medianSettings = std::get_if<MedianFilterSettings>(&m_data.filter))
-		{
-			m_cachedMedianRadius = medianSettings->radius;
-		}
-
-		m_data.filter = NoFilterSettings{};
-	}
+	m_data.offsetX = FractalDefaults::OFFSET_X;
+	m_data.offsetY = FractalDefaults::OFFSET_Y;
+	m_data.zoom = FractalDefaults::ZOOM;
 
 	NotifyObservers();
-}
-
-void Model::IncreaseFilterRadius()
-{
-	if (auto* medianSettings = std::get_if<MedianFilterSettings>(&m_data.filter))
-	{
-		if (medianSettings->radius < MedianFilterSettings::MAX_RADIUS)
-		{
-			medianSettings->radius++;
-			NotifyObservers();
-		}
-	}
-}
-
-void Model::DecreaseFilterRadius()
-{
-	if (auto* medianSettings = std::get_if<MedianFilterSettings>(&m_data.filter))
-	{
-		if (medianSettings->radius > MedianFilterSettings::MIN_RADIUS)
-		{
-			medianSettings->radius--;
-			NotifyObservers();
-		}
-	}
 }
 
 ModelData Model::GetState() const

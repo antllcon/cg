@@ -2,7 +2,6 @@
 
 #include "ModelData.h"
 #include "src/utils/Observer.h"
-#include <string>
 
 class Model final : public CObservable<ModelData>
 {
@@ -10,13 +9,10 @@ public:
 	Model() = default;
 	~Model() override = default;
 
-	void LoadImage(const std::string& path);
-	void SaveImage(const std::string& path) const;
-	void CloseImage();
-
-	void ToggleFilter();
-	void IncreaseFilterRadius();
-	void DecreaseFilterRadius();
+	void NextFractalType();
+	void MoveCamera(float dx, float dy);
+	void ZoomCamera(float delta);
+	void ResetView();
 
 	ModelData GetState() const;
 
@@ -25,5 +21,4 @@ protected:
 
 private:
 	ModelData m_data;
-	uint8_t m_cachedMedianRadius = MedianFilterSettings::MIN_RADIUS;
 };

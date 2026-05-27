@@ -1,33 +1,32 @@
 #pragma once
 
-#include "src/utils/image/Image.h"
 #include <cstdint>
-#include <memory>
-#include <variant>
 
-enum class AppState
+enum class FractalType : uint8_t
 {
-	NoImage,
-	ImageLoaded
+	Mandelbrot,
+	Julia,
+	BurningShip,
+	Count
 };
 
-struct NoFilterSettings
+inline FractalType& operator++(FractalType& type)
 {
-};
+	type = static_cast<FractalType>((static_cast<uint8_t>(type) + 1) % static_cast<uint8_t>(FractalType::Count));
+	return type;
+}
 
-struct MedianFilterSettings
+namespace FractalDefaults
 {
-	static constexpr uint8_t MIN_RADIUS = 0;
-	static constexpr uint8_t MAX_RADIUS = 7;
-
-	uint8_t radius = MIN_RADIUS;
-};
-
-using FilterSettings = std::variant<NoFilterSettings, MedianFilterSettings>;
+inline constexpr float OFFSET_X = 0.0f;
+inline constexpr float OFFSET_Y = 0.0f;
+inline constexpr float ZOOM = 1.0f;
+} // namespace FractalDefaults
 
 struct ModelData
 {
-	AppState state = AppState::NoImage;
-	std::shared_ptr<Image> image = nullptr;
-	FilterSettings filter = NoFilterSettings{};
+	FractalType type = FractalType::Mandelbrot;
+	float offsetX = FractalDefaults::OFFSET_X;
+	float offsetY = FractalDefaults::OFFSET_Y;
+	float zoom = FractalDefaults::ZOOM;
 };
