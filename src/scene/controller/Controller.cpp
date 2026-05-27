@@ -1,5 +1,4 @@
 #include "Controller.h"
-#include "src/utils/dialog/SystemDialogs.h"
 
 Controller::Controller(std::shared_ptr<Model> model)
 	: m_model(model)
@@ -14,42 +13,22 @@ void Controller::HandleEvent(const Event&)
 {
 }
 
-void Controller::OnOpenImageRequested()
+void Controller::NextFractal()
 {
-	auto pathOpt = SystemDialogs::OpenFile("Выберите изображение", Image::DIALOG_FILTER);
-
-	if (pathOpt.has_value())
-	{
-		m_model->LoadImage(pathOpt.value());
-	}
+	m_model->NextFractalType();
 }
 
-void Controller::OnCloseImageRequested()
+void Controller::ResetView()
 {
-	m_model->CloseImage();
+	m_model->ResetView();
 }
 
-void Controller::OnSaveImageRequested()
+void Controller::MoveCamera(float dx, float dy)
 {
-	auto pathOpt = SystemDialogs::SaveFile("Сохранить изображение как", Image::DIALOG_FILTER);
-
-	if (pathOpt.has_value())
-	{
-		m_model->SaveImage(pathOpt.value());
-	}
+	m_model->MoveCamera(dx, dy);
 }
 
-void Controller::ToggleFilter()
+void Controller::ZoomCamera(float delta)
 {
-	m_model->ToggleFilter();
-}
-
-void Controller::IncreaseFilterRadius()
-{
-	m_model->IncreaseFilterRadius();
-}
-
-void Controller::DecreaseFilterRadius()
-{
-	m_model->DecreaseFilterRadius();
+	m_model->ZoomCamera(delta);
 }

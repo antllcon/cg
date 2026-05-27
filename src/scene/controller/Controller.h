@@ -13,13 +13,10 @@ public:
 	void Update(float dt) override;
 	void HandleEvent(const Event& event) override;
 
-	void OnOpenImageRequested();
-	void OnCloseImageRequested();
-	void OnSaveImageRequested();
-
-	void ToggleFilter();
-	void IncreaseFilterRadius();
-	void DecreaseFilterRadius();
+	void NextFractal();
+	void MoveCamera(float dx, float dy);
+	void ZoomCamera(float delta);
+	void ResetView();
 
 private:
 	std::shared_ptr<Model> m_model;
