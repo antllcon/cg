@@ -5,9 +5,9 @@
 
 namespace AppConfig
 {
-inline constexpr auto WINDOW_NAME = "Fractals";
-inline constexpr uint32_t WINDOW_WIDTH = 800u;
-inline constexpr uint32_t WINDOW_HEIGHT = 800u;
+inline constexpr auto WINDOW_NAME = "Glow effect";
+inline constexpr uint32_t WINDOW_WIDTH = 960u;
+inline constexpr uint32_t WINDOW_HEIGHT = 640u;
 
 inline constexpr auto FONT_PATH = "static/font.ttf";
 inline constexpr uint32_t FONT_SIZE = 12;

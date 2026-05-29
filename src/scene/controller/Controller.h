@@ -2,6 +2,7 @@
 
 #include "src/scene/controller/IController.h"
 #include "src/scene/model/Model.h"
+#include <map>
 #include <memory>
 
 class Controller final : public IController
@@ -13,11 +14,10 @@ public:
 	void Update(float dt) override;
 	void HandleEvent(const Event& event) override;
 
-	void NextFractal();
-	void MoveCamera(float dx, float dy);
-	void ZoomCamera(float delta);
-	void ResetView();
+	void SetKeyState(KeyCode key, bool isPressed);
+	void RotateCamera(float dx, float dy);
 
 private:
 	std::shared_ptr<Model> m_model;
+	std::map<KeyCode, bool> m_activeKeys;
 };

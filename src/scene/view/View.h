@@ -19,6 +19,12 @@ public:
 	void Update(const ModelData& data, IObservable<ModelData>* subject) override;
 
 private:
+	void HandleKeyPressed(const KeyPressedEvent& e);
+	void HandleKeyReleased(const KeyReleasedEvent& e);
+	void HandleMousePressed(const MouseButtonPressedEvent& e);
+	void HandleMouseReleased(const MouseButtonReleasedEvent& e);
+	void HandleMouseMoved(const MouseMovedEvent& e);
+
 	std::shared_ptr<Model> m_model;
 	std::shared_ptr<Controller> m_controller;
 

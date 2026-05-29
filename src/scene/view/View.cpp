@@ -4,8 +4,8 @@
 
 namespace
 {
-constexpr float PAN_SENSITIVITY = 0.005f;
-} // namespace
+constexpr float MOUSE_SENSITIVITY = 0.1f;
+}
 
 View::View(std::shared_ptr<Model> model, std::shared_ptr<Controller> controller)
 	: m_model(model)
@@ -16,56 +16,56 @@ View::View(std::shared_ptr<Model> model, std::shared_ptr<Controller> controller)
 void View::HandleEvent(const Event& event)
 {
 	std::visit(Overload{
-				   [this](const KeyPressedEvent& e) {
-					   if (e.code == KeyCode::Space)
-					   {
-						   m_controller->NextFractal();
-					   }
-					   else if (e.code == KeyCode::Escape || e.code == KeyCode::Delete)
-					   {
-						   m_controller->ResetView();
-					   }
-				   },
-				   [this](const MouseButtonPressedEvent& e) {
-					   if (e.button == MouseButton::Right)
-					   {
-						   m_controller->NextFractal();
-					   }
-					   else if (e.button == MouseButton::Left)
-					   {
-						   m_isDragging = true;
-						   m_lastMousePos = e.position;
-					   }
-				   },
-				   [this](const MouseButtonReleasedEvent& e) {
-					   if (e.button == MouseButton::Left)
-					   {
-						   m_isDragging = false;
-					   }
-				   },
-				   [this](const MouseMovedEvent& e) {
-					   if (m_isDragging)
-					   {
-						   float dx = static_cast<float>(e.position.first - m_lastMousePos.first);
-						   float dy = static_cast<float>(e.position.second - m_lastMousePos.second);
-
-						   m_controller->MoveCamera(-dx * PAN_SENSITIVITY, dy * PAN_SENSITIVITY);
-						   m_lastMousePos = e.position;
-					   }
-				   },
-				   [this](const MouseScrolledEvent& e) {
-					   m_controller->ZoomCamera(e.delta);
-				   },
-				   [](const auto&) {
-				   }},
+				   [this](const KeyPressedEvent& e) { HandleKeyPressed(e); },
+				   [this](const KeyReleasedEvent& e) { HandleKeyReleased(e); },
+				   [this](const MouseButtonPressedEvent& e) { HandleMousePressed(e); },
+				   [this](const MouseButtonReleasedEvent& e) { HandleMouseReleased(e); },
+				   [this](const MouseMovedEvent& e) { HandleMouseMoved(e); },
+				   [](const auto&) {}},
 		event);
 }
 
 void View::Render(IRenderer& renderer) const
 {
-	renderer.DrawProcedural(m_model->GetState());
+	renderer.RenderFrame(m_model->GetState());
 }
 
 void View::Update(const ModelData&, IObservable<ModelData>*)
 {
+}
+
+void View::HandleKeyPressed(const KeyPressedEvent& e)
+{
+	m_controller->SetKeyState(e.code, true);
+}
+
+void View::HandleKeyReleased(const KeyReleasedEvent& e)
+{
+	m_controller->SetKeyState(e.code, false);
+}
+
+void View::HandleMousePressed(const MouseButtonPressedEvent& e)
+{
+	if (e.button == MouseButton::Left)
+	{
+		m_isDragging = true;
+		m_lastMousePos = e.position;
+	}
+}
+
+void View::HandleMouseReleased(const MouseButtonReleasedEvent& e)
+{
+	if (e.button == MouseButton::Left)
+	{
+		m_isDragging = false;
+	}
+}
+
+void View::HandleMouseMoved(const MouseMovedEvent& e)
+{
+	float dx = static_cast<float>(e.position.first - m_lastMousePos.first);
+	float dy = static_cast<float>(m_lastMousePos.second - e.position.second);
+
+	m_controller->RotateCamera(dx * MOUSE_SENSITIVITY, dy * MOUSE_SENSITIVITY);
+	m_lastMousePos = e.position;
 }

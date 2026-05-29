@@ -36,6 +36,7 @@ void SetupWindowProperties(IWindow& window)
 	window.SetTitleBarColor(AppConfig::DARK_ENABLED);
 	window.SetIcon(AppConfig::ICON_SIZE, AppConfig::ICON_COLOR);
 	window.SetVSync(AppConfig::VSYNC_ENABLED);
+	window.SetCursorCaptured(true);
 }
 
 void SetupRendererProperties(IRenderer& m_renderer)
@@ -71,7 +72,7 @@ void Application::Run()
 
 	while (m_window->IsOpen())
 	{
-		m_window->WaitEvents();
+		// m_window->WaitEvents();
 		const auto dt = ConsumeDeltaTime(lastTime);
 
 		ProcessEvents();

@@ -1,32 +1,41 @@
 #pragma once
 
-#include <cstdint>
+#include "src/utils/color/Color.h"
+#include <vector>
 
-enum class FractalType : uint8_t
+struct Vec3
 {
-	Mandelbrot,
-	Julia,
-	BurningShip,
-	Count
+	float x = 0.0f;
+	float y = 0.0f;
+	float z = 0.0f;
 };
 
-inline FractalType& operator++(FractalType& type)
+enum class ObjectType
 {
-	type = static_cast<FractalType>((static_cast<uint8_t>(type) + 1) % static_cast<uint8_t>(FractalType::Count));
-	return type;
-}
+	Cylinder,
+	Torus
+};
 
-namespace FractalDefaults
+struct SceneObject
 {
-inline constexpr float OFFSET_X = 0.0f;
-inline constexpr float OFFSET_Y = 0.0f;
-inline constexpr float ZOOM = 1.0f;
-} // namespace FractalDefaults
+	ObjectType type;
+	Vec3 position;
+	Vec3 rotation;
+	Vec3 scale;
+	Color color;
+	bool isEmissive;
+};
+
+struct CameraState
+{
+	Vec3 position;
+	float yaw;
+	float pitch;
+	float fov;
+};
 
 struct ModelData
 {
-	FractalType type = FractalType::Mandelbrot;
-	float offsetX = FractalDefaults::OFFSET_X;
-	float offsetY = FractalDefaults::OFFSET_Y;
-	float zoom = FractalDefaults::ZOOM;
+	CameraState camera;
+	std::vector<SceneObject> objects;
 };

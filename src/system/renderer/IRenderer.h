@@ -2,6 +2,7 @@
 
 #include "src/scene/model/ModelData.h"
 #include "src/utils/color/Color.h"
+#include <cstdint>
 
 class IRenderer
 {
@@ -13,5 +14,5 @@ public:
 	virtual void Clear() = 0;
 	virtual void Display() = 0;
 
-	virtual void DrawProcedural(const ModelData& data) = 0;
+	virtual void RenderFrame(const ModelData& data) = 0;
 };
