@@ -18,7 +18,6 @@ void Model::LoadImage(const std::string& path)
 	AssertIsFileExists(path);
 
 	m_data.image = std::make_shared<Image>(path);
-	m_data.state = AppState::ImageLoaded;
 	m_data.filter = NoFilterSettings{};
 
 	NotifyObservers();
@@ -35,7 +34,6 @@ void Model::SaveImage(const std::string& path) const
 void Model::CloseImage()
 {
 	m_data.image = nullptr;
-	m_data.state = AppState::NoImage;
 	m_data.filter = NoFilterSettings{};
 
 	NotifyObservers();

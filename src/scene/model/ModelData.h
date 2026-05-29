@@ -5,12 +5,6 @@
 #include <memory>
 #include <variant>
 
-enum class AppState
-{
-	NoImage,
-	ImageLoaded
-};
-
 struct NoFilterSettings
 {
 };
@@ -27,7 +21,6 @@ using FilterSettings = std::variant<NoFilterSettings, MedianFilterSettings>;
 
 struct ModelData
 {
-	AppState state = AppState::NoImage;
 	std::shared_ptr<Image> image = nullptr;
 	FilterSettings filter = NoFilterSettings{};
 };

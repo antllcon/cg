@@ -51,9 +51,9 @@ void View::HandleEvent(const Event& event)
 
 void View::Render(IRenderer& renderer) const
 {
-	const auto [state, image, filter] = m_model->GetState();
+	const auto [image, filter] = m_model->GetState();
 
-	if (state == AppState::ImageLoaded && image)
+	if (image)
 	{
 		renderer.DrawImage(image, filter);
 	}
