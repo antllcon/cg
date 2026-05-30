@@ -54,11 +54,11 @@ void main()
 
     int currentSample = 0;
 
-    for (int x = -medianRadius; x <= medianRadius; ++x)
+    for (int i = -medianRadius; i <= medianRadius; ++i)
     {
-        for (int y = -medianRadius; y <= medianRadius; ++y)
+        for (int j = -medianRadius; j <= medianRadius; ++j)
         {
-            vec2 offset = vec2(float(x), float(y)) * texelSize;
+            vec2 offset = vec2(float(i), float(j)) * texelSize;
             vec4 pixelColor = texture(imageTexture, textureCoordinate + offset);
 
             neighborColors[currentSample] = pixelColor;
@@ -67,5 +67,5 @@ void main()
         }
     }
 
-    fragmentColor = FindMedianColor(neighborColors, neighborBrights, windowArea, medianIndex);
+    fragmentColor = FindMedianColor(neighborColors, neighborBrights, medianArea, medianIndex);
 }
