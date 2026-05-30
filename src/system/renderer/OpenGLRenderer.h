@@ -32,6 +32,9 @@ private:
 	float m_scaleX = 1.0f;
 	float m_scaleY = 1.0f;
 
+	float m_texelSizeX = 1.0f;
+	float m_texelSizeY = 1.0f;
+
 	const Image* m_loadedImage = nullptr;
 
 	std::unique_ptr<Texture> m_texture;

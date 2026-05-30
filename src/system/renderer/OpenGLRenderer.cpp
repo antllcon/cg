@@ -1,5 +1,6 @@
 #include "OpenGLRenderer.h"
 #include "src/utils/PrimeVariant.h"
+#include <algorithm> // ðöð╗ÐÅ std::clamp
 #include <glad/glad.h>
 
 namespace
@@ -70,6 +71,9 @@ void OpenGLRenderer::UpdateTexture(const Image& image)
 	if (m_loadedImage == rawImage) return;
 	m_loadedImage = rawImage;
 
+	m_texelSizeX = 1.0f / static_cast<float>(image.GetWidth());
+	m_texelSizeY = 1.0f / static_cast<float>(image.GetHeight());
+
 	uint32_t format = image.IsRGB() ? GL_RGB : GL_RGBA;
 	m_texture->UpdateData(image.GetWidth(), image.GetHeight(), format, image.GetData());
 
@@ -81,6 +85,7 @@ void OpenGLRenderer::BindResourcesAndDraw(const FilterSettings& settings) const
 	m_shader->Use();
 	m_shader->SetInt("imageTexture", 0);
 	m_shader->SetFloat2("scale", m_scaleX, m_scaleY);
+	m_shader->SetFloat2("texelSize", m_texelSizeX, m_texelSizeY);
 
 	std::visit(overloaded{
 				   [this](const NoFilterSettings&) {
@@ -88,7 +93,15 @@ void OpenGLRenderer::BindResourcesAndDraw(const FilterSettings& settings) const
 				   },
 				   [this](const MedianFilterSettings& median) {
 					   m_shader->SetInt("useMedian", 1);
-					   m_shader->SetInt("medianRadius", median.radius);
+
+					   int safeRadius = std::clamp(static_cast<int>(median.radius), 0, 7);
+					   m_shader->SetInt("medianRadius", safeRadius);
+
+					   int windowArea = (2 * safeRadius + 1) * (2 * safeRadius + 1);
+					   int medianIndex = windowArea / 2;
+
+					   m_shader->SetInt("windowArea", windowArea);
+					   m_shader->SetInt("medianIndex", medianIndex);
 				   }},
 		settings);
 
