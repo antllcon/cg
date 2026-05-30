@@ -94,10 +94,10 @@ void OpenGLRenderer::BindResourcesAndDraw(const FilterSettings& settings) const
 					   m_shader->SetInt("useMedian", 1);
 					   m_shader->SetInt("medianRadius", median.radius);
 
-					   int windowArea = (2 * median.radius + 1) * (2 * median.radius + 1);
-					   int medianIndex = windowArea / 2;
+					   int medianArea = (2 * median.radius + 1) * (2 * median.radius + 1);
+					   int medianIndex = medianArea / 2;
 
-					   m_shader->SetInt("windowArea", windowArea);
+					   m_shader->SetInt("medianArea", medianArea);
 					   m_shader->SetInt("medianIndex", medianIndex);
 				   }},
 		settings);
