@@ -1,7 +1,11 @@
 #pragma once
 
 #include "IRenderer.h"
+#include "framebuffer/Framebuffer.h"
+#include "mash/Mesh.h"
 #include "shader/Shader.h"
+
+#include <array>
 #include <map>
 #include <memory>
 #include <string>
@@ -28,7 +32,6 @@ private:
 	void RenderGlowMaskPass(const ModelData& data);
 	void ApplyBlurPass();
 	void RenderCompositePass();
-
 	void DrawObject(const SceneObject& object, const std::unique_ptr<Shader>& shader);
 
 private:
@@ -36,27 +39,13 @@ private:
 	uint32_t m_viewportHeight = 1;
 	Color m_clearColor;
 
-	uint32_t m_canvasVao = 0;
-	uint32_t m_canvasVbo = 0;
+	std::unique_ptr<Mesh> m_canvasMesh;
+	std::unique_ptr<Mesh> m_cylinderMesh;
+	std::unique_ptr<Mesh> m_torusMesh;
 
-	uint32_t m_cylinderVao = 0;
-	uint32_t m_cylinderVbo = 0;
-	uint32_t m_cylinderVertexCount = 0;
-
-	uint32_t m_torusVao = 0;
-	uint32_t m_torusVbo = 0;
-	uint32_t m_torusVertexCount = 0;
-
-	uint32_t m_mainFbo = 0;
-	uint32_t m_mainColorTex = 0;
-	uint32_t m_mainDepthRbo = 0;
-
-	uint32_t m_glowFbo = 0;
-	uint32_t m_glowColorTex = 0;
-	uint32_t m_glowDepthRbo = 0;
-
-	uint32_t m_pingPongFbo[2] = {0, 0};
-	uint32_t m_pingPongTex[2] = {0, 0};
+	std::unique_ptr<Framebuffer> m_mainFbo;
+	std::unique_ptr<Framebuffer> m_glowFbo;
+	std::array<std::unique_ptr<Framebuffer>, 2> m_pingPongFbos;
 
 	std::map<std::string, std::unique_ptr<Shader>> m_shaders;
 };

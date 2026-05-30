@@ -5,21 +5,12 @@
 #include <libs/glm/gtc/matrix_transform.hpp>
 #include <libs/glm/gtc/type_ptr.hpp>
 #include <numbers>
-#include <stdexcept>
 
 namespace
 {
 constexpr uint8_t CANVAS_VERTICES_SIZE = 12u;
 constexpr std::array<float, CANVAS_VERTICES_SIZE> CANVAS_VERTICES = {
 	-1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f};
-
-void AssertIsFramebufferComplete()
-{
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-	{
-		throw std::runtime_error("Ошибка инициализации Framebuffer: буфер не собран");
-	}
-}
 
 glm::mat4 CalculateViewMatrix(const CameraState& camera)
 {
@@ -35,7 +26,6 @@ glm::mat4 CalculateViewMatrix(const CameraState& camera)
 	glm::vec3 upWorld(0.0f, 1.0f, 0.0f);
 	glm::vec3 right = glm::normalize(glm::cross(front, upWorld));
 	glm::vec3 up = glm::normalize(glm::cross(right, front));
-
 	glm::vec3 position(camera.position.x, camera.position.y, camera.position.z);
 
 	return glm::lookAt(position, position + front, up);
@@ -116,7 +106,6 @@ OpenGLRenderer::OpenGLRenderer()
 
 OpenGLRenderer::~OpenGLRenderer()
 {
-	CleanupResources();
 }
 
 void OpenGLRenderer::SetViewport(uint32_t width, uint32_t height)
@@ -164,10 +153,10 @@ void OpenGLRenderer::RenderFrame(const ModelData& data)
 
 void OpenGLRenderer::RenderMainPass(const ModelData& data)
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, m_mainFbo);
+	m_mainFbo->Bind();
 	glViewport(0, 0, m_viewportWidth, m_viewportHeight);
-
 	auto [r, g, b, a] = m_clearColor.GetAsFloats();
+
 	glClearColor(r, g, b, a);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -190,7 +179,7 @@ void OpenGLRenderer::RenderMainPass(const ModelData& data)
 
 void OpenGLRenderer::RenderGlowMaskPass(const ModelData& data)
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, m_glowFbo);
+	m_glowFbo->Bind();
 	glViewport(0, 0, m_viewportWidth / 2, m_viewportHeight / 2);
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -229,19 +218,19 @@ void OpenGLRenderer::ApplyBlurPass()
 
 	const auto& shader = m_shaders["blur"];
 	shader->Use();
-
 	glViewport(0, 0, m_viewportWidth / 2, m_viewportHeight / 2);
 
 	for (uint8_t i = 0; i < amount; i++)
 	{
-		glBindFramebuffer(GL_FRAMEBUFFER, m_pingPongFbo[horizontal]);
+		m_pingPongFbos[horizontal]->Bind();
 		shader->SetInt("u_horizontal", horizontal);
 
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, firstIteration ? m_glowColorTex : m_pingPongTex[!horizontal]);
+		uint32_t textureId = firstIteration ? m_glowFbo->GetColorTexture() : m_pingPongFbos[!horizontal]->GetColorTexture();
+		glBindTexture(GL_TEXTURE_2D, textureId);
 
-		glBindVertexArray(m_canvasVao);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		m_canvasMesh->Bind();
+		glDrawArrays(GL_TRIANGLES, 0, m_canvasMesh->GetVertexCount());
 
 		horizontal = !horizontal;
 		if (firstIteration)
@@ -253,7 +242,7 @@ void OpenGLRenderer::ApplyBlurPass()
 
 void OpenGLRenderer::RenderCompositePass()
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	Framebuffer::Unbind();
 	glViewport(0, 0, m_viewportWidth, m_viewportHeight);
 	glClear(GL_COLOR_BUFFER_BIT);
 
@@ -261,15 +250,15 @@ void OpenGLRenderer::RenderCompositePass()
 	shader->Use();
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_mainColorTex);
+	glBindTexture(GL_TEXTURE_2D, m_mainFbo->GetColorTexture());
 	shader->SetInt("u_mainTexture", 0);
 
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, m_pingPongTex[0]);
+	glBindTexture(GL_TEXTURE_2D, m_pingPongFbos[0]->GetColorTexture());
 	shader->SetInt("u_glowTexture", 1);
 
-	glBindVertexArray(m_canvasVao);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+	m_canvasMesh->Bind();
+	glDrawArrays(GL_TRIANGLES, 0, m_canvasMesh->GetVertexCount());
 }
 
 void OpenGLRenderer::DrawObject(const SceneObject& object, const std::unique_ptr<Shader>& shader)
@@ -279,16 +268,16 @@ void OpenGLRenderer::DrawObject(const SceneObject& object, const std::unique_ptr
 
 	if (object.type == ObjectType::Cylinder)
 	{
-		glBindVertexArray(m_cylinderVao);
-		glDrawArrays(GL_TRIANGLES, 0, m_cylinderVertexCount);
+		m_cylinderMesh->Bind();
+		glDrawArrays(GL_TRIANGLES, 0, m_cylinderMesh->GetVertexCount());
 	}
 	else if (object.type == ObjectType::Torus)
 	{
-		glBindVertexArray(m_torusVao);
-		glDrawArrays(GL_TRIANGLES, 0, m_torusVertexCount);
+		m_torusMesh->Bind();
+		glDrawArrays(GL_TRIANGLES, 0, m_torusMesh->GetVertexCount());
 	}
 
-	glBindVertexArray(0);
+	Mesh::Unbind();
 }
 
 void OpenGLRenderer::InitShaders()
@@ -301,110 +290,42 @@ void OpenGLRenderer::InitShaders()
 
 void OpenGLRenderer::InitGeometry()
 {
-	glGenVertexArrays(1, &m_canvasVao);
-	glGenBuffers(1, &m_canvasVbo);
-	glBindVertexArray(m_canvasVao);
-	glBindBuffer(GL_ARRAY_BUFFER, m_canvasVbo);
-	glBufferData(GL_ARRAY_BUFFER, CANVAS_VERTICES_SIZE * sizeof(float), CANVAS_VERTICES.data(), GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), reinterpret_cast<void*>(0));
-	glEnableVertexAttribArray(0);
+	std::vector<float> canvasVertices(CANVAS_VERTICES.begin(), CANVAS_VERTICES.end());
+	m_canvasMesh = std::make_unique<Mesh>(canvasVertices, 2);
 
 	std::vector<float> cylinderVertices;
 	GenerateCylinder(cylinderVertices, 32, 0.5f, 2.0f);
-	m_cylinderVertexCount = static_cast<uint32_t>(cylinderVertices.size() / 3);
-
-	glGenVertexArrays(1, &m_cylinderVao);
-	glGenBuffers(1, &m_cylinderVbo);
-	glBindVertexArray(m_cylinderVao);
-	glBindBuffer(GL_ARRAY_BUFFER, m_cylinderVbo);
-	glBufferData(GL_ARRAY_BUFFER, cylinderVertices.size() * sizeof(float), cylinderVertices.data(), GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<void*>(0));
-	glEnableVertexAttribArray(0);
+	m_cylinderMesh = std::make_unique<Mesh>(cylinderVertices, 3);
 
 	std::vector<float> torusVertices;
 	GenerateTorus(torusVertices, 48, 24, 1.5f, 0.4f);
-	m_torusVertexCount = static_cast<uint32_t>(torusVertices.size() / 3);
-
-	glGenVertexArrays(1, &m_torusVao);
-	glGenBuffers(1, &m_torusVbo);
-	glBindVertexArray(m_torusVao);
-	glBindBuffer(GL_ARRAY_BUFFER, m_torusVbo);
-	glBufferData(GL_ARRAY_BUFFER, torusVertices.size() * sizeof(float), torusVertices.data(), GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<void*>(0));
-	glEnableVertexAttribArray(0);
-
-	glBindVertexArray(0);
+	m_torusMesh = std::make_unique<Mesh>(torusVertices, 3);
 }
 
 void OpenGLRenderer::InitFramebuffers()
 {
-	if (m_mainFbo != 0)
-	{
-		CleanupResources();
-	}
+	FramebufferConfig mainConfig;
+	mainConfig.width = m_viewportWidth;
+	mainConfig.height = m_viewportHeight;
+	mainConfig.hasDepthBuffer = true;
+	mainConfig.useClampToEdge = false;
 
-	glGenFramebuffers(1, &m_mainFbo);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_mainFbo);
+	m_mainFbo = std::make_unique<Framebuffer>(mainConfig);
 
-	glGenTextures(1, &m_mainColorTex);
-	glBindTexture(GL_TEXTURE_2D, m_mainColorTex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, m_viewportWidth, m_viewportHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_mainColorTex, 0);
+	FramebufferConfig glowConfig;
+	glowConfig.width = m_viewportWidth / 2;
+	glowConfig.height = m_viewportHeight / 2;
+	glowConfig.hasDepthBuffer = true;
+	glowConfig.useClampToEdge = true;
 
-	glGenRenderbuffers(1, &m_mainDepthRbo);
-	glBindRenderbuffer(GL_RENDERBUFFER, m_mainDepthRbo);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_viewportWidth, m_viewportHeight);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_mainDepthRbo);
-	AssertIsFramebufferComplete();
+	m_glowFbo = std::make_unique<Framebuffer>(glowConfig);
 
-	glGenFramebuffers(1, &m_glowFbo);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_glowFbo);
+	FramebufferConfig pingPongConfig;
+	pingPongConfig.width = m_viewportWidth / 2;
+	pingPongConfig.height = m_viewportHeight / 2;
+	pingPongConfig.hasDepthBuffer = false;
+	pingPongConfig.useClampToEdge = true;
 
-	glGenTextures(1, &m_glowColorTex);
-	glBindTexture(GL_TEXTURE_2D, m_glowColorTex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, m_viewportWidth / 2, m_viewportHeight / 2, 0, GL_RGBA, GL_FLOAT, nullptr);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_glowColorTex, 0);
-
-	glGenRenderbuffers(1, &m_glowDepthRbo);
-	glBindRenderbuffer(GL_RENDERBUFFER, m_glowDepthRbo);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_viewportWidth / 2, m_viewportHeight / 2);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_glowDepthRbo);
-	AssertIsFramebufferComplete();
-
-	glGenFramebuffers(2, m_pingPongFbo);
-	glGenTextures(2, m_pingPongTex);
-	for (unsigned int i = 0; i < 2; i++)
-	{
-		glBindFramebuffer(GL_FRAMEBUFFER, m_pingPongFbo[i]);
-		glBindTexture(GL_TEXTURE_2D, m_pingPongTex[i]);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, m_viewportWidth / 2, m_viewportHeight / 2, 0, GL_RGBA, GL_FLOAT, nullptr);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_pingPongTex[i], 0);
-		AssertIsFramebufferComplete();
-	}
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
-void OpenGLRenderer::CleanupResources()
-{
-	glDeleteFramebuffers(1, &m_mainFbo);
-	glDeleteTextures(1, &m_mainColorTex);
-	glDeleteRenderbuffers(1, &m_mainDepthRbo);
-
-	glDeleteFramebuffers(1, &m_glowFbo);
-	glDeleteTextures(1, &m_glowColorTex);
-	glDeleteRenderbuffers(1, &m_glowDepthRbo);
-
-	glDeleteFramebuffers(2, m_pingPongFbo);
-	glDeleteTextures(2, m_pingPongTex);
+	m_pingPongFbos[0] = std::make_unique<Framebuffer>(pingPongConfig);
+	m_pingPongFbos[1] = std::make_unique<Framebuffer>(pingPongConfig);
 }
