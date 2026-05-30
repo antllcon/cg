@@ -1,63 +1,71 @@
 #version 330 core
 
-out vec4 FragColor;
-
-in vec2 TexCoord;
+in vec2 textureCoordinate;
+out vec4 fragColor;
 
 uniform sampler2D imageTexture;
 uniform int useMedian;
 uniform int medianRadius;
 
-float GetLuminance(vec3 color)
+uniform vec2 texelSize;
+uniform int windowArea;
+uniform int medianIndex;
+
+const int MAX_SAMPLES = 225;
+const vec3 LUMINANCE_WEIGHTS = vec3(0.299, 0.587, 0.114);
+
+float CalculateLuminance(vec3 color)
 {
-    return dot(color, vec3(0.299, 0.587, 0.114));
+    return dot(color, LUMINANCE_WEIGHTS);
+}
+
+vec4 FindMedianColor(vec4 colors[MAX_SAMPLES], float luminances[MAX_SAMPLES], int count, int medIndex)
+{
+    for (int i = 1; i < count; ++i)
+    {
+        vec4 keyColor = colors[i];
+        float keyLuminance = luminances[i];
+        int j = i - 1;
+
+        while (j >= 0 && luminances[j] > keyLuminance)
+        {
+            colors[j + 1] = colors[j];
+            luminances[j + 1] = luminances[j];
+            j--;
+        }
+
+        colors[j + 1] = keyColor;
+        luminances[j + 1] = keyLuminance;
+    }
+
+    return colors[medIndex];
 }
 
 void main()
 {
     if (useMedian == 0 || medianRadius == 0)
     {
-        FragColor = texture(imageTexture, TexCoord);
+        fragColor = texture(imageTexture, textureCoordinate);
         return;
     }
 
-    vec2 texelSize = 1.0 / vec2(textureSize(imageTexture, 0));
+    vec4 neighborColors[MAX_SAMPLES];
+    float neighborLuminances[MAX_SAMPLES];
 
-    vec4 colors[225];
-    float lumas[225];
-
-    int count = 0;
+    int currentSample = 0;
 
     for (int x = -medianRadius; x <= medianRadius; ++x)
     {
         for (int y = -medianRadius; y <= medianRadius; ++y)
         {
             vec2 offset = vec2(float(x), float(y)) * texelSize;
-            vec4 pixelColor = texture(imageTexture, TexCoord + offset);
+            vec4 pixelColor = texture(imageTexture, textureCoordinate + offset);
 
-            colors[count] = pixelColor;
-            lumas[count] = GetLuminance(pixelColor.rgb);
-            count++;
+            neighborColors[currentSample] = pixelColor;
+            neighborLuminances[currentSample] = CalculateLuminance(pixelColor.rgb);
+            currentSample++;
         }
     }
 
-    for (int i = 1; i < count; ++i)
-    {
-        vec4 keyColor = colors[i];
-        float keyLuma = lumas[i];
-        int j = i - 1;
-
-        while (j >= 0 && lumas[j] > keyLuma)
-        {
-            colors[j + 1] = colors[j];
-            lumas[j + 1] = lumas[j];
-            j--;
-        }
-
-        colors[j + 1] = keyColor;
-        lumas[j + 1] = keyLuma;
-    }
-
-    int medianIndex = count / 2;
-    FragColor = colors[medianIndex];
+    fragColor = FindMedianColor(neighborColors, neighborLuminances, windowArea, medianIndex);
 }

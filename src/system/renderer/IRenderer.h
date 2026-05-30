@@ -14,5 +14,5 @@ public:
 	virtual void SetClearColor(const Color& color) = 0;
 	virtual void Clear() = 0;
 	virtual void Display() = 0;
-	virtual void DrawImage(const std::shared_ptr<Image>& image, const FilterSettings& settings) = 0;
+	virtual void DrawImage(const Image& image, const FilterSettings& settings) = 0;
 };

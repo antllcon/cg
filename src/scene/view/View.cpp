@@ -55,7 +55,7 @@ void View::Render(IRenderer& renderer) const
 
 	if (image)
 	{
-		renderer.DrawImage(image, filter);
+		renderer.DrawImage(*image, filter);
 	}
 	else
 	{
