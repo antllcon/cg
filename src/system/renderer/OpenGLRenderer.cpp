@@ -1,6 +1,5 @@
 #include "OpenGLRenderer.h"
 #include "src/utils/PrimeVariant.h"
-#include <algorithm> // ðöð╗ÐÅ std::clamp
 #include <glad/glad.h>
 
 namespace
@@ -93,11 +92,9 @@ void OpenGLRenderer::BindResourcesAndDraw(const FilterSettings& settings) const
 				   },
 				   [this](const MedianFilterSettings& median) {
 					   m_shader->SetInt("useMedian", 1);
+					   m_shader->SetInt("medianRadius", median.radius);
 
-					   int safeRadius = std::clamp(static_cast<int>(median.radius), 0, 7);
-					   m_shader->SetInt("medianRadius", safeRadius);
-
-					   int windowArea = (2 * safeRadius + 1) * (2 * safeRadius + 1);
+					   int windowArea = (2 * median.radius + 1) * (2 * median.radius + 1);
 					   int medianIndex = windowArea / 2;
 
 					   m_shader->SetInt("windowArea", windowArea);
