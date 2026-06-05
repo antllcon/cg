@@ -1,17 +1,20 @@
 #pragma once
 
-#include "controller/IController.h"
-#include "model/Model.h"
+#include "controller/CameraController.h"
+#include "controller/SceneController.h"
+#include "model/CameraModel.h"
+#include "model/SceneModel.h"
 #include "src/utils/types/event/Event.h"
-#include "view/IView.h"
+#include "view/View.h"
 #include <memory>
 
 class IRenderer;
+class IWindow;
 
 class MainScene final
 {
 public:
-	MainScene();
+	explicit MainScene(IWindow& window);
 	~MainScene() = default;
 
 	void ProcessEvents(const Event& event);
@@ -19,7 +22,9 @@ public:
 	void Render(IRenderer& renderer) const;
 
 private:
-	std::shared_ptr<Model> m_model;
-	std::shared_ptr<IController> m_controller;
-	std::shared_ptr<IView> m_view;
+	std::shared_ptr<CameraModel> m_cameraModel;
+	std::shared_ptr<SceneModel> m_sceneModel;
+	std::shared_ptr<CameraController> m_cameraController;
+	std::shared_ptr<SceneController> m_sceneController;
+	std::shared_ptr<View> m_view;
 };

@@ -20,7 +20,7 @@ public:
 	void SetClearColor(const Color& color) override;
 	void Clear() override;
 	void Display() override;
-	void RenderFrame(const ModelData& data) override;
+	void RenderFrame(const RenderData& data) override;
 
 private:
 	void InitShaders();
@@ -28,8 +28,8 @@ private:
 	void InitFramebuffers();
 	void CleanupResources();
 
-	void RenderMainPass(const ModelData& data);
-	void RenderGlowMaskPass(const ModelData& data);
+	void RenderMainPass(const RenderData& data);
+	void RenderGlowMaskPass(const RenderData& data);
 	void ApplyBlurPass();
 	void RenderCompositePass();
 	void DrawObject(const SceneObject& object, const std::unique_ptr<Shader>& shader);

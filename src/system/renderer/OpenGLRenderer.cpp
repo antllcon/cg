@@ -9,8 +9,7 @@
 namespace
 {
 constexpr uint8_t CANVAS_VERTICES_SIZE = 12u;
-constexpr std::array<float, CANVAS_VERTICES_SIZE> CANVAS_VERTICES = {
-	-1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f};
+constexpr std::array<float, CANVAS_VERTICES_SIZE> CANVAS_VERTICES = {-1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f};
 
 glm::mat4 CalculateViewMatrix(const CameraState& camera)
 {
@@ -133,7 +132,7 @@ void OpenGLRenderer::Display()
 	glFlush();
 }
 
-void OpenGLRenderer::RenderFrame(const ModelData& data)
+void OpenGLRenderer::RenderFrame(const RenderData& data)
 {
 	if (m_viewportHeight == 0 || m_viewportWidth == 0)
 	{
@@ -151,7 +150,7 @@ void OpenGLRenderer::RenderFrame(const ModelData& data)
 	RenderCompositePass();
 }
 
-void OpenGLRenderer::RenderMainPass(const ModelData& data)
+void OpenGLRenderer::RenderMainPass(const RenderData& data)
 {
 	m_mainFbo->Bind();
 	glViewport(0, 0, m_viewportWidth, m_viewportHeight);
@@ -177,7 +176,7 @@ void OpenGLRenderer::RenderMainPass(const ModelData& data)
 	}
 }
 
-void OpenGLRenderer::RenderGlowMaskPass(const ModelData& data)
+void OpenGLRenderer::RenderGlowMaskPass(const RenderData& data)
 {
 	m_glowFbo->Bind();
 	glViewport(0, 0, m_viewportWidth / 2, m_viewportHeight / 2);
@@ -291,15 +290,15 @@ void OpenGLRenderer::InitShaders()
 void OpenGLRenderer::InitGeometry()
 {
 	std::vector<float> canvasVertices(CANVAS_VERTICES.begin(), CANVAS_VERTICES.end());
-	m_canvasMesh = std::make_unique<Mesh>(canvasVertices, 2);
+	m_canvasMesh = std::make_unique<Mesh>(canvasVertices, uint8_t{ 2 });
 
 	std::vector<float> cylinderVertices;
 	GenerateCylinder(cylinderVertices, 32, 0.5f, 2.0f);
-	m_cylinderMesh = std::make_unique<Mesh>(cylinderVertices, 3);
+	m_cylinderMesh = std::make_unique<Mesh>(cylinderVertices, uint8_t{ 3 });
 
 	std::vector<float> torusVertices;
 	GenerateTorus(torusVertices, 48, 24, 1.5f, 0.4f);
-	m_torusMesh = std::make_unique<Mesh>(torusVertices, 3);
+	m_torusMesh = std::make_unique<Mesh>(torusVertices, uint8_t{ 3 });
 }
 
 void OpenGLRenderer::InitFramebuffers()

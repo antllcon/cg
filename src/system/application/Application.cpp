@@ -57,7 +57,7 @@ float ConsumeDeltaTime(Clock::time_point& lastTime)
 Application::Application()
 	: m_window(std::make_unique<GlfwWindow>())
 	, m_renderer(std::make_unique<OpenGLRenderer>())
-	, m_mainScene(std::make_unique<MainScene>())
+	, m_mainScene(std::make_unique<MainScene>(*m_window))
 {
 	AssertIsWindowValid(m_window.get());
 	AssertIsRendererValid(m_renderer.get());

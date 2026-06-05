@@ -1,8 +1,6 @@
 #include "MainScene.h"
-#include "controller/Controller.h"
-#include "model/Model.h"
 #include "src/system/renderer/IRenderer.h"
-#include "view/View.h"
+#include "src/system/window/IWindow.h"
 #include <stdexcept>
 
 namespace
@@ -16,17 +14,13 @@ void AssertIsRendererValid(const IRenderer* renderer)
 }
 } // namespace
 
-MainScene::MainScene()
+MainScene::MainScene(IWindow& window)
 {
-	auto model = std::make_shared<Model>();
-	auto controller = std::make_shared<Controller>(model);
-	auto view = std::make_shared<View>(model, controller);
-
-	model->RegisterObserver(view);
-
-	m_model = model;
-	m_controller = controller;
-	m_view = view;
+	m_cameraModel = std::make_shared<CameraModel>();
+	m_sceneModel = std::make_shared<SceneModel>();
+	m_cameraController = std::make_shared<CameraController>(m_cameraModel, window);
+	m_sceneController = std::make_shared<SceneController>(m_sceneModel);
+	m_view = std::make_shared<View>(m_cameraModel, m_sceneModel, m_cameraController);
 }
 
 void MainScene::ProcessEvents(const Event& event)
@@ -36,7 +30,8 @@ void MainScene::ProcessEvents(const Event& event)
 
 void MainScene::Update(float dt)
 {
-	m_controller->Update(dt);
+	m_cameraController->Update(dt);
+	m_sceneController->Update(dt);
 }
 
 void MainScene::Render(IRenderer& renderer) const

@@ -1,33 +1,25 @@
 #pragma once
 
-#include "src/scene/controller/Controller.h"
-#include "src/scene/model/Model.h"
-#include "src/scene/view/IView.h"
-#include "src/utils/Observer.h"
+#include "IView.h"
+#include "src/scene/controller/CameraController.h"
+#include "src/scene/model/CameraModel.h"
+#include "src/scene/model/SceneModel.h"
 #include <memory>
 
-class View final
-	: public IView
-	, public IObserver<ModelData>
+class View final : public IView
 {
 public:
-	View(std::shared_ptr<Model> model, std::shared_ptr<Controller> controller);
+	View(
+		std::shared_ptr<CameraModel> cameraModel,
+		std::shared_ptr<SceneModel> sceneModel,
+		std::shared_ptr<CameraController> cameraController);
 	~View() override = default;
 
 	void HandleEvent(const Event& event) override;
 	void Render(IRenderer& renderer) const override;
-	void Update(const ModelData& data, IObservable<ModelData>* subject) override;
 
 private:
-	void HandleKeyPressed(const KeyPressedEvent& e);
-	void HandleKeyReleased(const KeyReleasedEvent& e);
-	void HandleMousePressed(const MouseButtonPressedEvent& e);
-	void HandleMouseReleased(const MouseButtonReleasedEvent& e);
-	void HandleMouseMoved(const MouseMovedEvent& e);
-
-	std::shared_ptr<Model> m_model;
-	std::shared_ptr<Controller> m_controller;
-
-	bool m_isDragging = false;
-	std::pair<double, double> m_lastMousePos = {0.0, 0.0};
+	std::shared_ptr<CameraModel> m_cameraModel;
+	std::shared_ptr<SceneModel> m_sceneModel;
+	std::shared_ptr<CameraController> m_cameraController;
 };
