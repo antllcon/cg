@@ -29,6 +29,22 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(glfw)
 
+FetchContent_Declare(
+        OpenCLHeaders
+        GIT_REPOSITORY https://github.com/KhronosGroup/OpenCL-Headers.git
+        GIT_TAG v2026.05.29
+)
+FetchContent_MakeAvailable(OpenCLHeaders)
+
+set(OPENCL_ICD_LOADER_BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+set(OPENCL_ICD_LOADER_BUILD_TESTING OFF CACHE BOOL "" FORCE)
+FetchContent_Declare(
+        OpenCLICDLoader
+        GIT_REPOSITORY https://github.com/KhronosGroup/OpenCL-ICD-Loader.git
+        GIT_TAG v2026.05.29
+)
+FetchContent_MakeAvailable(OpenCLICDLoader)
+
 add_library(glad STATIC "libs/glad/src/glad.c")
 target_include_directories(glad PUBLIC "libs/glad/include")
 if (MSVC)
@@ -39,9 +55,10 @@ endif()
 
 add_library(core_lib STATIC ${SRC_FILES} ${HEADER_FILES})
 target_include_directories(core_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(core_lib PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_include_directories(core_lib PUBLIC libs/stb)
 target_compile_options(core_lib PRIVATE ${PROJECT_WARNINGS})
-target_link_libraries(core_lib PUBLIC glfw glad)
+target_link_libraries(core_lib PUBLIC glfw glad OpenCL)
 
 if (WIN32)
     target_link_libraries(core_lib PUBLIC dwmapi)
