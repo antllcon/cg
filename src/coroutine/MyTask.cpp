@@ -12,6 +12,14 @@ namespace
 		}
 	}
 
+	void AssertIsNotDone(bool isDone)
+	{
+		if (isDone)
+		{
+			throw std::runtime_error("Корутина уже завершена");
+		}
+	}
+
 	void AssertIsExceptionAbsent(const std::exception_ptr& exception)
 	{
 		if (exception)
@@ -36,9 +44,8 @@ std::suspend_always MyTask::promise_type::final_suspend() noexcept
 	return {};
 }
 
-void MyTask::promise_type::return_value(std::string value) noexcept
+void MyTask::promise_type::return_void() noexcept
 {
-	m_value = std::move(value);
 }
 
 void MyTask::promise_type::unhandled_exception() noexcept
@@ -77,9 +84,10 @@ MyTask& MyTask::operator=(MyTask&& other) noexcept
 	return *this;
 }
 
-std::string MyTask::GetResult() const
+void MyTask::Resume()
 {
 	AssertIsHandleValid(static_cast<bool>(m_handle));
+	AssertIsNotDone(m_handle.done());
+	m_handle.resume();
 	AssertIsExceptionAbsent(m_handle.promise().m_exception);
-	return m_handle.promise().m_value;
 }
