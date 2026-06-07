@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.18)
 project(cg VERSION 1.0)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -28,22 +28,6 @@ FetchContent_Declare(
         GIT_TAG 3.4
 )
 FetchContent_MakeAvailable(glfw)
-
-FetchContent_Declare(
-        OpenCLHeaders
-        GIT_REPOSITORY https://github.com/KhronosGroup/OpenCL-Headers.git
-        GIT_TAG v2026.05.29
-)
-FetchContent_MakeAvailable(OpenCLHeaders)
-
-set(OPENCL_ICD_LOADER_BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
-set(OPENCL_ICD_LOADER_BUILD_TESTING OFF CACHE BOOL "" FORCE)
-FetchContent_Declare(
-        OpenCLICDLoader
-        GIT_REPOSITORY https://github.com/KhronosGroup/OpenCL-ICD-Loader.git
-        GIT_TAG v2026.05.29
-)
-FetchContent_MakeAvailable(OpenCLICDLoader)
 
 add_library(glad STATIC "libs/glad/src/glad.c")
 target_include_directories(glad PUBLIC "libs/glad/include")
