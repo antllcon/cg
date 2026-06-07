@@ -7,7 +7,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 file(GLOB_RECURSE SRC_FILES "src/*.cpp")
 file(GLOB_RECURSE HEADER_FILES "src/*.h")
-list(REMOVE_ITEM SRC_FILES "src/main.cpp")
+list(REMOVE_ITEM SRC_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
 
 if (MSVC)
     set(PROJECT_WARNINGS /utf-8 /W4 /WX)
@@ -42,7 +42,12 @@ target_include_directories(core_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(core_lib PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_include_directories(core_lib PUBLIC libs/stb)
 target_compile_options(core_lib PRIVATE ${PROJECT_WARNINGS})
-target_link_libraries(core_lib PUBLIC glfw glad OpenCL)
+find_package(OpenCL QUIET)
+
+target_link_libraries(core_lib PUBLIC glfw glad)
+if (OpenCL_FOUND)
+    target_link_libraries(core_lib PUBLIC OpenCL::OpenCL)
+endif ()
 
 if (WIN32)
     target_link_libraries(core_lib PUBLIC dwmapi)
