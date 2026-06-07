@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IRenderer.h"
+#include "framebuffer/Framebuffer.h"
 #include "mesh/CanvasMesh.h"
 #include "shader/Shader.h"
 #include "src/utils/image/Image.h"
@@ -23,11 +24,15 @@ public:
 private:
 	void UpdateTexture(const Image& image);
 	void BindResourcesAndDraw(const FilterSettings& settings) const;
+	void ApplyGaussianBlur(const GaussianBlurSettings& settings) const;
+	void ResizePingPongBuffers(uint32_t width, uint32_t height);
 	void RecalculateScale();
 
 private:
 	uint32_t m_viewportWidth = 1;
 	uint32_t m_viewportHeight = 1;
+	uint32_t m_imageWidth = 1;
+	uint32_t m_imageHeight = 1;
 
 	float m_scaleX = 1.0f;
 	float m_scaleY = 1.0f;
@@ -39,5 +44,7 @@ private:
 
 	std::unique_ptr<Texture> m_texture;
 	std::unique_ptr<Shader> m_shader;
+	std::unique_ptr<Shader> m_gaussianShader;
 	std::unique_ptr<CanvasMesh> m_canvasMesh;
+	std::unique_ptr<Framebuffer> m_pingPongFBO[2];
 };

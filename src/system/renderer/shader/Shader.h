@@ -16,6 +16,7 @@ public:
 
 	void SetInt(const std::string& name, int value) const;
 	void SetFloat2(const std::string& name, float x, float y) const;
+	void SetFloat1v(const std::string& name, const float* values, int count) const;
 
 private:
 	uint32_t m_programId = 0;

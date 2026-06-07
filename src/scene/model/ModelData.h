@@ -17,7 +17,15 @@ struct MedianFilterSettings
 	uint8_t radius = MIN_RADIUS;
 };
 
-using FilterSettings = std::variant<NoFilterSettings, MedianFilterSettings>;
+struct GaussianBlurSettings
+{
+	static constexpr uint8_t MIN_RADIUS = 1;
+	static constexpr uint8_t MAX_RADIUS = 40;
+
+	uint8_t radius = MIN_RADIUS;
+};
+
+using FilterSettings = std::variant<NoFilterSettings, MedianFilterSettings, GaussianBlurSettings>;
 
 struct ModelData
 {

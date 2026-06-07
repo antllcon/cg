@@ -26,4 +26,5 @@ protected:
 private:
 	ModelData m_data;
 	uint8_t m_cachedMedianRadius = MedianFilterSettings::MIN_RADIUS;
+	uint8_t m_cachedGaussianRadius = GaussianBlurSettings::MIN_RADIUS;
 };

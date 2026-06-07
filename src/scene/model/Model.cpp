@@ -47,13 +47,16 @@ void Model::ToggleFilter()
 		settings.radius = m_cachedMedianRadius;
 		m_data.filter = settings;
 	}
-	else
+	else if (const auto* median = std::get_if<MedianFilterSettings>(&m_data.filter))
 	{
-		if (const auto* medianSettings = std::get_if<MedianFilterSettings>(&m_data.filter))
-		{
-			m_cachedMedianRadius = medianSettings->radius;
-		}
-
+		m_cachedMedianRadius = median->radius;
+		GaussianBlurSettings settings;
+		settings.radius = m_cachedGaussianRadius;
+		m_data.filter = settings;
+	}
+	else if (const auto* gaussian = std::get_if<GaussianBlurSettings>(&m_data.filter))
+	{
+		m_cachedGaussianRadius = gaussian->radius;
 		m_data.filter = NoFilterSettings{};
 	}
 
@@ -62,11 +65,19 @@ void Model::ToggleFilter()
 
 void Model::IncreaseFilterRadius()
 {
-	if (auto* medianSettings = std::get_if<MedianFilterSettings>(&m_data.filter))
+	if (auto* median = std::get_if<MedianFilterSettings>(&m_data.filter))
 	{
-		if (medianSettings->radius < MedianFilterSettings::MAX_RADIUS)
+		if (median->radius < MedianFilterSettings::MAX_RADIUS)
 		{
-			medianSettings->radius++;
+			median->radius++;
+			NotifyObservers();
+		}
+	}
+	else if (auto* gaussian = std::get_if<GaussianBlurSettings>(&m_data.filter))
+	{
+		if (gaussian->radius < GaussianBlurSettings::MAX_RADIUS)
+		{
+			gaussian->radius++;
 			NotifyObservers();
 		}
 	}
@@ -74,11 +85,19 @@ void Model::IncreaseFilterRadius()
 
 void Model::DecreaseFilterRadius()
 {
-	if (auto* medianSettings = std::get_if<MedianFilterSettings>(&m_data.filter))
+	if (auto* median = std::get_if<MedianFilterSettings>(&m_data.filter))
 	{
-		if (medianSettings->radius > MedianFilterSettings::MIN_RADIUS)
+		if (median->radius > MedianFilterSettings::MIN_RADIUS)
 		{
-			medianSettings->radius--;
+			median->radius--;
+			NotifyObservers();
+		}
+	}
+	else if (auto* gaussian = std::get_if<GaussianBlurSettings>(&m_data.filter))
+	{
+		if (gaussian->radius > GaussianBlurSettings::MIN_RADIUS)
+		{
+			gaussian->radius--;
 			NotifyObservers();
 		}
 	}
