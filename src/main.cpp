@@ -1,15 +1,16 @@
 #include "Windows.h"
-#include "book/BookChapterGenerator.h"
+#include "coroutine/MyAwaiter.h"
+#include "coroutine/MyTask.h"
 #include "utils/console/ConsoleEncoding.h"
 #include <iostream>
-#include <vector>
 
-#ifdef _WIN32
-extern "C" {
-__declspec(dllexport) uint32_t NvOptimusEnablement = 1;
-__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+MyTask CoroutineWithAwait(int x, int y)
+{
+	std::cout << "Before await" << std::endl;
+	int result = co_await MyAwaiter{ x, y };
+	std::cout << result << std::endl;
+	std::cout << "After await" << std::endl;
 }
-#endif
 
 int main()
 {
@@ -17,16 +18,12 @@ int main()
 
 	try
 	{
-		std::vector<Book> books = {
-			{"The Great Gatsby", "F. Scott Fitzgerald", {"Chapter 1", "Chapter 2"}},
-			{"1984", "George Orwell", {"Chapter 1", "Chapter 2", "Chapter 3"}},
-			{"To Kill a Mockingbird", "Harper Lee", {"Chapter 1"}},
-		};
-
-		for (const auto& chapter : ListBookChapters(books))
-		{
-			std::cout << chapter << std::endl;
-		}
+		auto task = CoroutineWithAwait(30, 12);
+		std::cout << "Before resume" << std::endl;
+		task.Resume();
+		std::cout << "After resume" << std::endl;
+		CoroutineWithAwait(5, 10).Resume();
+		std::cout << "End of main" << std::endl;
 	}
 	catch (const std::exception& e)
 	{
