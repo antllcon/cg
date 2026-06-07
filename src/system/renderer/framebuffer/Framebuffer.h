@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <cstdint>
 
 struct FramebufferConfig
@@ -8,6 +9,7 @@ struct FramebufferConfig
 	uint32_t height = 1;
 	bool hasDepthBuffer = true;
 	bool useClampToEdge = false;
+	uint8_t colorAttachmentCount = 1;
 };
 
 class Framebuffer final
@@ -24,10 +26,10 @@ public:
 	void Bind() const;
 	static void Unbind();
 
-	uint32_t GetColorTexture() const;
+	uint32_t GetColorTexture(uint8_t index = 0) const;
 
 private:
 	uint32_t m_fbo = 0;
-	uint32_t m_colorTex = 0;
+	std::array<uint32_t, 2> m_colorTextures = { 0, 0 };
 	uint32_t m_depthRbo = 0;
 };

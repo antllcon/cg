@@ -4,6 +4,8 @@
 
 namespace
 {
+constexpr std::array<GLenum, 2> DRAW_BUFFERS = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+
 void AssertIsGenerated(uint32_t id)
 {
 	if (id == 0)
@@ -19,29 +21,54 @@ void AssertIsFramebufferComplete()
 		throw std::runtime_error("Ошибка инициализации: фреймбуфер собран некорректно");
 	}
 }
-} // namespace
 
-Framebuffer::Framebuffer(const FramebufferConfig& config)
+void AssertIsAttachmentCountValid(uint8_t count)
 {
-	glGenFramebuffers(1, &m_fbo);
-	AssertIsGenerated(m_fbo);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+	if (count == 0 || count > 2)
+	{
+		throw std::invalid_argument("Количество цветовых аттачментов должно быть от 1 до 2");
+	}
+}
 
-	glGenTextures(1, &m_colorTex);
-	AssertIsGenerated(m_colorTex);
-	glBindTexture(GL_TEXTURE_2D, m_colorTex);
+uint32_t CreateColorTexture(uint32_t width, uint32_t height, bool useClampToEdge)
+{
+	uint32_t tex = 0;
+	glGenTextures(1, &tex);
+	AssertIsGenerated(tex);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, config.width, config.height, 0, GL_RGBA, GL_FLOAT, nullptr);
+	glBindTexture(GL_TEXTURE_2D, tex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	if (config.useClampToEdge)
+	if (useClampToEdge)
 	{
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	}
 
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_colorTex, 0);
+	return tex;
+}
+} // namespace
+
+Framebuffer::Framebuffer(const FramebufferConfig& config)
+{
+	AssertIsAttachmentCountValid(config.colorAttachmentCount);
+
+	glGenFramebuffers(1, &m_fbo);
+	AssertIsGenerated(m_fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+
+	for (uint8_t i = 0; i < config.colorAttachmentCount; ++i)
+	{
+		m_colorTextures[i] = CreateColorTexture(config.width, config.height, config.useClampToEdge);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, m_colorTextures[i], 0);
+	}
+
+	if (config.colorAttachmentCount > 1)
+	{
+		glDrawBuffers(config.colorAttachmentCount, DRAW_BUFFERS.data());
+	}
 
 	if (config.hasDepthBuffer)
 	{
@@ -63,9 +90,12 @@ Framebuffer::~Framebuffer()
 		glDeleteRenderbuffers(1, &m_depthRbo);
 	}
 
-	if (m_colorTex != 0)
+	for (uint32_t tex : m_colorTextures)
 	{
-		glDeleteTextures(1, &m_colorTex);
+		if (tex != 0)
+		{
+			glDeleteTextures(1, &tex);
+		}
 	}
 
 	if (m_fbo != 0)
@@ -84,7 +114,7 @@ void Framebuffer::Unbind()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-uint32_t Framebuffer::GetColorTexture() const
+uint32_t Framebuffer::GetColorTexture(uint8_t index) const
 {
-	return m_colorTex;
+	return m_colorTextures[index];
 }

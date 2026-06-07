@@ -26,11 +26,11 @@ private:
 	void InitShaders();
 	void InitGeometry();
 	void InitFramebuffers();
-	void CleanupResources();
 
-	void RenderMainPass(const RenderData& data);
-	void RenderGlowMaskPass(const RenderData& data);
+	void RenderGeometryPass(const RenderData& data);
+	void DownscaleGlowPass();
 	void ApplyBlurPass();
+	void ApplyLightMotionBlurPass();
 	void RenderCompositePass();
 	void DrawObject(const SceneObject& object, const std::unique_ptr<Shader>& shader);
 

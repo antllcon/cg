@@ -140,24 +140,77 @@ void OpenGLRenderer::RenderFrame(const RenderData& data)
 	}
 
 	glEnable(GL_DEPTH_TEST);
-
-	RenderMainPass(data);
-	RenderGlowMaskPass(data);
-
+	RenderGeometryPass(data);
 	glDisable(GL_DEPTH_TEST);
 
+	DownscaleGlowPass();
 	ApplyBlurPass();
+	ApplyLightMotionBlurPass();
 	RenderCompositePass();
 }
 
-void OpenGLRenderer::RenderMainPass(const RenderData& data)
+void OpenGLRenderer::InitShaders()
+{
+	m_shaders["main"] = std::make_unique<Shader>("static/shaders/main.vert", "static/shaders/main.frag");
+	m_shaders["blit"] = std::make_unique<Shader>("static/shaders/canvas.vert", "static/shaders/blit.frag");
+	m_shaders["blur"] = std::make_unique<Shader>("static/shaders/canvas.vert", "static/shaders/blur.frag");
+	m_shaders["composite"] = std::make_unique<Shader>("static/shaders/canvas.vert", "static/shaders/composite.frag");
+}
+
+void OpenGLRenderer::InitGeometry()
+{
+	std::vector<float> canvasVertices(CANVAS_VERTICES.begin(), CANVAS_VERTICES.end());
+	m_canvasMesh = std::make_unique<Mesh>(canvasVertices, uint8_t{2});
+
+	std::vector<float> cylinderVertices;
+	GenerateCylinder(cylinderVertices, 32, 0.5f, 2.0f);
+	m_cylinderMesh = std::make_unique<Mesh>(cylinderVertices, uint8_t{3});
+
+	std::vector<float> torusVertices;
+	GenerateTorus(torusVertices, 48, 24, 1.5f, 0.4f);
+	m_torusMesh = std::make_unique<Mesh>(torusVertices, uint8_t{3});
+}
+
+void OpenGLRenderer::InitFramebuffers()
+{
+	FramebufferConfig mainConfig;
+	mainConfig.width = m_viewportWidth;
+	mainConfig.height = m_viewportHeight;
+	mainConfig.hasDepthBuffer = true;
+	mainConfig.useClampToEdge = false;
+	mainConfig.colorAttachmentCount = 2;
+
+	m_mainFbo = std::make_unique<Framebuffer>(mainConfig);
+
+	FramebufferConfig glowConfig;
+	glowConfig.width = m_viewportWidth / 2;
+	glowConfig.height = m_viewportHeight / 2;
+	glowConfig.hasDepthBuffer = true;
+	glowConfig.useClampToEdge = true;
+
+	m_glowFbo = std::make_unique<Framebuffer>(glowConfig);
+
+	FramebufferConfig pingPongConfig;
+	pingPongConfig.width = m_viewportWidth / 2;
+	pingPongConfig.height = m_viewportHeight / 2;
+	pingPongConfig.hasDepthBuffer = false;
+	pingPongConfig.useClampToEdge = true;
+
+	m_pingPongFbos[0] = std::make_unique<Framebuffer>(pingPongConfig);
+	m_pingPongFbos[1] = std::make_unique<Framebuffer>(pingPongConfig);
+}
+
+void OpenGLRenderer::RenderGeometryPass(const RenderData& data)
 {
 	m_mainFbo->Bind();
 	glViewport(0, 0, m_viewportWidth, m_viewportHeight);
-	auto [r, g, b, a] = m_clearColor.GetAsFloats();
 
-	glClearColor(r, g, b, a);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	auto [r, g, b, a] = m_clearColor.GetAsFloats();
+	const std::array<float, 4> bgColor = { r, g, b, a };
+	const std::array<float, 4> black = { 0.0f, 0.0f, 0.0f, 1.0f };
+	glClearBufferfv(GL_COLOR, 0, bgColor.data());
+	glClearBufferfv(GL_COLOR, 1, black.data());
+	glClear(GL_DEPTH_BUFFER_BIT);
 
 	const auto& shader = m_shaders["main"];
 	shader->Use();
@@ -172,41 +225,30 @@ void OpenGLRenderer::RenderMainPass(const RenderData& data)
 	for (const auto& object : data.objects)
 	{
 		shader->SetFloat4("u_color", object.color.GetAsFloats());
+		shader->SetBool("u_isEmissive", object.isEmissive);
 		DrawObject(object, shader);
 	}
 }
 
-void OpenGLRenderer::RenderGlowMaskPass(const RenderData& data)
+void OpenGLRenderer::DownscaleGlowPass()
 {
 	m_glowFbo->Bind();
 	glViewport(0, 0, m_viewportWidth / 2, m_viewportHeight / 2);
+	glClear(GL_COLOR_BUFFER_BIT);
 
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	const auto& shader = m_shaders["mask"];
+	const auto& shader = m_shaders["blit"];
 	shader->Use();
 
-	float aspect = static_cast<float>(m_viewportWidth) / static_cast<float>(m_viewportHeight);
-	glm::mat4 projection = glm::perspective(glm::radians(data.camera.fov), aspect, 0.1f, 100.0f);
-	glm::mat4 view = CalculateViewMatrix(data.camera);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_mainFbo->GetColorTexture(1));
+	shader->SetInt("u_image", 0);
 
-	shader->SetMat4("u_projection", glm::value_ptr(projection));
-	shader->SetMat4("u_view", glm::value_ptr(view));
+	m_canvasMesh->Bind();
+	glDrawArrays(GL_TRIANGLES, 0, m_canvasMesh->GetVertexCount());
+}
 
-	for (const auto& object : data.objects)
-	{
-		if (object.isEmissive)
-		{
-			shader->SetFloat4("u_color", object.color.GetAsFloats());
-		}
-		else
-		{
-			shader->SetFloat4("u_color", {0.0f, 0.0f, 0.0f, 1.0f});
-		}
-
-		DrawObject(object, shader);
-	}
+void OpenGLRenderer::ApplyLightMotionBlurPass()
+{
 }
 
 void OpenGLRenderer::ApplyBlurPass()
@@ -249,7 +291,7 @@ void OpenGLRenderer::RenderCompositePass()
 	shader->Use();
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_mainFbo->GetColorTexture());
+	glBindTexture(GL_TEXTURE_2D, m_mainFbo->GetColorTexture(0));
 	shader->SetInt("u_mainTexture", 0);
 
 	glActiveTexture(GL_TEXTURE1);
@@ -277,54 +319,4 @@ void OpenGLRenderer::DrawObject(const SceneObject& object, const std::unique_ptr
 	}
 
 	Mesh::Unbind();
-}
-
-void OpenGLRenderer::InitShaders()
-{
-	m_shaders["main"] = std::make_unique<Shader>("static/shaders/main.vert", "static/shaders/main.frag");
-	m_shaders["mask"] = std::make_unique<Shader>("static/shaders/main.vert", "static/shaders/mask.frag");
-	m_shaders["blur"] = std::make_unique<Shader>("static/shaders/canvas.vert", "static/shaders/blur.frag");
-	m_shaders["composite"] = std::make_unique<Shader>("static/shaders/canvas.vert", "static/shaders/composite.frag");
-}
-
-void OpenGLRenderer::InitGeometry()
-{
-	std::vector<float> canvasVertices(CANVAS_VERTICES.begin(), CANVAS_VERTICES.end());
-	m_canvasMesh = std::make_unique<Mesh>(canvasVertices, uint8_t{ 2 });
-
-	std::vector<float> cylinderVertices;
-	GenerateCylinder(cylinderVertices, 32, 0.5f, 2.0f);
-	m_cylinderMesh = std::make_unique<Mesh>(cylinderVertices, uint8_t{ 3 });
-
-	std::vector<float> torusVertices;
-	GenerateTorus(torusVertices, 48, 24, 1.5f, 0.4f);
-	m_torusMesh = std::make_unique<Mesh>(torusVertices, uint8_t{ 3 });
-}
-
-void OpenGLRenderer::InitFramebuffers()
-{
-	FramebufferConfig mainConfig;
-	mainConfig.width = m_viewportWidth;
-	mainConfig.height = m_viewportHeight;
-	mainConfig.hasDepthBuffer = true;
-	mainConfig.useClampToEdge = false;
-
-	m_mainFbo = std::make_unique<Framebuffer>(mainConfig);
-
-	FramebufferConfig glowConfig;
-	glowConfig.width = m_viewportWidth / 2;
-	glowConfig.height = m_viewportHeight / 2;
-	glowConfig.hasDepthBuffer = true;
-	glowConfig.useClampToEdge = true;
-
-	m_glowFbo = std::make_unique<Framebuffer>(glowConfig);
-
-	FramebufferConfig pingPongConfig;
-	pingPongConfig.width = m_viewportWidth / 2;
-	pingPongConfig.height = m_viewportHeight / 2;
-	pingPongConfig.hasDepthBuffer = false;
-	pingPongConfig.useClampToEdge = true;
-
-	m_pingPongFbos[0] = std::make_unique<Framebuffer>(pingPongConfig);
-	m_pingPongFbos[1] = std::make_unique<Framebuffer>(pingPongConfig);
 }
