@@ -53,9 +53,8 @@ private:
 	std::unique_ptr<Framebuffer> m_mainFbo;
 	std::unique_ptr<Framebuffer> m_glowFbo;
 	std::array<std::unique_ptr<Framebuffer>, 2> m_pingPongFbos;
+	std::array<std::unique_ptr<Framebuffer>, 2> m_historyFbos;
 
 	std::map<std::string, std::unique_ptr<Shader>> m_shaders;
-
-	std::array<std::unique_ptr<Framebuffer>, 2> m_historyFbos;
 	uint8_t m_currentHistoryIdx = 0;
 };
