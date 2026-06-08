@@ -332,79 +332,90 @@ void OpenGLRenderer::DownscaleGlowPass()
 
 void OpenGLRenderer::ApplyLightMotionBlurPass()
 {
-	// Определяем, в какой буфер будем писать (противоположный от текущего)
-	uint8_t writeIdx = 1 - m_currentHistoryIdx;
+	uint8_t writeIndex = 1 - m_currentHistoryIdx;
 
-	m_historyFbos[writeIdx]->Bind();
+	m_historyFbos[writeIndex]->Bind();
 	glViewport(0, 0, m_viewportWidth / 2, m_viewportHeight / 2);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	const auto& shader = m_shaders["motion_blur"];
 	shader->Use();
 
-	// 1. Текущее размытое свечение (результат Пинг-Понга)
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_pingPongFbos[0]->GetColorTexture());
 	shader->SetInt("u_currentGlow", 0);
 
-	// 2. История предыдущего кадра
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, m_historyFbos[m_currentHistoryIdx]->GetColorTexture());
 	shader->SetInt("u_historyGlow", 1);
 
-	// Настраиваем длину "хвоста" (от 0.0 до 1.0)
 	shader->SetFloat("u_fadeFactor", 0.9f);
 
 	m_canvasMesh->Bind();
 	glDrawArrays(GL_TRIANGLES, 0, m_canvasMesh->GetVertexCount());
 
-	// Сохраняем индекс для следующего кадра
-	m_currentHistoryIdx = writeIdx;
+	m_currentHistoryIdx = writeIndex;
 }
 
 void OpenGLRenderer::ApplyBlurPass()
 {
-	bool horizontal = true;
-	bool firstIteration = true;
-	uint8_t amount = 10;
+	const uint8_t blurIterations = 10;
 
+	PrepareBlurState();
+	PerformPingPongBlur(blurIterations);
+}
+
+void OpenGLRenderer::PrepareBlurState()
+{
 	const auto& shader = m_shaders["blur"];
 	shader->Use();
+
 	glViewport(0, 0, m_viewportWidth / 2, m_viewportHeight / 2);
+}
 
-	for (uint8_t i = 0; i < amount; i++)
+void OpenGLRenderer::PerformPingPongBlur(uint8_t iterations)
+{
+	bool isHorizontal = true;
+
+	for (uint8_t i = 0; i < iterations; i++)
 	{
-		m_pingPongFbos[horizontal]->Bind();
-		shader->SetInt("u_horizontal", horizontal);
+		uint32_t inputTexture = (i == 0)
+			? m_glowFbo->GetColorTexture()
+			: m_pingPongFbos[!isHorizontal]->GetColorTexture();
 
-		glActiveTexture(GL_TEXTURE0);
-		uint32_t textureId = firstIteration ? m_glowFbo->GetColorTexture() : m_pingPongFbos[!horizontal]->GetColorTexture();
-		glBindTexture(GL_TEXTURE_2D, textureId);
-		shader->SetInt("u_image", 0);
-
-		m_canvasMesh->Bind();
-		glDrawArrays(GL_TRIANGLES, 0, m_canvasMesh->GetVertexCount());
-
-		horizontal = !horizontal;
-		firstIteration = false;
+		RenderSingleBlurPass(isHorizontal, inputTexture);
+		isHorizontal = !isHorizontal;
 	}
+}
+
+void OpenGLRenderer::RenderSingleBlurPass(bool isHorizontal, uint32_t inputTexture)
+{
+	m_pingPongFbos[isHorizontal]->Bind();
+
+	const auto& shader = m_shaders["blur"];
+	shader->SetInt("u_horizontal", isHorizontal);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, inputTexture);
+	shader->SetInt("u_image", 0);
+
+	m_canvasMesh->Bind();
+	glDrawArrays(GL_TRIANGLES, 0, m_canvasMesh->GetVertexCount());
 }
 
 void OpenGLRenderer::RenderCompositePass()
 {
-	Framebuffer::Unbind(); // Рисуем прямо на экран монитора
+	Framebuffer::Unbind();
 	glViewport(0, 0, m_viewportWidth, m_viewportHeight);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	const auto& shader = m_shaders["composite"];
 	shader->Use();
 
-	// 1. Основная четкая сцена (Слой 0)
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_mainFbo->GetColorTexture(0));
 	shader->SetInt("u_mainTexture", 0);
 
-	// 2. Финальное свечение с инерционным следом
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, m_historyFbos[m_currentHistoryIdx]->GetColorTexture());
 	shader->SetInt("u_glowTexture", 1);

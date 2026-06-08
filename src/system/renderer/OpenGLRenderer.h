@@ -34,6 +34,9 @@ private:
 	void RenderGeometryPass(const RenderData& data);
 	void DownscaleGlowPass();
 	void ApplyBlurPass();
+	void PrepareBlurState();
+	void PerformPingPongBlur(uint8_t iterations);
+	void RenderSingleBlurPass(bool isHorizontal, uint32_t inputTexture);
 	void ApplyLightMotionBlurPass();
 	void RenderCompositePass();
 	void DrawObject(const SceneObject& object, const std::unique_ptr<Shader>& shader);

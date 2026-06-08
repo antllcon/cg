@@ -2,10 +2,10 @@
 
 layout (location = 0) in vec2 aPos;
 
-out vec2 TexCoords;
+out vec2 TextureCoordinates;
 
 void main()
 {
-    TexCoords = aPos * 0.5 + 0.5;
+    TextureCoordinates = aPos * 0.5 + 0.5;
     gl_Position = vec4(aPos.x, aPos.y, 0.0, 1.0);
 }
