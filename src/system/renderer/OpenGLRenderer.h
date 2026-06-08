@@ -27,6 +27,10 @@ private:
 	void InitGeometry();
 	void InitFramebuffers();
 
+	void ClearGeometryBuffers();
+	void SetupShaderUniforms(const Shader& shader, const CameraState& camera);
+	void RenderSceneObjects(const std::vector<SceneObject>& objects, const std::unique_ptr<Shader>& shader);
+
 	void RenderGeometryPass(const RenderData& data);
 	void DownscaleGlowPass();
 	void ApplyBlurPass();
@@ -48,4 +52,7 @@ private:
 	std::array<std::unique_ptr<Framebuffer>, 2> m_pingPongFbos;
 
 	std::map<std::string, std::unique_ptr<Shader>> m_shaders;
+
+	std::array<std::unique_ptr<Framebuffer>, 2> m_historyFbos;
+	uint8_t m_currentHistoryIdx = 0;
 };

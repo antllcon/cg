@@ -10,7 +10,7 @@ constexpr float MAX_PITCH = 89.0f;
 constexpr float MIN_PITCH = -89.0f;
 constexpr float FULL_CIRCLE = 360.0f;
 
-constexpr Vector3 INIT_POSITION = { 0.0f, 0.0f, 5.0f };
+constexpr Vector3 INIT_POSITION = {0.0f, 0.0f, 5.0f};
 
 void AssertIsFinite(float value)
 {
@@ -54,9 +54,9 @@ Vector3 ApplyMovement(Vector3 position, float yaw, float dForward, float dRight,
 CameraModel::CameraModel()
 {
 	m_state.position = INIT_POSITION;
-	m_state.yaw = YAW_DEFAULT;
-	m_state.pitch = PITCH_DEFAULT;
-	m_state.fov = FOV_DEFAULT;
+	m_state.yaw = CameraSettings::YAW_DEFAULT;
+	m_state.pitch = CameraSettings::PITCH_DEFAULT;
+	m_state.fov = CameraSettings::FOV_DEFAULT;
 }
 
 void CameraModel::MoveCamera(float dForward, float dRight, float dUp)

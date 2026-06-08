@@ -26,18 +26,19 @@ void AssertIsAttachmentCountValid(uint8_t count)
 {
 	if (count == 0 || count > 2)
 	{
-		throw std::invalid_argument("Количество цветовых аттачментов должно быть от 1 до 2");
+		throw std::invalid_argument("Количество цветовых должно быть от 1 до 2");
 	}
 }
 
 uint32_t CreateColorTexture(uint32_t width, uint32_t height, bool useClampToEdge)
 {
-	uint32_t tex = 0;
-	glGenTextures(1, &tex);
-	AssertIsGenerated(tex);
+	uint32_t textureIndex = 0;
+	glGenTextures(1, &textureIndex);
+	AssertIsGenerated(textureIndex);
 
-	glBindTexture(GL_TEXTURE_2D, tex);
+	glBindTexture(GL_TEXTURE_2D, textureIndex);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
+
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -47,7 +48,7 @@ uint32_t CreateColorTexture(uint32_t width, uint32_t height, bool useClampToEdge
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	}
 
-	return tex;
+	return textureIndex;
 }
 } // namespace
 

@@ -30,6 +30,6 @@ public:
 
 private:
 	uint32_t m_fbo = 0;
-	std::array<uint32_t, 2> m_colorTextures = { 0, 0 };
+	std::array<uint32_t, 2> m_colorTextures = {0, 0};
 	uint32_t m_depthRbo = 0;
 };
