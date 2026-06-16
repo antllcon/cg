@@ -8,7 +8,6 @@
 
 namespace
 {
-// TODO спрятать нахуй!!!!
 glm::mat4 CalculateProjectionMatrix(float fov, float aspect)
 {
 	constexpr float nearPlane = 0.1f;
@@ -86,7 +85,7 @@ void OpenGLRenderer::Display()
 	glFlush();
 }
 
-void OpenGLRenderer::RenderFrame(const RenderData& data)
+void OpenGLRenderer::RenderFrame(const RenderData& /*data*/)
 {
 	if (m_viewportHeight == 0 || m_viewportWidth == 0)
 	{

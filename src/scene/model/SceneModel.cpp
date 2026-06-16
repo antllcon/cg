@@ -29,10 +29,17 @@ void SceneModel::Update(float dt)
 
 	if (!m_objects.empty())
 	{
+		// Здесь появится анимация объектов сцены; после изменения m_objects
+		NotifyObservers();
 	}
 }
 
 std::vector<SceneObject> SceneModel::GetObjects() const
+{
+	return m_objects;
+}
+
+std::vector<SceneObject> SceneModel::GetChangedData() const
 {
 	return m_objects;
 }

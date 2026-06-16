@@ -21,6 +21,9 @@ MainScene::MainScene(IWindow& window)
 	m_cameraController = std::make_shared<CameraController>(m_cameraModel, window);
 	m_sceneController = std::make_shared<SceneController>(m_sceneModel);
 	m_view = std::make_shared<View>(m_cameraModel, m_sceneModel, m_cameraController);
+
+	m_cameraModel->RegisterObserver(std::static_pointer_cast<Istb_observer<CameraState>>(m_view));
+	m_sceneModel->RegisterObserver(std::static_pointer_cast<Istb_observer<std::vector<SceneObject>>>(m_view));
 }
 
 void MainScene::ProcessEvents(const Event& event)

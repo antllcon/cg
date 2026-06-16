@@ -1,17 +1,21 @@
 #pragma once
 
 #include "CameraData.h"
+#include "stb_observer.h"
 
-class CameraModel final
+class CameraModel final : public CObservable<CameraState>
 {
 public:
 	CameraModel();
-	~CameraModel() = default;
+	~CameraModel() override = default;
 
 	void MoveCamera(float dForward, float dRight, float dUp);
 	void RotateCamera(float dYaw, float dPitch);
 
 	CameraState GetState() const;
+
+protected:
+	CameraState GetChangedData() const override;
 
 private:
 	CameraState m_state;

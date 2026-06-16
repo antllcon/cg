@@ -66,6 +66,7 @@ void CameraModel::MoveCamera(float dForward, float dRight, float dUp)
 	AssertIsFinite(dUp);
 
 	m_state.position = ApplyMovement(m_state.position, m_state.yaw, dForward, dRight, dUp);
+	NotifyObservers();
 }
 
 void CameraModel::RotateCamera(float dYaw, float dPitch)
@@ -75,9 +76,15 @@ void CameraModel::RotateCamera(float dYaw, float dPitch)
 
 	m_state.yaw = WrapYaw(m_state.yaw + dYaw);
 	m_state.pitch = ClampPitch(m_state.pitch + dPitch);
+	NotifyObservers();
 }
 
 CameraState CameraModel::GetState() const
+{
+	return m_state;
+}
+
+CameraState CameraModel::GetChangedData() const
 {
 	return m_state;
 }

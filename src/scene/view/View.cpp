@@ -1,5 +1,4 @@
 #include "View.h"
-#include "src/scene/model/RenderData.h"
 #include "src/system/renderer/IRenderer.h"
 
 View::View(
@@ -10,6 +9,10 @@ View::View(
 	, m_sceneModel(std::move(sceneModel))
 	, m_cameraController(std::move(cameraController))
 {
+	// Начальная синхронизация снимка с моделями: дальше он обновляется
+	// только по уведомлениям наблюдателя (Active Model).
+	m_renderData.camera = m_cameraModel->GetState();
+	m_renderData.objects = m_sceneModel->GetObjects();
 }
 
 void View::HandleEvent(const Event& event)
@@ -19,6 +22,15 @@ void View::HandleEvent(const Event& event)
 
 void View::Render(IRenderer& renderer) const
 {
-	RenderData data{ m_cameraModel->GetState(), m_sceneModel->GetObjects() };
-	renderer.RenderFrame(data);
+	renderer.RenderFrame(m_renderData);
+}
+
+void View::Update(const CameraState& /*data*/, IObservable<CameraState>* /*subject*/)
+{
+	m_renderData.camera = m_cameraModel->GetState();
+}
+
+void View::Update(const std::vector<SceneObject>& /*data*/, IObservable<std::vector<SceneObject>>* /*subject*/)
+{
+	m_renderData.objects = m_sceneModel->GetObjects();
 }
