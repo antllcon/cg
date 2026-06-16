@@ -9,10 +9,9 @@ View::View(
 	, m_sceneModel(std::move(sceneModel))
 	, m_cameraController(std::move(cameraController))
 {
-	// Начальная синхронизация снимка с моделями: дальше он обновляется
-	// только по уведомлениям наблюдателя (Active Model).
 	m_renderData.camera = m_cameraModel->GetState();
 	m_renderData.objects = m_sceneModel->GetObjects();
+	m_renderData.light = m_sceneModel->GetLight();
 }
 
 void View::HandleEvent(const Event& event)
@@ -33,4 +32,5 @@ void View::Update(const CameraState& /*data*/, IObservable<CameraState>* /*subje
 void View::Update(const std::vector<SceneObject>& /*data*/, IObservable<std::vector<SceneObject>>* /*subject*/)
 {
 	m_renderData.objects = m_sceneModel->GetObjects();
+	m_renderData.light = m_sceneModel->GetLight();
 }
