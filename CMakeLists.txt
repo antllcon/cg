@@ -44,7 +44,7 @@ target_compile_options(core_lib PRIVATE ${PROJECT_WARNINGS})
 target_link_libraries(core_lib PUBLIC glfw glad)
 
 if (WIN32)
-    target_link_libraries(core_lib PUBLIC dwmapi)
+    target_link_libraries(core_lib PUBLIC dwmapi opengl32 glu32)
 endif ()
 
 add_executable(start src/main.cpp)
