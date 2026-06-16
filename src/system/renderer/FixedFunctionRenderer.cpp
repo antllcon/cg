@@ -32,6 +32,93 @@ Vec3 CameraFront(const CameraState& camera)
 		std::sin(pitch),
 		std::sin(yaw) * std::cos(pitch)};
 }
+
+void EnableGlobalRenderStates()
+{
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_NORMALIZE);
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+	glEnable(GL_COLOR_MATERIAL);
+	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+}
+
+void SetupProjection(float fov, uint32_t width, uint32_t height)
+{
+	const double aspect = static_cast<double>(width) / static_cast<double>(height);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(fov, aspect, NEAR_PLANE, FAR_PLANE);
+}
+
+void ApplyCameraState(const CameraState& camera)
+{
+	const Vec3 front = CameraFront(camera);
+	gluLookAt(
+		camera.position.x,
+		camera.position.y,
+		camera.position.z,
+		camera.position.x + front.x,
+		camera.position.y + front.y,
+		camera.position.z + front.z,
+		0.0,
+		1.0,
+		0.0);
+}
+
+void ApplyLightState(const Light& light)
+{
+	const GLfloat position[4] = {light.position.x, light.position.y, light.position.z, 1.0f};
+	const auto [r, g, b, a] = light.color.GetAsFloats();
+	const GLfloat diffuse[4] = {r, g, b, a};
+
+	glLightfv(GL_LIGHT0, GL_POSITION, position);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
+}
+
+void SetupModelView(const CameraState& camera, const Light& light)
+{
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	ApplyCameraState(camera);
+	ApplyLightState(light);
+}
+
+void ApplyTransform(const SceneObject& object)
+{
+	glTranslatef(object.position.x, object.position.y, object.position.z);
+	glRotatef(object.rotation.x, 1.0f, 0.0f, 0.0f);
+	glRotatef(object.rotation.y, 0.0f, 1.0f, 0.0f);
+	glRotatef(object.rotation.z, 0.0f, 0.0f, 1.0f);
+	glScalef(object.scale.x, object.scale.y, object.scale.z);
+}
+
+void ApplyMaterial(const SceneObject& object)
+{
+	const auto [r, g, b, a] = object.color.GetAsFloats();
+	glColor4f(r, g, b, a);
+
+	const GLfloat specular[4] = {
+		object.specularStrength,
+		object.specularStrength,
+		object.specularStrength,
+		1.0f};
+
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
+	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, object.shininess);
+}
+
+void DrawGeometry(const std::vector<Geometry::Vertex>& vertices)
+{
+	glBegin(GL_TRIANGLES);
+	for (const auto& [px, py, pz, nx, ny, nz] : vertices)
+	{
+		glNormal3f(nx, ny, nz);
+		glVertex3f(px, py, pz);
+	}
+	glEnd();
+}
 } // namespace
 
 FixedFunctionRenderer::FixedFunctionRenderer()
@@ -70,48 +157,14 @@ void FixedFunctionRenderer::RenderFrame(const RenderData& data)
 		return;
 	}
 
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_NORMALIZE);
-	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
-	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
-	glEnable(GL_COLOR_MATERIAL);
-	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-
-	const double aspect = static_cast<double>(m_viewportWidth) / static_cast<double>(m_viewportHeight);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(data.camera.fov, aspect, NEAR_PLANE, FAR_PLANE);
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	ApplyCamera(data.camera);
-
-	ApplyLight(data.light);
+	EnableGlobalRenderStates();
+	SetupProjection(data.camera.fov, m_viewportWidth, m_viewportHeight);
+	SetupModelView(data.camera, data.light);
 
 	for (const auto& object : data.objects)
 	{
 		DrawObject(object);
 	}
-}
-
-void FixedFunctionRenderer::ApplyCamera(const CameraState& camera) const
-{
-	const Vec3 front = CameraFront(camera);
-	const Vec3 eye = {camera.position.x, camera.position.y, camera.position.z};
-
-	gluLookAt(
-		eye.x, eye.y, eye.z, eye.x + front.x, eye.y + front.y, eye.z + front.z, 0.0, 1.0, 0.0);
-}
-
-void FixedFunctionRenderer::ApplyLight(const Light& light) const
-{
-	const GLfloat position[4] = {light.position.x, light.position.y, light.position.z, 1.0f};
-	const auto [r, g, b, a] = light.color.GetAsFloats();
-	const GLfloat diffuse[4] = {r, g, b, a};
-
-	glLightfv(GL_LIGHT0, GL_POSITION, position);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
 }
 
 void FixedFunctionRenderer::DrawObject(const SceneObject& object) const
@@ -124,30 +177,9 @@ void FixedFunctionRenderer::DrawObject(const SceneObject& object) const
 
 	glPushMatrix();
 
-	glTranslatef(object.position.x, object.position.y, object.position.z);
-	glRotatef(object.rotation.x, 1.0f, 0.0f, 0.0f);
-	glRotatef(object.rotation.y, 0.0f, 1.0f, 0.0f);
-	glRotatef(object.rotation.z, 0.0f, 0.0f, 1.0f);
-	glScalef(object.scale.x, object.scale.y, object.scale.z);
-
-	const auto [r, g, b, a] = object.color.GetAsFloats();
-	glColor4f(r, g, b, a);
-
-	const GLfloat specular[4] = {
-		object.specularStrength,
-		object.specularStrength,
-		object.specularStrength,
-		1.0f};
-	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
-	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, object.shininess);
-
-	glBegin(GL_TRIANGLES);
-	for (const auto& [px, py, pz, nx, ny, nz] : it->second)
-	{
-		glNormal3f(nx, ny, nz);
-		glVertex3f(px, py, pz);
-	}
-	glEnd();
+	ApplyTransform(object);
+	ApplyMaterial(object);
+	DrawGeometry(it->second);
 
 	glPopMatrix();
 }
