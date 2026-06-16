@@ -1,6 +1,6 @@
 #include "Application.h"
 #include "src/system/AppConfig.h"
-#include "src/system/renderer/OpenGLRenderer.h"
+#include "src/system/renderer/FixedFunctionRenderer.h"
 #include "src/system/window/GlfwWindow.h"
 #include <chrono>
 #include <stdexcept>
@@ -56,7 +56,7 @@ float ConsumeDeltaTime(Clock::time_point& lastTime)
 
 Application::Application()
 	: m_window(std::make_unique<GlfwWindow>())
-	, m_renderer(std::make_unique<OpenGLRenderer>())
+	, m_renderer(std::make_unique<FixedFunctionRenderer>())
 	, m_mainScene(std::make_unique<MainScene>(*m_window))
 {
 	AssertIsWindowValid(m_window.get());
