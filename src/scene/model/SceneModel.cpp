@@ -1,5 +1,4 @@
 #include "SceneModel.h"
-#include <cmath>
 #include <stdexcept>
 
 namespace
@@ -20,6 +19,16 @@ void AssertIsFinite(float value)
 SceneModel::SceneModel()
 	: m_totalTime(0.0f)
 {
+	SceneObject mobius;
+	mobius.shape = RenderableShape::MobiusStrip;
+	mobius.position = CENTER_POSITION;
+	mobius.rotation = DEFAULT_ROTATION;
+	mobius.scale = DEFAULT_SCALE;
+	mobius.color = Color::FromRGBA(80, 160, 220);
+	m_objects.push_back(mobius);
+
+	m_light.position = CENTER_POSITION;
+	m_light.color = Color::FromRGBA(255, 255, 255);
 }
 
 void SceneModel::Update(float dt)
@@ -29,7 +38,6 @@ void SceneModel::Update(float dt)
 
 	if (!m_objects.empty())
 	{
-		// Здесь появится анимация объектов сцены; после изменения m_objects
 		NotifyObservers();
 	}
 }
@@ -37,6 +45,11 @@ void SceneModel::Update(float dt)
 std::vector<SceneObject> SceneModel::GetObjects() const
 {
 	return m_objects;
+}
+
+Light SceneModel::GetLight() const
+{
+	return m_light;
 }
 
 std::vector<SceneObject> SceneModel::GetChangedData() const

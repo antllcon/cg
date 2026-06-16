@@ -1,5 +1,6 @@
 #pragma once
 
+#include "src/system/renderer/RenderableShape.h"
 #include "src/utils/color/Color.h"
 
 struct Vector3
@@ -9,15 +10,14 @@ struct Vector3
 	float z = 0.0f;
 };
 
-enum class ObjectType
-{
-};
-
 struct SceneObject
 {
-	ObjectType type;
+	RenderableShape shape = RenderableShape::MobiusStrip;
 	Vector3 position;
 	Vector3 rotation;
-	Vector3 scale;
+	Vector3 scale = {1.0f, 1.0f, 1.0f};
 	Color color;
+
+	float specularStrength = 0.5f;
+	float shininess = 32.0f;
 };
