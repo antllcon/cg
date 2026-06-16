@@ -11,8 +11,6 @@ struct Vector3
 
 enum class ObjectType
 {
-	Cylinder,
-	Torus
 };
 
 struct SceneObject
@@ -22,5 +20,4 @@ struct SceneObject
 	Vector3 rotation;
 	Vector3 scale;
 	Color color;
-	bool isEmissive;
 };

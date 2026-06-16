@@ -1,14 +1,9 @@
 #pragma once
 
 #include "IRenderer.h"
-#include "framebuffer/Framebuffer.h"
-#include "mash/Mesh.h"
 #include "shader/Shader.h"
 
-#include <array>
 #include <map>
-#include <memory>
-#include <string>
 
 class OpenGLRenderer final : public IRenderer
 {
@@ -25,36 +20,11 @@ public:
 private:
 	void InitShaders();
 	void InitGeometry();
-	void InitFramebuffers();
-
-	void ClearGeometryBuffers();
-	void SetupShaderUniforms(const Shader& shader, const CameraState& camera);
-	void RenderSceneObjects(const std::vector<SceneObject>& objects, const std::unique_ptr<Shader>& shader);
-
-	void RenderGeometryPass(const RenderData& data);
-	void DownscaleGlowPass();
-	void ApplyBlurPass();
-	void PrepareBlurState();
-	void PerformPingPongBlur(uint8_t iterations);
-	void RenderSingleBlurPass(bool isHorizontal, uint32_t inputTexture);
-	void ApplyLightMotionBlurPass();
-	void RenderCompositePass();
-	void DrawObject(const SceneObject& object, const std::unique_ptr<Shader>& shader);
 
 private:
 	uint32_t m_viewportWidth = 1;
 	uint32_t m_viewportHeight = 1;
 	Color m_clearColor;
 
-	std::unique_ptr<Mesh> m_canvasMesh;
-	std::unique_ptr<Mesh> m_cylinderMesh;
-	std::unique_ptr<Mesh> m_torusMesh;
-
-	std::unique_ptr<Framebuffer> m_mainFbo;
-	std::unique_ptr<Framebuffer> m_glowFbo;
-	std::array<std::unique_ptr<Framebuffer>, 2> m_pingPongFbos;
-	std::array<std::unique_ptr<Framebuffer>, 2> m_historyFbos;
-
 	std::map<std::string, std::unique_ptr<Shader>> m_shaders;
-	uint8_t m_currentHistoryIdx = 0;
 };
