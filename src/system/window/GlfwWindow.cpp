@@ -1,6 +1,5 @@
 #include "GlfwWindow.h"
 #include "src/system/AppConfig.h"
-#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <cmath>
 #include <filesystem>
@@ -16,8 +15,8 @@
 
 namespace
 {
-constexpr int GLD_VERSION_MAJOR = 3;
-constexpr int GLD_VERSION_MINOR = 3;
+constexpr int GLD_VERSION_MAJOR = 2;
+constexpr int GLD_VERSION_MINOR = 1;
 
 void AssertIsGlfwInitialized(int result)
 {
@@ -32,14 +31,6 @@ void AssertIsWindowCreated(const GLFWwindow* window)
 	if (window == nullptr)
 	{
 		throw std::runtime_error("Не удалось создать окно GLFW");
-	}
-}
-
-void AssertIsGladInitialized(int result)
-{
-	if (result == 0)
-	{
-		throw std::runtime_error("Не удалось инициализировать GLAD");
 	}
 }
 
@@ -234,7 +225,6 @@ GlfwWindow::GlfwWindow()
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, GLD_VERSION_MAJOR);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, GLD_VERSION_MINOR);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
 	m_window = glfwCreateWindow(
@@ -247,7 +237,6 @@ GlfwWindow::GlfwWindow()
 	AssertIsWindowCreated(m_window);
 	glfwMakeContextCurrent(m_window);
 
-	AssertIsGladInitialized(gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)));
 	PrintOpenGLVersion();
 	glfwSetWindowUserPointer(m_window, this);
 
