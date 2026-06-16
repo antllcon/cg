@@ -44,11 +44,6 @@ target_include_directories(core_lib PUBLIC libs/stb)
 target_compile_options(core_lib PRIVATE ${PROJECT_WARNINGS})
 find_package(OpenCL QUIET)
 
-target_link_libraries(core_lib PUBLIC glfw glad)
-if (OpenCL_FOUND)
-    target_link_libraries(core_lib PUBLIC OpenCL::OpenCL)
-endif ()
-
 if (WIN32)
     target_link_libraries(core_lib PUBLIC dwmapi)
 endif ()

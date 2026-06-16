@@ -1,15 +1,36 @@
-#include "Windows.h"
-#include "coroutine/MyAwaiter.h"
-#include "coroutine/MyTask.h"
+#include "coroutine/AsyncFile.h"
+#include "coroutine/Dispatcher.h"
+#include "coroutine/Task.h"
 #include "utils/console/ConsoleEncoding.h"
 #include <iostream>
+#include <string>
+#include <vector>
 
-MyTask CoroutineWithAwait(int x, int y)
+namespace
 {
-	std::cout << "Before await" << std::endl;
-	int result = co_await MyAwaiter{ x, y };
-	std::cout << result << std::endl;
-	std::cout << "After await" << std::endl;
+constexpr std::size_t BufferSize = 1024;
+}
+
+Task AsyncCopyFile(Dispatcher& dispatcher, std::string from, std::string to)
+{
+	AsyncFile input = co_await AsyncOpenFile(dispatcher, std::move(from), OpenMode::Read);
+	AsyncFile output = co_await AsyncOpenFile(dispatcher, std::move(to), OpenMode::Write);
+
+	std::vector<char> buffer(BufferSize);
+
+	for (DWORD bytesRead;
+		(bytesRead = co_await input.ReadAsync(dispatcher, buffer.data(), buffer.size())) != 0;)
+	{
+		co_await output.WriteAsync(dispatcher, buffer.data(), bytesRead);
+	}
+}
+
+Task AsyncCopyTwoFiles(Dispatcher& dispatcher)
+{
+	auto firstCopy = AsyncCopyFile(dispatcher, "a.in", "a.out");
+	auto secondCopy = AsyncCopyFile(dispatcher, "b.in", "b.out");
+	co_await firstCopy;
+	co_await secondCopy;
 }
 
 int main()
@@ -18,12 +39,10 @@ int main()
 
 	try
 	{
-		auto task = CoroutineWithAwait(30, 12);
-		std::cout << "Before resume" << std::endl;
-		task.Resume();
-		std::cout << "After resume" << std::endl;
-		CoroutineWithAwait(5, 10).Resume();
-		std::cout << "End of main" << std::endl;
+		Dispatcher dispatcher;
+		Task task = AsyncCopyTwoFiles(dispatcher);
+		dispatcher.Run();
+		std::cout << "Copy finished" << std::endl;
 	}
 	catch (const std::exception& e)
 	{
