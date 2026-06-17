@@ -6,10 +6,10 @@
 class CameraModel final : public CObservable<CameraState>
 {
 public:
-	CameraModel();
+	explicit CameraModel(const Vector3& startPosition);
 	~CameraModel() override = default;
 
-	void MoveCamera(float dForward, float dRight, float dUp);
+	void SetPosition(const Vector3& position);
 	void RotateCamera(float dYaw, float dPitch);
 
 	CameraState GetState() const;

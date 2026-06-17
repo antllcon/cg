@@ -1,21 +1,44 @@
 #include "CameraController.h"
+#include "src/system/AppConfig.h"
 #include "src/utils/types/event/EventHandling.h"
+#include <cmath>
+#include <numbers>
 
 namespace
 {
-constexpr float CAMERA_SPEED = 5.0f;
-constexpr float MOUSE_SENSITIVITY = 0.1f;
+struct PlanarDelta
+{
+	float x;
+	float z;
+};
 
 float GetMovementAxis(bool positive, bool negative)
 {
 	return (positive ? 1.0f : 0.0f) - (negative ? 1.0f : 0.0f);
 }
+
+PlanarDelta ComputeWorldDelta(float yaw, float forwardAxis, float rightAxis, float distance)
+{
+	const float yawRad = yaw * (std::numbers::pi_v<float> / 180.0f);
+	const float forwardX = std::cos(yawRad);
+	const float forwardZ = std::sin(yawRad);
+	const float rightX = std::sin(yawRad);
+	const float rightZ = -std::cos(yawRad);
+
+	return {
+		(forwardX * forwardAxis + rightX * rightAxis) * distance,
+		(forwardZ * forwardAxis + rightZ * rightAxis) * distance};
+}
 } // namespace
 
-CameraController::CameraController(std::shared_ptr<CameraModel> cameraModel, IWindow& window)
+CameraController::CameraController(
+	std::shared_ptr<CameraModel> cameraModel,
+	std::shared_ptr<const Maze> maze,
+	IWindow& window)
 	: m_cameraModel(std::move(cameraModel))
+	, m_maze(std::move(maze))
 	, m_window(window)
-	, m_lastMousePos({ 0.0, 0.0 })
+	, m_lastMousePos({0.0, 0.0})
 	, m_firstMouseEvent(true)
 {
 }
@@ -27,16 +50,34 @@ void CameraController::Update(float dt)
 		return;
 	}
 
-	float dForward = GetMovementAxis(m_activeKeys[KeyCode::W], m_activeKeys[KeyCode::S]);
-	float dRight = GetMovementAxis(m_activeKeys[KeyCode::A], m_activeKeys[KeyCode::D]);
-	float dUp = GetMovementAxis(m_activeKeys[KeyCode::Space], m_activeKeys[KeyCode::LShift]);
+	const float forwardAxis = GetMovementAxis(m_activeKeys[KeyCode::W], m_activeKeys[KeyCode::S]);
+	const float rightAxis = GetMovementAxis(m_activeKeys[KeyCode::A], m_activeKeys[KeyCode::D]);
 
-	if (dForward != 0.0f || dRight != 0.0f || dUp != 0.0f)
+	if (forwardAxis == 0.0f && rightAxis == 0.0f)
 	{
-		m_cameraModel->MoveCamera(
-			dForward * CAMERA_SPEED * dt,
-			dRight * CAMERA_SPEED * dt,
-			dUp * CAMERA_SPEED * dt);
+		return;
+	}
+
+	const CameraState state = m_cameraModel->GetState();
+	const float distance = MazeConfig::MOVE_SPEED * dt;
+	const PlanarDelta delta = ComputeWorldDelta(state.yaw, forwardAxis, rightAxis, distance);
+
+	float newX = state.position.x;
+	float newZ = state.position.z;
+
+	if (!m_maze->IsBlocked(state.position.x + delta.x, state.position.z, MazeConfig::COLLISION_RADIUS))
+	{
+		newX = state.position.x + delta.x;
+	}
+
+	if (!m_maze->IsBlocked(state.position.x, state.position.z + delta.z, MazeConfig::COLLISION_RADIUS))
+	{
+		newZ = state.position.z + delta.z;
+	}
+
+	if (newX != state.position.x || newZ != state.position.z)
+	{
+		m_cameraModel->SetPosition({newX, MazeConfig::EYE_HEIGHT, newZ});
 	}
 }
 
@@ -70,9 +111,11 @@ void CameraController::HandleEvent(const Event& event)
 
 					   if (m_window.IsCursorCaptured())
 					   {
-						   float dx = static_cast<float>(e.position.first - m_lastMousePos.first);
-						   float dy = static_cast<float>(m_lastMousePos.second - e.position.second);
-						   m_cameraModel->RotateCamera(dx * MOUSE_SENSITIVITY, dy * MOUSE_SENSITIVITY);
+						   const float dx = static_cast<float>(e.position.first - m_lastMousePos.first);
+						   const float dy = static_cast<float>(m_lastMousePos.second - e.position.second);
+						   m_cameraModel->RotateCamera(
+							   dx * MazeConfig::MOUSE_SENSITIVITY,
+							   dy * MazeConfig::MOUSE_SENSITIVITY);
 					   }
 
 					   m_lastMousePos = e.position;

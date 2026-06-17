@@ -27,6 +27,7 @@ void View::Render(IRenderer& renderer) const
 void View::Update(const CameraState& /*data*/, IObservable<CameraState>* /*subject*/)
 {
 	m_renderData.camera = m_cameraModel->GetState();
+	m_renderData.light.position = m_renderData.camera.position;
 }
 
 void View::Update(const std::vector<SceneObject>& /*data*/, IObservable<std::vector<SceneObject>>* /*subject*/)

@@ -1,7 +1,6 @@
 #include "CameraModel.h"
 #include <algorithm>
 #include <cmath>
-#include <numbers>
 #include <stdexcept>
 
 namespace
@@ -9,8 +8,6 @@ namespace
 constexpr float MAX_PITCH = 89.0f;
 constexpr float MIN_PITCH = -89.0f;
 constexpr float FULL_CIRCLE = 360.0f;
-
-constexpr Vector3 INIT_POSITION = {0.0f, 0.0f, 5.0f};
 
 void AssertIsFinite(float value)
 {
@@ -34,38 +31,23 @@ float ClampPitch(float pitch)
 {
 	return std::clamp(pitch, MIN_PITCH, MAX_PITCH);
 }
-
-Vector3 ApplyMovement(Vector3 position, float yaw, float dForward, float dRight, float dUp)
-{
-	float yawRad = yaw * (std::numbers::pi_v<float> / 180.0f);
-	float forwardX = std::cos(yawRad);
-	float forwardZ = std::sin(yawRad);
-	float rightX = std::cos(yawRad - std::numbers::pi_v<float> / 2.0f);
-	float rightZ = std::sin(yawRad - std::numbers::pi_v<float> / 2.0f);
-
-	position.x += forwardX * dForward + rightX * dRight;
-	position.y += dUp;
-	position.z += forwardZ * dForward + rightZ * dRight;
-
-	return position;
-}
 } // namespace
 
-CameraModel::CameraModel()
+CameraModel::CameraModel(const Vector3& startPosition)
 {
-	m_state.position = INIT_POSITION;
+	m_state.position = startPosition;
 	m_state.yaw = CameraSettings::YAW_DEFAULT;
 	m_state.pitch = CameraSettings::PITCH_DEFAULT;
 	m_state.fov = CameraSettings::FOV_DEFAULT;
 }
 
-void CameraModel::MoveCamera(float dForward, float dRight, float dUp)
+void CameraModel::SetPosition(const Vector3& position)
 {
-	AssertIsFinite(dForward);
-	AssertIsFinite(dRight);
-	AssertIsFinite(dUp);
+	AssertIsFinite(position.x);
+	AssertIsFinite(position.y);
+	AssertIsFinite(position.z);
 
-	m_state.position = ApplyMovement(m_state.position, m_state.yaw, dForward, dRight, dUp);
+	m_state.position = position;
 	NotifyObservers();
 }
 
