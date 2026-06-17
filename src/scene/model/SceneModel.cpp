@@ -24,7 +24,7 @@ SceneModel::SceneModel()
 	mobius.position = CENTER_POSITION;
 	mobius.rotation = DEFAULT_ROTATION;
 	mobius.scale = DEFAULT_SCALE;
-	mobius.color = Color::FromRGBA(80, 160, 220);
+	mobius.color = Color::FromRGBA(88, 0, 255);
 	m_objects.push_back(mobius);
 
 	m_light.position = CENTER_POSITION;

@@ -38,7 +38,7 @@ void AssertIsValidGrid(uint32_t segmentsA, uint32_t segmentsB)
 
 Vector3D SurfacePoint(float a, float b, float radius)
 {
-	const float half = a * 1.5f;
+	const float half = a * 10.0f;
 	const float factor = radius + b * std::cos(half);
 
 	return {

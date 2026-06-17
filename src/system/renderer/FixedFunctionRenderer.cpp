@@ -123,7 +123,7 @@ void DrawGeometry(const std::vector<Geometry::Vertex>& vertices)
 
 FixedFunctionRenderer::FixedFunctionRenderer()
 {
-	m_shapes[RenderableShape::MobiusStrip] = Geometry::BuildMobiusStrip(30, 20, 2.0f, 0.6f);
+	m_shapes[RenderableShape::MobiusStrip] = Geometry::BuildMobiusStrip(300, 40, 3.0f, 1.0f);
 }
 
 void FixedFunctionRenderer::SetViewport(uint32_t width, uint32_t height)
