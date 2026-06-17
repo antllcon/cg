@@ -2,5 +2,5 @@
 
 enum class RenderableShape
 {
-	MobiusStrip
+	Cube
 };

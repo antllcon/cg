@@ -42,6 +42,9 @@ void EnableGlobalRenderStates()
 	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
 	glEnable(GL_COLOR_MATERIAL);
 	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+
+	const GLfloat globalAmbient[4] = {0.04f, 0.04f, 0.04f, 1.0f};
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, globalAmbient);
 }
 
 void SetupProjection(float fov, uint32_t width, uint32_t height)
@@ -72,9 +75,19 @@ void ApplyLightState(const Light& light)
 	const GLfloat position[4] = {light.position.x, light.position.y, light.position.z, 1.0f};
 	const auto [r, g, b, a] = light.color.GetAsFloats();
 	const GLfloat diffuse[4] = {r, g, b, a};
+	const GLfloat ambient[4] = {
+		r * light.ambientStrength,
+		g * light.ambientStrength,
+		b * light.ambientStrength,
+		1.0f};
 
 	glLightfv(GL_LIGHT0, GL_POSITION, position);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
+
+	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, light.constant);
+	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, light.linear);
+	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, light.quadratic);
 }
 
 void SetupModelView(const CameraState& camera, const Light& light)
@@ -123,7 +136,7 @@ void DrawGeometry(const std::vector<Geometry::Vertex>& vertices)
 
 FixedFunctionRenderer::FixedFunctionRenderer()
 {
-	m_shapes[RenderableShape::MobiusStrip] = Geometry::BuildMobiusStrip(300, 40, 3.0f, 1.0f);
+	m_shapes[RenderableShape::Cube] = Geometry::BuildUnitCube();
 }
 
 void FixedFunctionRenderer::SetViewport(uint32_t width, uint32_t height)

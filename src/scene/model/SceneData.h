@@ -12,7 +12,7 @@ struct Vector3
 
 struct SceneObject
 {
-	RenderableShape shape = RenderableShape::MobiusStrip;
+	RenderableShape shape = RenderableShape::Cube;
 	Vector3 position;
 	Vector3 rotation;
 	Vector3 scale = {1.0f, 1.0f, 1.0f};

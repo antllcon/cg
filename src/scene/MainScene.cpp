@@ -1,4 +1,6 @@
 #include "MainScene.h"
+#include "src/scene/maze/Maze.h"
+#include "src/system/AppConfig.h"
 #include "src/system/renderer/IRenderer.h"
 #include "src/system/window/IWindow.h"
 #include <stdexcept>
@@ -16,9 +18,11 @@ void AssertIsRendererValid(const IRenderer* renderer)
 
 MainScene::MainScene(IWindow& window)
 {
-	m_cameraModel = std::make_shared<CameraModel>();
-	m_sceneModel = std::make_shared<SceneModel>();
-	m_cameraController = std::make_shared<CameraController>(m_cameraModel, window);
+	auto maze = std::make_shared<Maze>(MazeConfig::CELL_SIZE);
+
+	m_cameraModel = std::make_shared<CameraModel>(maze->GetSpawnPosition(MazeConfig::EYE_HEIGHT));
+	m_sceneModel = std::make_shared<SceneModel>(maze);
+	m_cameraController = std::make_shared<CameraController>(m_cameraModel, maze, window);
 	m_sceneController = std::make_shared<SceneController>(m_sceneModel);
 	m_view = std::make_shared<View>(m_cameraModel, m_sceneModel, m_cameraController);
 

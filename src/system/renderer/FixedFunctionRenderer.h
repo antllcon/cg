@@ -2,7 +2,7 @@
 
 #include "IRenderer.h"
 #include "RenderableShape.h"
-#include "geometry/MobiusStrip.h"
+#include "geometry/Cube.h"
 #include <map>
 #include <vector>
 
