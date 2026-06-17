@@ -1,6 +1,7 @@
 #pragma once
 
 #include "src/system/renderer/RenderableShape.h"
+#include "src/system/renderer/texture/TextureKey.h"
 #include "src/utils/color/Color.h"
 
 struct Vector3
@@ -16,8 +17,13 @@ struct SceneObject
 	Vector3 position;
 	Vector3 rotation;
 	Vector3 scale = {1.0f, 1.0f, 1.0f};
-	Color color;
+	Color color = Color::FromRGBA(255, 255, 255);
 
-	float specularStrength = 0.5f;
-	float shininess = 32.0f;
+	TextureKey texture = TextureKey::Wall1;
+	float uvScaleU = 1.0f;
+	float uvScaleV = 1.0f;
+	bool useShadow = false;
+
+	float specularStrength = 0.2f;
+	float shininess = 16.0f;
 };

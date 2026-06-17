@@ -1,12 +1,7 @@
 #include "FixedFunctionRenderer.h"
+#include "src/system/AppConfig.h"
+#include "src/system/renderer/gl/GlHeaders.h"
 #include <cmath>
-
-#ifdef _WIN32
-#include <windows.h>
-#endif
-
-#include <GL/gl.h>
-#include <GL/glu.h>
 #include <numbers>
 
 namespace
@@ -45,6 +40,16 @@ void EnableGlobalRenderStates()
 
 	const GLfloat globalAmbient[4] = {0.04f, 0.04f, 0.04f, 1.0f};
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, globalAmbient);
+
+	glEnable(GL_TEXTURE_2D);
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+	const auto [fr, fg, fb, fa] = RenderConfig::FOG_COLOR.GetAsFloats();
+	const GLfloat fogColor[4] = {fr, fg, fb, fa};
+	glEnable(GL_FOG);
+	glFogi(GL_FOG_MODE, GL_EXP2);
+	glFogfv(GL_FOG_COLOR, fogColor);
+	glFogf(GL_FOG_DENSITY, RenderConfig::FOG_DENSITY);
 }
 
 void SetupProjection(float fov, uint32_t width, uint32_t height)
@@ -121,17 +126,6 @@ void ApplyMaterial(const SceneObject& object)
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
 	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, object.shininess);
 }
-
-void DrawGeometry(const std::vector<Geometry::Vertex>& vertices)
-{
-	glBegin(GL_TRIANGLES);
-	for (const auto& [px, py, pz, nx, ny, nz] : vertices)
-	{
-		glNormal3f(nx, ny, nz);
-		glVertex3f(px, py, pz);
-	}
-	glEnd();
-}
 } // namespace
 
 FixedFunctionRenderer::FixedFunctionRenderer()
@@ -174,6 +168,8 @@ void FixedFunctionRenderer::RenderFrame(const RenderData& data)
 	SetupProjection(data.camera.fov, m_viewportWidth, m_viewportHeight);
 	SetupModelView(data.camera, data.light);
 
+	m_sky.Render(m_textures, data.camera.position);
+
 	for (const auto& object : data.objects)
 	{
 		DrawObject(object);
@@ -188,11 +184,69 @@ void FixedFunctionRenderer::DrawObject(const SceneObject& object) const
 		return;
 	}
 
+	const bool useShadow = object.useShadow && m_multiTexture.IsSupported();
+
 	glPushMatrix();
 
 	ApplyTransform(object);
 	ApplyMaterial(object);
-	DrawGeometry(it->second);
+
+	BindBaseTexture(object.texture);
+	if (useShadow)
+	{
+		BindShadowTexture();
+	}
+
+	DrawGeometry(it->second, object.uvScaleU, object.uvScaleV, useShadow);
+
+	if (useShadow)
+	{
+		UnbindShadowTexture();
+	}
 
 	glPopMatrix();
+}
+
+void FixedFunctionRenderer::DrawGeometry(const std::vector<Geometry::Vertex>& vertices, float uvScaleU, float uvScaleV, bool useShadow) const
+{
+	glBegin(GL_TRIANGLES);
+	for (const auto& vertex : vertices)
+	{
+		glNormal3f(vertex.norX, vertex.norY, vertex.norZ);
+
+		if (useShadow)
+		{
+			m_multiTexture.Coord(0, vertex.texU * uvScaleU, vertex.texV * uvScaleV);
+			m_multiTexture.Coord(1, vertex.texU, vertex.texV);
+		}
+		else
+		{
+			glTexCoord2f(vertex.texU * uvScaleU, vertex.texV * uvScaleV);
+		}
+
+		glVertex3f(vertex.posX, vertex.posY, vertex.posZ);
+	}
+	glEnd();
+}
+
+void FixedFunctionRenderer::BindBaseTexture(TextureKey texture) const
+{
+	m_multiTexture.ActiveTexture(0);
+	glEnable(GL_TEXTURE_2D);
+	m_textures.Bind(texture);
+}
+
+void FixedFunctionRenderer::BindShadowTexture() const
+{
+	m_multiTexture.ActiveTexture(1);
+	glEnable(GL_TEXTURE_2D);
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	m_textures.Bind(TextureKey::Shadow);
+}
+
+void FixedFunctionRenderer::UnbindShadowTexture() const
+{
+	m_multiTexture.ActiveTexture(1);
+	glDisable(GL_TEXTURE_2D);
+	m_multiTexture.ActiveTexture(0);
 }

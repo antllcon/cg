@@ -2,7 +2,10 @@
 
 #include "IRenderer.h"
 #include "RenderableShape.h"
+#include "SkySphere.h"
 #include "geometry/Cube.h"
+#include "gl/GlMultiTexture.h"
+#include "texture/TextureLibrary.h"
 #include <map>
 #include <vector>
 
@@ -19,13 +22,19 @@ public:
 	void RenderFrame(const RenderData& data) override;
 
 private:
-	void ApplyCamera(const CameraState& camera) const;
-	void ApplyLight(const Light& light) const;
 	void DrawObject(const SceneObject& object) const;
+	void DrawGeometry(const std::vector<Geometry::Vertex>& vertices, float uvScaleU, float uvScaleV, bool useShadow) const;
+
+	void BindBaseTexture(TextureKey texture) const;
+	void BindShadowTexture() const;
+	void UnbindShadowTexture() const;
 
 	uint32_t m_viewportWidth = 1;
 	uint32_t m_viewportHeight = 1;
 	Color m_clearColor;
 
 	std::map<RenderableShape, std::vector<Geometry::Vertex>> m_shapes;
+	TextureLibrary m_textures;
+	GlMultiTexture m_multiTexture;
+	SkySphere m_sky;
 };

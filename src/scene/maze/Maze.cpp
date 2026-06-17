@@ -27,9 +27,17 @@ bool IsWallCell(int col, int row)
 	return MazeMap::CELLS[static_cast<size_t>(row)][static_cast<size_t>(col)] != 0;
 }
 
+constexpr int WALL_TYPE_COUNT = 6;
+
 float CellCenterOffset(int index, int count)
 {
 	return (static_cast<float>(index) + 0.5f - static_cast<float>(count) / 2.0f);
+}
+
+int HashCellType(int col, int row)
+{
+	const uint32_t hash = static_cast<uint32_t>(col) * 73856093u ^ static_cast<uint32_t>(row) * 19349663u;
+	return static_cast<int>(hash % static_cast<uint32_t>(WALL_TYPE_COUNT));
 }
 
 int WorldToIndex(float worldCoordinate, float cellSize, int count)
@@ -73,6 +81,11 @@ bool Maze::IsBlocked(float worldX, float worldZ, float radius) const
 	}
 
 	return false;
+}
+
+int Maze::GetWallType(int col, int row) const
+{
+	return HashCellType(col, row);
 }
 
 int Maze::GetColumns() const
@@ -127,9 +140,9 @@ Vector3 Maze::GetSpawnPosition(float eyeHeight) const
 	throw std::runtime_error("В лабиринте нет свободной клетки для появления наблюдателя");
 }
 
-std::vector<Vector3> Maze::GetWallCenters() const
+std::vector<WallCell> Maze::GetWallCells() const
 {
-	std::vector<Vector3> centers;
+	std::vector<WallCell> cells;
 
 	for (int row = 0; row < MazeMap::HEIGHT; ++row)
 	{
@@ -137,10 +150,10 @@ std::vector<Vector3> Maze::GetWallCenters() const
 		{
 			if (IsWallCell(col, row))
 			{
-				centers.push_back(CellToWorld(col, row));
+				cells.push_back(WallCell{CellToWorld(col, row), HashCellType(col, row)});
 			}
 		}
 	}
 
-	return centers;
+	return cells;
 }

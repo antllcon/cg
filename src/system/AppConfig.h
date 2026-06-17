@@ -45,3 +45,27 @@ inline constexpr float LIGHT_CONSTANT = 1.0f;
 inline constexpr float LIGHT_LINEAR = 0.14f;
 inline constexpr float LIGHT_QUADRATIC = 0.05f;
 } // namespace MazeConfig
+
+namespace TextureConfig
+{
+inline constexpr auto WALL_1 = "static/texture/wall_1.png";
+inline constexpr auto WALL_2 = "static/texture/wall_2.png";
+inline constexpr auto WALL_3 = "static/texture/wall_3.png";
+inline constexpr auto WALL_4 = "static/texture/wall_4.png";
+inline constexpr auto WALL_5 = "static/texture/wall_5.png";
+inline constexpr auto WALL_6 = "static/texture/wall_6.png";
+inline constexpr auto FLOOR = "static/texture/floor.png";
+inline constexpr auto CEILING = "static/texture/ceiling.png";
+inline constexpr auto SHADOW = "static/texture/shadow.png";
+inline constexpr auto SKY = "static/texture/sky.png";
+} // namespace TextureConfig
+
+namespace RenderConfig
+{
+inline const Color FOG_COLOR = Color::FromRGBA(150, 160, 178);
+inline constexpr float FOG_DENSITY = 0.045f;
+
+inline constexpr float SKY_RADIUS = 50.0f;
+inline constexpr int SKY_SLICES = 32;
+inline constexpr int SKY_STACKS = 16;
+} // namespace RenderConfig

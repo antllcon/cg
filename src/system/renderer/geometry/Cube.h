@@ -12,6 +12,8 @@ struct Vertex
 	float norX;
 	float norY;
 	float norZ;
+	float texU;
+	float texV;
 };
 
 std::vector<Vertex> BuildUnitCube();

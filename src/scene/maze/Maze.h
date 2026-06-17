@@ -3,6 +3,12 @@
 #include "src/scene/model/SceneData.h"
 #include <vector>
 
+struct WallCell
+{
+	Vector3 center;
+	int type;
+};
+
 class Maze final
 {
 public:
@@ -18,9 +24,10 @@ public:
 	float GetWorldWidth() const;
 	float GetWorldDepth() const;
 
+	int GetWallType(int col, int row) const;
 	Vector3 CellToWorld(int col, int row) const;
 	Vector3 GetSpawnPosition(float eyeHeight) const;
-	std::vector<Vector3> GetWallCenters() const;
+	std::vector<WallCell> GetWallCells() const;
 
 private:
 	float m_cellSize;
