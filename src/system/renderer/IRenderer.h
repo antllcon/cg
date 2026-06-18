@@ -8,6 +8,7 @@ class IRenderer
 public:
 	virtual ~IRenderer() = default;
 
+	virtual void SetViewport(uint32_t width, uint32_t height) = 0;
 	virtual void SetClearColor(const Color& color) = 0;
 	virtual void Clear() = 0;
 	virtual void Display() = 0;

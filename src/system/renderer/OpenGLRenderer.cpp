@@ -1,5 +1,4 @@
 #include "OpenGLRenderer.h"
-#include <cmath>
 #include <glad/glad.h>
 #include <numbers>
 #include <vector>
@@ -9,27 +8,18 @@ namespace
 constexpr auto VERTEX_SHADER_SOURCE = "static/shaders/cannabis.vert";
 constexpr auto FRAGMENT_SHADER_SOURCE = "static/shaders/cannabis.frag";
 
-constexpr uint32_t CURVE_VERTEX_COMPONENTS = 2u;
-constexpr float CURVE_ANGLE_STEP = std::numbers::pi_v<float> / 1000.0f;
-constexpr float CURVE_MAX_ANGLE = 2.0f * std::numbers::pi_v<float>;
+constexpr uint32_t LINE_VERTEX_COMPONENTS = 2u;
+constexpr float LINE_ANGLE_STEP = std::numbers::pi_v<float> / 1000.0f;
+constexpr float LINE_MAX_ANGLE = 2.0f * std::numbers::pi_v<float>;
 
-float CannabisRadius(float angle)
-{
-	return (1.0f + std::sin(angle))
-		* (1.0f + 0.9f * std::cos(8.0f * angle))
-		* (1.0f + 0.1f * std::cos(24.0f * angle))
-		* (0.5f + 0.05f * std::cos(140.0f * angle));
-}
-
-std::vector<float> GenerateCannabisCurve()
+std::vector<float> GenerateStraightLine()
 {
 	std::vector<float> vertices;
 
-	for (float angle = 0.0f; angle <= CURVE_MAX_ANGLE; angle += CURVE_ANGLE_STEP)
+	for (float angle = 0.0f; angle <= LINE_MAX_ANGLE; angle += LINE_ANGLE_STEP)
 	{
-		float radius = CannabisRadius(angle);
-		vertices.push_back(radius * std::cos(angle));
-		vertices.push_back(radius * std::sin(angle));
+		vertices.push_back(angle);
+		vertices.push_back(0.0f);
 	}
 
 	return vertices;
@@ -37,9 +27,20 @@ std::vector<float> GenerateCannabisCurve()
 } // namespace
 
 OpenGLRenderer::OpenGLRenderer()
-	: m_curve(GenerateCannabisCurve(), CURVE_VERTEX_COMPONENTS, PrimitiveType::LineStrip)
+	: m_line(GenerateStraightLine(), LINE_VERTEX_COMPONENTS, PrimitiveType::LineStrip)
 	, m_shader(std::make_unique<Shader>(VERTEX_SHADER_SOURCE, FRAGMENT_SHADER_SOURCE))
 {
+}
+
+void OpenGLRenderer::SetViewport(uint32_t width, uint32_t height)
+{
+	if (width == 0u || height == 0u)
+	{
+		return;
+	}
+
+	glViewport(0, 0, static_cast<int>(width), static_cast<int>(height));
+	m_aspect = static_cast<float>(width) / static_cast<float>(height);
 }
 
 void OpenGLRenderer::SetClearColor(const Color& color)
@@ -61,5 +62,6 @@ void OpenGLRenderer::Display()
 void OpenGLRenderer::DrawProcedural(const ModelData&)
 {
 	m_shader->Use();
-	m_curve.Draw();
+	m_shader->SetFloat("aspect", m_aspect);
+	m_line.Draw();
 }
