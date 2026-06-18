@@ -1,6 +1,5 @@
 #pragma once
 
-#include "src/scene/controller/Controller.h"
 #include "src/scene/model/Model.h"
 #include "src/scene/view/IView.h"
 #include "src/utils/Observer.h"
@@ -11,7 +10,7 @@ class View final
 	, public IObserver<ModelData>
 {
 public:
-	View(std::shared_ptr<Model> model, std::shared_ptr<Controller> controller);
+	explicit View(std::shared_ptr<Model> model);
 	~View() override = default;
 
 	void HandleEvent(const Event& event) override;
@@ -20,8 +19,4 @@ public:
 
 private:
 	std::shared_ptr<Model> m_model;
-	std::shared_ptr<Controller> m_controller;
-
-	bool m_isDragging = false;
-	std::pair<double, double> m_lastMousePos = {0.0, 0.0};
 };

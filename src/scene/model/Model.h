@@ -9,11 +9,6 @@ public:
 	Model() = default;
 	~Model() override = default;
 
-	void NextFractalType();
-	void MoveCamera(float dx, float dy);
-	void ZoomCamera(float delta);
-	void ResetView();
-
 	ModelData GetState() const;
 
 protected:

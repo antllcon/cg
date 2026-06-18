@@ -19,10 +19,21 @@ int32_t CalculateVertexCount(std::span<const float> vertices, uint32_t component
 	AssertComponentsPerVertexIsValid(componentsPerVertex);
 	return static_cast<int32_t>(vertices.size() / componentsPerVertex);
 }
+
+GLenum ToGlPrimitive(PrimitiveType primitive)
+{
+	switch (primitive)
+	{
+	case PrimitiveType::Triangles: return GL_TRIANGLES;
+	case PrimitiveType::LineStrip: return GL_LINE_STRIP;
+	default: throw std::invalid_argument("Неизвестный тип примитива");
+	}
+}
 } // namespace
 
-Mesh::Mesh(std::span<const float> vertices, uint32_t componentsPerVertex)
+Mesh::Mesh(std::span<const float> vertices, uint32_t componentsPerVertex, PrimitiveType primitive)
 	: m_vertexCount(CalculateVertexCount(vertices, componentsPerVertex))
+	, m_primitive(primitive)
 {
 	glGenVertexArrays(1, &m_vertexArrayObject);
 	glGenBuffers(1, &m_vertexBufferObject);
@@ -47,6 +58,7 @@ Mesh::Mesh(Mesh&& other) noexcept
 	: m_vertexArrayObject(other.m_vertexArrayObject)
 	, m_vertexBufferObject(other.m_vertexBufferObject)
 	, m_vertexCount(other.m_vertexCount)
+	, m_primitive(other.m_primitive)
 {
 	other.m_vertexArrayObject = 0;
 	other.m_vertexBufferObject = 0;
@@ -62,6 +74,7 @@ Mesh& Mesh::operator=(Mesh&& other) noexcept
 		m_vertexArrayObject = other.m_vertexArrayObject;
 		m_vertexBufferObject = other.m_vertexBufferObject;
 		m_vertexCount = other.m_vertexCount;
+		m_primitive = other.m_primitive;
 
 		other.m_vertexArrayObject = 0;
 		other.m_vertexBufferObject = 0;
@@ -73,7 +86,7 @@ Mesh& Mesh::operator=(Mesh&& other) noexcept
 void Mesh::Draw() const
 {
 	glBindVertexArray(m_vertexArrayObject);
-	glDrawArrays(GL_TRIANGLES, 0, m_vertexCount);
+	glDrawArrays(ToGlPrimitive(m_primitive), 0, m_vertexCount);
 	glBindVertexArray(0);
 }
 

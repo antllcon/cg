@@ -19,8 +19,8 @@ void AssertIsRendererValid(const IRenderer* renderer)
 MainScene::MainScene()
 {
 	auto model = std::make_shared<Model>();
-	auto controller = std::make_shared<Controller>(model);
-	auto view = std::make_shared<View>(model, controller);
+	auto controller = std::make_shared<Controller>();
+	auto view = std::make_shared<View>(model);
 
 	model->RegisterObserver(view);
 
