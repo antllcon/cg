@@ -20,5 +20,5 @@ void main()
 
     vec2 point = curved * BASE_SCALE + CENTER_OFFSET;
 
-    gl_Position = projection * vec4(point.yx, 0.0, 1.0);
+    gl_Position = projection * vec4(point, 0.0, 1.0);
 }
