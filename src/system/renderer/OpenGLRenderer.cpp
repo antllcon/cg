@@ -1,5 +1,7 @@
 #include "OpenGLRenderer.h"
 #include <glad/glad.h>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <numbers>
 #include <vector>
 
@@ -11,6 +13,16 @@ constexpr auto FRAGMENT_SHADER_SOURCE = "static/shaders/cannabis.frag";
 constexpr uint32_t LINE_VERTEX_COMPONENTS = 2u;
 constexpr float LINE_ANGLE_STEP = std::numbers::pi_v<float> / 1000.0f;
 constexpr float LINE_MAX_ANGLE = 2.0f * std::numbers::pi_v<float>;
+
+glm::mat4 MakeAspectProjection(float aspect)
+{
+	if (aspect >= 1.0f)
+	{
+		return glm::ortho(-aspect, aspect, -1.0f, 1.0f);
+	}
+
+	return glm::ortho(-1.0f, 1.0f, -1.0f / aspect, 1.0f / aspect);
+}
 
 std::vector<float> GenerateStraightLine()
 {
@@ -40,7 +52,7 @@ void OpenGLRenderer::SetViewport(uint32_t width, uint32_t height)
 	}
 
 	glViewport(0, 0, static_cast<int>(width), static_cast<int>(height));
-	m_aspect = static_cast<float>(width) / static_cast<float>(height);
+	m_projection = MakeAspectProjection(static_cast<float>(width) / static_cast<float>(height));
 }
 
 void OpenGLRenderer::SetClearColor(const Color& color)
@@ -62,6 +74,6 @@ void OpenGLRenderer::Display()
 void OpenGLRenderer::DrawProcedural(const ModelData&)
 {
 	m_shader->Use();
-	m_shader->SetFloat("aspect", m_aspect);
+	m_shader->SetMatrix4("projection", glm::value_ptr(m_projection));
 	m_line.Draw();
 }

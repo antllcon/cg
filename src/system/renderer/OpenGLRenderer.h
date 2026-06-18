@@ -3,6 +3,7 @@
 #include "IRenderer.h"
 #include "mesh/Mesh.h"
 #include "shader/Shader.h"
+#include <glm/glm.hpp>
 #include <memory>
 
 class OpenGLRenderer final : public IRenderer
@@ -20,5 +21,5 @@ public:
 private:
 	Mesh m_line;
 	std::unique_ptr<Shader> m_shader;
-	float m_aspect = 1.0f;
+	glm::mat4 m_projection{1.0f};
 };

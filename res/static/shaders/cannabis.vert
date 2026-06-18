@@ -2,7 +2,7 @@
 
 layout(location = 0) in vec2 position;
 
-uniform float aspect;
+uniform mat4 projection;
 
 const float BASE_SCALE = 0.35;
 const vec2 CENTER_OFFSET = vec2(0.0, -0.3);
@@ -20,14 +20,5 @@ void main()
 
     vec2 point = curved * BASE_SCALE + CENTER_OFFSET;
 
-    if (aspect >= 1.0)
-    {
-        point.x /= aspect;
-    }
-    else
-    {
-        point.y *= aspect;
-    }
-
-    gl_Position = vec4(point, 0.0, 1.0);
+    gl_Position = projection * vec4(point.yx, 0.0, 1.0);
 }
