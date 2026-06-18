@@ -62,6 +62,9 @@ Application::Application()
 
 	SetupWindowProperties(*m_window);
 	SetupRendererProperties(*m_renderer);
+
+	const auto [width, height] = m_window->GetSize();
+	m_renderer->SetViewport(width, height);
 }
 
 void Application::Run()
@@ -88,6 +91,11 @@ void Application::ProcessEvents()
 		if (std::holds_alternative<WindowClosedEvent>(event))
 		{
 			m_window->Close();
+		}
+		else if (std::holds_alternative<WindowResizedEvent>(event))
+		{
+			const auto [width, height] = m_window->GetSize();
+			m_renderer->SetViewport(width, height);
 		}
 
 		m_mainScene->ProcessEvents(event);

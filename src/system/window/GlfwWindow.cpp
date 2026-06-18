@@ -235,7 +235,7 @@ GlfwWindow::GlfwWindow()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, GLD_VERSION_MAJOR);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, GLD_VERSION_MINOR);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+	glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
 	m_window = glfwCreateWindow(
 		AppConfig::WINDOW_WIDTH,
