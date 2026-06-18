@@ -4,7 +4,7 @@
 
 namespace
 {
-constexpr float PAN_SENSITIVITY = 0.005f;
+constexpr float PAN_SENSITIVITY = 0.001f;
 } // namespace
 
 View::View(std::shared_ptr<Model> model, std::shared_ptr<Controller> controller)
